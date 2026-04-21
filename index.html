@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valerie's Speelatelier</title>
+
+    <style>
+        * {
+          margin:0;
+          padding:0;
+          box-sizing:border-box;
+          font-family: Arial, sans-serif;
+        }
+
+        body {
+          background:#f6faf7;
+          color:#2f3e2f;
+          line-height:1.6;
+        }
+
+        /* HERO */
+        .hero {
+          height: 85vh;
+          background:url('https://images.unsplash.com/photo-1607453998774-d533f65dac99?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          text-align:center;
+          color:white;
+          position:relative;
+        }
+
+        .hero::after {
+          content:"";
+          position:absolute;
+          inset:0;
+          background:rgba(0,0,0,0.45);
+        }
+
+        .hero-content {
+          position:relative;
+          max-width:700px;
+          padding:20px;
+        }
+
+        .hero h1 {
+          font-size:3rem;
+          margin-bottom:10px;
+        }
+
+        .hero p {
+          font-size:1.2rem;
+        }
+
+        /* BUTTON */
+        .btn {
+          display:inline-block;
+          margin-top:15px;
+          padding:12px 25px;
+          background:#ff8b94;
+          color:white;
+          border-radius:30px;
+          border:none;
+          cursor:pointer;
+          transition:0.3s;
+        }
+
+        .btn:hover {
+          background:#ff5c6c;
+        }
+
+        /* SECTIONS */
+        section {
+          padding:70px 20px;
+          max-width:1100px;
+          margin:auto;
+        }
+
+        h2 {
+          text-align:center;
+          margin-bottom:30px;
+          font-size:2rem;
+        }
+
+        /* ABOUT */
+        .about {
+          text-align:center;
+          max-width:800px;
+          margin:auto;
+          font-size:1.1rem;
+        }
+
+        .banner {
+          margin-top:20px;
+          background:#dcedc1;
+          padding:20px;
+          border-radius:15px;
+        }
+
+        /* ACTIVITIES GRID */
+        .grid {
+          display:grid;
+          grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+          gap:20px;
+        }
+
+        .card {
+          background:white;
+          border-radius:15px;
+          overflow:hidden;
+          box-shadow:0 10px 20px rgba(0,0,0,0.08);
+          transition:0.3s;
+        }
+
+        .card:hover {
+          transform:translateY(-5px);
+        }
+
+        .card img {
+          width:100%;
+          height:180px;
+          object-fit:cover;
+        }
+
+        .card-content {
+          padding:15px;
+        }
+
+        /* GALLERY */
+        .gallery {
+          display:grid;
+          grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+          gap:10px;
+        }
+
+        .gallery img {
+          width:100%;
+          height:180px;
+          object-fit:cover;
+          border-radius:10px;
+        }
+
+        /* CALENDAR */
+        .calendar-box {
+          background:white;
+          padding:25px;
+          border-radius:15px;
+          box-shadow:0 5px 15px rgba(0,0,0,0.1);
+          text-align:center;
+        }
+
+        input[type="date"] {
+          padding:10px;
+          border-radius:10px;
+          border:1px solid #ccc;
+          margin-top:10px;
+        }
+
+        /* MODAL */
+        .modal {
+          display:none;
+          position:fixed;
+          inset:0;
+          background:rgba(0,0,0,0.6);
+          justify-content:center;
+          align-items:center;
+        }
+
+        .modal-content {
+          background:white;
+          padding:25px;
+          border-radius:15px;
+          width:90%;
+          max-width:400px;
+        }
+
+        .modal-content input {
+          width:100%;
+          margin:8px 0;
+          padding:10px;
+          border-radius:10px;
+          border:1px solid #ccc;
+        }
+
+        /* FOOTER */
+        footer {
+          background:#2f3e2f;
+          color:white;
+          text-align:center;
+          padding:30px;
+          margin-top:40px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-content">
+        <h1>Valerie's Speelatelier 🌿</h1>
+        <p>Sensorisch spel op zaterdagvoormiddag voor kinderen van 1,5 tot 6 jaar</p>
+    </div>
+</div>
+
+<!-- OVER -->
+<section>
+    <h2>Over het speelatelier</h2>
+    <div class="about">
+        <p>
+            Als kleuterjuf ben ik gefascineerd door hoe kinderen leren door te voelen, ontdekken en vrij te spelen.
+            Dit is een warm en rustig speelatelier waar kinderen volledig zichzelf mogen zijn 💛
+        </p>
+
+        <div class="banner">
+            <strong>✨ Dit idee is nog in opbouw</strong><br>
+            Ik bekijk of er voldoende interesse is om dit op zaterdagvoormiddag te organiseren.
+        </div>
+    </div>
+</section>
+
+<!-- ACTIVITEITEN -->
+<section>
+    <h2>Wat doen we?</h2>
+
+    <div class="grid">
+
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1607453998774-d533f65dac99?auto=format&fit=crop&w=800&q=80">
+            <div class="card-content">
+                <h3>🫧 Water & schuim</h3>
+                <p>Spetteren, voelen en ontdekken zonder regels.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=800&q=80">
+            <div class="card-content">
+                <h3>🎨 Verf & kliederen</h3>
+                <p>Creatief experimenteren zonder druk.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1603574670812-d24560880210?auto=format&fit=crop&w=800&q=80">
+            <div class="card-content">
+                <h3>🌾 Sensorische bakken</h3>
+                <p>Rijst, pasta en kleine schatten ontdekken.</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- GALERIJ -->
+<section>
+    <h2>Sfeerbeelden 🌿</h2>
+
+    <div class="gallery">
+        <img src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&w=800&q=80">
+        <img src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=800&q=80">
+        <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=800&q=80">
+    </div>
+</section>
+
+<!-- KALENDER -->
+<section>
+    <h2>📅 Inschrijven</h2>
+
+    <div class="calendar-box">
+        <input type="date" id="datePicker">
+        <br>
+        <button class="btn" onclick="openForm()">Inschrijven 💛</button>
+    </div>
+</section>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+
+        <h3>Inschrijving 🌿</h3>
+        <p id="selectedDate"></p>
+
+        <input type="text" id="name" placeholder="Naam">
+        <input type="email" id="email" placeholder="E-mail">
+
+        <button class="btn" onclick="submitForm()">Bevestigen 💛</button>
+        <button class="btn" style="background:#aaa" onclick="closeForm()">Sluiten</button>
+
+        <p id="confirm"></p>
+
+    </div>
+</div>
+
+<footer>
+    Valerie's Speelatelier 🌿
+</footer>
+
+<!-- EMAILJS SCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+    emailjs.init("ryf0HAbDqTzY368PW");
+</script>
+
+<script>
+
+    let selectedDate = "";
+
+    function openForm() {
+      selectedDate = document.getElementById("datePicker").value;
+
+      if (!selectedDate) {
+        alert("Kies een datum 🌿");
+        return;
+      }
+
+      document.getElementById("modal").style.display = "flex";
+      document.getElementById("selectedDate").innerText =
+        "Gekozen datum: " + selectedDate;
+    }
+
+    function closeForm() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+  function submitForm() {
+  let name = document.getElementById("name").value;
+  let email = document.getElementById("email").value;
+
+  if (!name || !email) {
+    alert("Vul alles in 💛");
+    return;
+  }
+
+  let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+  bookings.push({ name, email, date: selectedDate });
+  localStorage.setItem("bookings", JSON.stringify(bookings));
+
+  // 1️⃣ ADMIN MAIL
+  emailjs.send("service_9u8ex4o", "template_m20bheg", {
+    name: name,
+    email: email,
+    date: selectedDate,
+    message: `${name} heeft een inschrijving op ${selectedDate}`
+  })
+  .then(res => console.log("Admin mail OK", res))
+  .catch(err => console.log("Admin mail FAIL", err));
+
+  // 2️⃣ BEVESTIGING MAIL
+  emailjs.send("service_9u8ex4o", "template_nndh15x", {
+    to_name: name,
+    to_email: email,
+    date: selectedDate
+  })
+  .then(function(res) {
+    console.log("Bevestiging OK", res);
+
+    document.getElementById("confirm").innerText =
+      "💛 Bevestiging verzonden naar " + email;
+  })
+  .catch(function(error) {
+    console.log("Bevestiging FAIL:", error);
+    alert("Bevestigingsmail mislukt ❌");
+  });
+
+  setTimeout(closeForm, 2000);
+}
+</script>
+</body>
+</html>
