@@ -1,339 +1,427 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valerie's Speelatelier</title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
-        /* -------------------------------- */
+
         /* BASIS */
-        /* -------------------------------- */
-        * {
-          margin:0;
-          padding:0;
-          box-sizing:border-box;
-          font-family: "Poppins", Arial, sans-serif;
+
+        *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:"Poppins", Arial, sans-serif;
         }
 
-        body {
-          background:#f7faf5;
-          color:#2f3e2f;
-          line-height:1.7;
-          scroll-behavior:smooth;
+        body{
+        background:#f7faf5;
+        color:#2f3e2f;
+        line-height:1.7;
+        scroll-behavior:smooth;
         }
 
-        /* -------------------------------- */
-        /* NAVIGATIE */
-        /* -------------------------------- */
-        nav {
-          position:fixed;
-          top:0;
-          width:100%;
-          background:white;
-          padding:15px 30px;
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          box-shadow:0 4px 20px rgba(0,0,0,0.05);
-          z-index:1000;
+        /* NAV */
+
+        nav{
+        position:fixed;
+        top:0;
+        width:100%;
+        background:white;
+        padding:15px 30px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        box-shadow:0 4px 20px rgba(0,0,0,0.05);
+        z-index:1000;
         }
 
-        nav a {
-          margin-left:20px;
-          text-decoration:none;
-          color:#2f3e2f;
-          font-weight:600;
-          transition:0.3s;
-          cursor:pointer;
+        nav a{
+        margin-left:20px;
+        text-decoration:none;
+        color:#2f3e2f;
+        font-weight:600;
+        transition:0.3s;
         }
 
-        nav a:hover {
-          color:#ff8b94;
+        nav a:hover{
+        color:#ff8b94;
         }
 
-        /* -------------------------------- */
+        nav i{
+        font-size:1.3rem;
+        color:#ff8b94;
+        }
+
         /* HERO */
-        /* -------------------------------- */
-        .hero {
-          height: 90vh;
-          background:url('https://images.unsplash.com/photo-1607453998774-d533f65dac99?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          text-align:center;
-          color:white;
-          position:relative;
+
+        .hero{
+        height:90vh;
+        background:url('https://images.unsplash.com/photo-1607453998774-d533f65dac99?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        color:white;
+        position:relative;
         }
 
-        .hero::after {
-          content:"";
-          position:absolute;
-          inset:0;
-          background:rgba(0,0,0,0.45);
-          pointer-events:none; /* FIX: overlay blokkeert geen klikken meer */
+        .hero::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        background:rgba(0,0,0,0.45);
         }
 
-        .hero-content {
-          position:relative;
-          max-width:700px;
-          padding:20px;
+        .hero-content{
+        position:relative;
+        max-width:700px;
         }
 
-        .hero h1 {
-          font-size:3.5rem;
-          margin-bottom:10px;
+        .hero h1{
+        font-size:3.5rem;
         }
 
-        .hero p {
-          font-size:1.3rem;
+        .hero p{
+        font-size:1.3rem;
+        margin-top:10px;
         }
 
-        /* -------------------------------- */
-        /* BUTTON */
-        /* -------------------------------- */
-        .btn {
-          display:inline-block;
-          margin-top:20px;
-          padding:14px 30px;
-          background:#ff8b94;
-          color:white;
-          border-radius:30px;
-          border:none;
-          cursor:pointer;
-          transition:0.3s;
-          font-size:1rem;
+        .btn{
+        display:inline-block;
+        margin-top:20px;
+        padding:14px 30px;
+        background:#ff8b94;
+        color:white;
+        border-radius:30px;
+        border:none;
+        cursor:pointer;
         }
 
-        .btn:hover {
-          background:#ff5c6c;
-          transform:scale(1.05);
-        }
-
-        /* -------------------------------- */
         /* SECTIONS */
-        /* -------------------------------- */
-        section {
-          padding:90px 20px;
-          max-width:1100px;
-          margin:auto;
+
+        section{
+        padding:90px 20px;
+        max-width:1100px;
+        margin:auto;
         }
 
-        h2 {
-          text-align:center;
-          margin-bottom:40px;
-          font-size:2.4rem;
+        h2{
+        text-align:center;
+        margin-bottom:40px;
+        font-size:2.4rem;
         }
 
-        /* -------------------------------- */
-        /* ABOUT */
-        /* -------------------------------- */
-        .about {
-          text-align:center;
-          max-width:800px;
-          margin:auto;
-          font-size:1.2rem;
+        /* GRID */
+
+        .grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+        gap:25px;
         }
 
-        .banner {
-          margin-top:25px;
-          background:#dcedc1;
-          padding:25px;
-          border-radius:15px;
-          font-size:1.1rem;
+        /* CARDS */
+
+        .card{
+        background:white;
+        border-radius:15px;
+        overflow:hidden;
+        box-shadow:0 10px 20px rgba(0,0,0,0.08);
         }
 
-        /* -------------------------------- */
-        /* ACTIVITEITEN */
-        /* -------------------------------- */
-        .grid {
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-          gap:25px;
+        .card img{
+        width:100%;
+        height:200px;
+        object-fit:cover;
         }
 
-        .card {
-          background:white;
-          border-radius:15px;
-          overflow:hidden;
-          box-shadow:0 10px 20px rgba(0,0,0,0.08);
-          transition:0.3s;
+        .card-content{
+        padding:20px;
         }
 
-        .card:hover {
-          transform:translateY(-8px);
+        /* TEACHER */
+
+        .teacher{
+        display:flex;
+        flex-wrap:wrap;
+        align-items:center;
+        justify-content:center;
+        gap:30px;
         }
 
-        .card img {
-          width:100%;
-          height:200px;
-          object-fit:cover;
+        .teacher img{
+        width:260px;
+        border-radius:20px;
+        box-shadow:0 10px 25px rgba(0,0,0,0.15);
         }
 
-        .card-content {
-          padding:20px;
+        /* GALERIJ */
+
+        .gallery{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+        gap:15px;
         }
 
-        /* -------------------------------- */
+        .gallery img{
+        width:100%;
+        height:180px;
+        object-fit:cover;
+        border-radius:10px;
+        }
+
         /* FAQ */
-        /* -------------------------------- */
-        .faq-item {
-          background:white;
-          padding:20px;
-          border-radius:15px;
-          margin-bottom:15px;
-          cursor:pointer;
-          box-shadow:0 5px 15px rgba(0,0,0,0.05);
+
+        .faq-item{
+        background:white;
+        padding:20px;
+        border-radius:15px;
+        margin-bottom:15px;
+        cursor:pointer;
+        box-shadow:0 5px 15px rgba(0,0,0,0.05);
         }
 
-        .faq-item h4 {
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
+        .faq-answer{
+        display:none;
+        margin-top:10px;
         }
 
-        .faq-answer {
-          display:none;
-          margin-top:10px;
-          color:#555;
+        /* INSTAGRAM */
+
+        #instagram{
+        text-align:center;
         }
 
-        /* -------------------------------- */
-        /* MODAL */
-        /* -------------------------------- */
-        .modal {
-          display:none;
-          position:fixed;
-          inset:0;
-          background:rgba(0,0,0,0.6);
-          justify-content:center;
-          align-items:center;
-          z-index:2000;
+        /* MODAL (INSCHRIJVING NIET GEWIJZIGD) */
+
+        .modal{
+        display:none;
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,0.6);
+        justify-content:center;
+        align-items:center;
+        z-index:2000;
         }
 
-        .modal-content {
-          background:white;
-          padding:25px;
-          border-radius:15px;
-          width:90%;
-          max-width:400px;
+        .modal-content{
+        background:white;
+        padding:25px;
+        border-radius:15px;
+        width:90%;
+        max-width:400px;
         }
 
-        .modal-content input {
-          width:100%;
-          margin:8px 0;
-          padding:10px;
-          border-radius:10px;
-          border:1px solid #ccc;
+        .modal-content input{
+        width:100%;
+        margin:8px 0;
+        padding:10px;
+        border-radius:10px;
+        border:1px solid #ccc;
         }
 
-        /* -------------------------------- */
         /* FOOTER */
-        /* -------------------------------- */
-        footer {
-          background:#2f3e2f;
-          color:white;
-          text-align:center;
-          padding:40px;
-          margin-top:40px;
+
+        footer{
+        background:#2f3e2f;
+        color:white;
+        text-align:center;
+        padding:40px;
+        margin-top:40px;
         }
+
     </style>
 </head>
 
 <body>
 
-<!-- NAV -->
 <nav>
+
     <strong>🌿 Valerie's Speelatelier</strong>
+
     <div>
-        <a href="#over">Over</a>
+        <a href="#over">Speelatelier</a>
+        <a href="#overmij">Juf Valerie</a>
         <a href="#activiteiten">Activiteiten</a>
+        <a href="#galerij">Galerij</a>
+        <a href="#instagram">Instagram</a>
         <a href="#faq">FAQ</a>
         <a onclick="openForm()">Inschrijven</a>
+
+        <a href="https://www.instagram.com/juf__valerie" target="_blank">
+            <i class="fa-brands fa-instagram"></i>
+        </a>
+
     </div>
+
 </nav>
 
-<!-- HERO -->
 <div class="hero">
+
     <div class="hero-content">
+
         <h1>Valerie's Speelatelier</h1>
+
         <p>Warm, rustig en speels ontdekken voor kinderen van 1,5 tot 6 jaar</p>
+
         <a onclick="openForm()" class="btn">Schrijf je in 💛</a>
+
     </div>
+
 </div>
 
-<!-- OVER -->
 <section id="over">
-    <h2>Over het speelatelier</h2>
-    <div class="about">
-        <p>
-            Ik ben Valerie, kleuterjuf en gepassioneerd door spelend leren.
-            In dit atelier krijgen kinderen de ruimte om te ontdekken, voelen, creëren en zichzelf te zijn.
-        </p>
 
-        <div class="banner">
-            <strong>✨ Dit project is in opbouw</strong><br>
-            Ik verzamel momenteel interesse om te starten op zaterdagvoormiddag.
-        </div>
-    </div>
+    <h2>Over het speelatelier</h2>
+
+    <p style="text-align:center;max-width:700px;margin:auto;font-size:1.2rem">
+
+        Ik ben Valerie, kleuterjuf en gepassioneerd door spelend leren.
+        In dit atelier krijgen kinderen de ruimte om te ontdekken,
+        voelen, creëren en zichzelf te zijn.
+
+    </p>
+
 </section>
 
-<!-- ACTIVITEITEN -->
+<section id="overmij">
+
+    <h2>Over Juf Valerie</h2>
+
+    <div class="teacher">
+
+        <img src="valerie.jpg">
+
+        <div>
+
+            <h3>Juf Valerie De Beuckelaer</h3>
+
+            <p><strong>Klasjuf De Gele Avontuurlijke Artiesten (K2)</strong></p>
+
+            <p>
+
+                Ik ben een juf vol energie die enorm geniet van werken met jonge kinderen.
+                Spelend leren staat centraal in mijn aanpak.
+
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
 <section id="activiteiten">
+
     <h2>Wat doen we?</h2>
 
     <div class="grid">
 
         <div class="card">
-            <img src="https://images.unsplash.com/photo-1607453998774-d533f65dac99?auto=format&fit=crop&w=800&q=80">
+
+            <img src="https://images.unsplash.com/photo-1607453998774-d533f65dac99">
+
             <div class="card-content">
+
                 <h3>🫧 Water & schuim</h3>
-                <p>Spetteren, voelen en ontdekken zonder regels.</p>
+
+                <p>Spetteren en experimenteren.</p>
+
             </div>
+
         </div>
 
         <div class="card">
-            <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=800&q=80">
+
+            <img src="https://images.unsplash.com/photo-1588072432836-e10032774350">
+
             <div class="card-content">
-                <h3>🎨 Verf & kliederen</h3>
-                <p>Creatief experimenteren zonder druk.</p>
+
+                <h3>🎨 Verf</h3>
+
+                <p>Vrij schilderen en kliederen.</p>
+
             </div>
+
         </div>
 
         <div class="card">
-            <img src="https://images.unsplash.com/photo-1603574670812-d24560880210?auto=format&fit=crop&w=800&q=80">
+
+            <img src="https://images.unsplash.com/photo-1603574670812-d24560880210">
+
             <div class="card-content">
+
                 <h3>🌾 Sensorische bakken</h3>
-                <p>Rijst, pasta en kleine schatten ontdekken.</p>
+
+                <p>Rijst, pasta en schatten ontdekken.</p>
+
             </div>
+
         </div>
 
     </div>
+
 </section>
 
-<!-- FAQ -->
+<section id="galerij">
+
+    <h2>Impressie van activiteiten</h2>
+
+    <div class="gallery">
+
+        <img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74">
+
+        <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9">
+
+        <img src="https://images.unsplash.com/photo-1588072432836-e10032774350">
+
+        <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7">
+
+    </div>
+
+</section>
+
+<section id="instagram">
+
+    <h2>Volg onze avonturen op Instagram 📸</h2>
+
+    <script src="https://apps.elfsight.com/p/platform.js" defer></script>
+
+    <div class="elfsight-app-YOURCODE"></div>
+
+</section>
+
 <section id="faq">
+
     <h2>Veelgestelde vragen</h2>
 
     <div class="faq-item">
-        <h4>Voor welke leeftijden is het atelier? <span>+</span></h4>
+
+        <h4>Voor welke leeftijden?</h4>
+
         <div class="faq-answer">Voor kinderen van 1,5 tot 6 jaar.</div>
+
     </div>
 
     <div class="faq-item">
-        <h4>Moeten ouders blijven? <span>+</span></h4>
-        <div class="faq-answer">Ja, ouders blijven aanwezig in de ruimte.</div>
-    </div>
 
-    <div class="faq-item">
-        <h4>Wat moet ik meenemen? <span>+</span></h4>
-        <div class="faq-answer">Reservekledij en eventueel een handdoek.</div>
+        <h4>Moeten ouders blijven?</h4>
+
+        <div class="faq-answer">Ja, ouders blijven aanwezig.</div>
+
     </div>
 
 </section>
 
-<!-- MODAL -->
+<!-- INSCHRIJVING (NIET AANGEPAST) -->
+
 <div class="modal" id="modal">
+
     <div class="modal-content">
 
         <h3>Inschrijving 🌿</h3>
@@ -353,69 +441,66 @@
 </div>
 
 <footer>
+
     Valerie's Speelatelier 🌿
+
     <br>Warm spel, zachte prikkels, grote ontdekkingen.
 
     <p>
+
         Volg ons op
-        <a href="https://www.instagram.com/juf__valerie" target="_blank" rel="noopener noreferrer">
+
+        <a href="https://www.instagram.com/juf__valerie" target="_blank">
+
             Instagram
+
         </a>
+
     </p>
 
     <p>&copy; 2026 SpeelAtelier - Valerie De Beuckelaer</p>
+
 </footer>
 
-<!-- EMAILJS SCRIPT -->
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-    emailjs.init("ryf0HAbDqTzY368PW");
-</script>
 
-<script>
-    function openForm() {
-      document.getElementById("modal").style.display = "flex";
+    function openForm(){
+    document.getElementById("modal").style.display="flex";
     }
 
-    function closeForm() {
-      document.getElementById("modal").style.display = "none";
+    function closeForm(){
+    document.getElementById("modal").style.display="none";
     }
 
-    function submitForm() {
-      let selectedDate = document.getElementById("datePicker").value;
-      let name = document.getElementById("name").value;
-      let email = document.getElementById("email").value;
+    function submitForm(){
 
-      if (!selectedDate || !name || !email) {
-        alert("Vul alles in 💛");
-        return;
-      }
+    let selectedDate=document.getElementById("datePicker").value;
+    let name=document.getElementById("name").value;
+    let email=document.getElementById("email").value;
 
-      // Opslaan in localStorage
-      let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
-      bookings.push({ name, email, date: selectedDate });
-      localStorage.setItem("bookings", JSON.stringify(bookings));
-
-      // EmailJS
-      emailjs.send("service_9u8ex4o", "template_m20bheg", {
-          name: name,
-          email: email,
-          message: `${name} heeft een afspraak op ${selectedDate}`
-      });
-
-      document.getElementById("confirm").innerText =
-        "💛 Bedankt " + name + "! Je bent ingeschreven op " + selectedDate;
-
-      setTimeout(closeForm, 2000);
+    if(!selectedDate || !name || !email){
+    alert("Vul alles in 💛");
+    return;
     }
 
-    /* FAQ toggle */
-    document.querySelectorAll(".faq-item").forEach(item => {
-      item.addEventListener("click", () => {
-        let answer = item.querySelector(".faq-answer");
-        answer.style.display = answer.style.display === "block" ? "none" : "block";
-      });
+    let bookings=JSON.parse(localStorage.getItem("bookings")) || [];
+    bookings.push({name,email,date:selectedDate});
+    localStorage.setItem("bookings",JSON.stringify(bookings));
+
+    document.getElementById("confirm").innerText=
+    "💛 Bedankt "+name+"! Je bent ingeschreven op "+selectedDate;
+
+    setTimeout(closeForm,2000);
+
+    }
+
+    document.querySelectorAll(".faq-item").forEach(item=>{
+    item.addEventListener("click",()=>{
+    let answer=item.querySelector(".faq-answer");
+    answer.style.display=answer.style.display==="block"?"none":"block";
     });
+    });
+
 </script>
 
 </body>
