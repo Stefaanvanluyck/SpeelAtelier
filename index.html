@@ -8,9 +8,10 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <style>
+    <!-- EMAILJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
-        /* BASIS */
+    <style>
 
         *{
         margin:0;
@@ -40,8 +41,6 @@
         overflow-x:hidden;
         }
 
-        /* NAV */
-
         nav{
         position:fixed;
         top:20px;
@@ -64,7 +63,6 @@
 
         nav strong{
         font-size:1.1rem;
-        letter-spacing:0.5px;
         }
 
         nav a{
@@ -72,37 +70,8 @@
         text-decoration:none;
         color:var(--text);
         font-weight:600;
-        position:relative;
-        transition:0.3s;
         cursor:pointer;
         }
-
-        nav a::after{
-        content:"";
-        position:absolute;
-        left:0;
-        bottom:-6px;
-        width:0%;
-        height:2px;
-        background:var(--accent);
-        transition:0.3s;
-        border-radius:10px;
-        }
-
-        nav a:hover{
-        color:var(--accent);
-        }
-
-        nav a:hover::after{
-        width:100%;
-        }
-
-        nav i{
-        font-size:1.3rem;
-        color:var(--accent);
-        }
-
-        /* HERO */
 
         .hero{
         height:100vh;
@@ -114,34 +83,17 @@
         justify-content:center;
         text-align:center;
         color:white;
-        position:relative;
-        padding:20px;
         }
 
         .hero-content{
-        position:relative;
         max-width:800px;
         padding:50px;
         border-radius:35px;
         background:rgba(255,255,255,0.08);
         backdrop-filter:blur(8px);
-        border:1px solid rgba(255,255,255,0.15);
-        box-shadow:0 10px 40px rgba(0,0,0,0.2);
-        animation:fadeUp 1s ease;
         }
 
-        .hero h1{
-        font-size:4.5rem;
-        line-height:1.1;
-        font-weight:800;
-        letter-spacing:-2px;
-        }
-
-        .hero p{
-        font-size:1.3rem;
-        margin-top:20px;
-        opacity:0.95;
-        }
+        .hero h1{font-size:4.5rem;}
 
         .btn{
         display:inline-block;
@@ -152,18 +104,7 @@
         border-radius:999px;
         border:none;
         cursor:pointer;
-        font-weight:600;
-        font-size:1rem;
-        transition:0.3s;
-        box-shadow:0 10px 25px rgba(255,139,148,0.35);
         }
-
-        .btn:hover{
-        transform:translateY(-3px) scale(1.03);
-        box-shadow:0 14px 30px rgba(255,139,148,0.45);
-        }
-
-        /* SECTIONS */
 
         section{
         padding:120px 20px;
@@ -173,24 +114,9 @@
 
         h2{
         text-align:center;
-        margin-bottom:55px;
         font-size:3rem;
-        font-weight:800;
-        letter-spacing:-1px;
-        position:relative;
+        margin-bottom:55px;
         }
-
-        h2::after{
-        content:"";
-        width:80px;
-        height:5px;
-        background:linear-gradient(to right,var(--accent),var(--accent2));
-        display:block;
-        margin:15px auto 0;
-        border-radius:20px;
-        }
-
-        /* GRID */
 
         .grid{
         display:grid;
@@ -198,76 +124,34 @@
         gap:30px;
         }
 
-        /* CARDS */
-
         .card{
         background:var(--card);
-        backdrop-filter:var(--blur);
-        border:1px solid rgba(255,255,255,0.5);
         border-radius:28px;
         overflow:hidden;
         box-shadow:var(--shadow);
-        transition:0.35s;
-        }
-
-        .card:hover{
-        transform:translateY(-10px);
-        box-shadow:0 20px 45px rgba(0,0,0,0.12);
         }
 
         .card img{
         width:100%;
         height:240px;
         object-fit:cover;
-        transition:0.4s;
         }
 
-        .card:hover img{
-        transform:scale(1.05);
-        }
-
-        .card-content{
-        padding:25px;
-        }
-
-        .card-content h3{
-        font-size:1.4rem;
-        margin-bottom:8px;
-        }
-
-        /* TEACHER */
+        .card-content{padding:25px;}
 
         .teacher{
         display:flex;
         flex-wrap:wrap;
-        align-items:center;
-        justify-content:center;
         gap:50px;
-        background:rgba(255,255,255,0.55);
         padding:50px;
         border-radius:35px;
-        backdrop-filter:var(--blur);
-        box-shadow:var(--shadow);
+        background:rgba(255,255,255,0.55);
         }
 
         .teacher img{
         width:300px;
         border-radius:30px;
-        box-shadow:0 15px 35px rgba(0,0,0,0.15);
-        object-fit:cover;
         }
-
-        .teacher h3{
-        font-size:2rem;
-        margin-bottom:10px;
-        }
-
-        .teacher p{
-        max-width:500px;
-        font-size:1.05rem;
-        }
-
-        /* GALERIJ */
 
         .gallery{
         display:grid;
@@ -280,15 +164,7 @@
         height:220px;
         object-fit:cover;
         border-radius:24px;
-        transition:0.35s;
-        box-shadow:var(--shadow);
         }
-
-        .gallery img:hover{
-        transform:scale(1.04) rotate(1deg);
-        }
-
-        /* FAQ */
 
         .faq-item{
         background:rgba(255,255,255,0.75);
@@ -296,45 +172,17 @@
         border-radius:24px;
         margin-bottom:18px;
         cursor:pointer;
-        box-shadow:var(--shadow);
-        backdrop-filter:var(--blur);
-        transition:0.3s;
         }
 
-        .faq-item:hover{
-        transform:translateY(-3px);
-        }
-
-        .faq-item h4{
-        font-size:1.15rem;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        }
-
-        .faq-answer{
-        display:none;
-        margin-top:14px;
-        opacity:0.85;
-        }
-
-        /* INSTAGRAM */
-
-        #instagram{
-        text-align:center;
-        }
-
-        /* MODAL */
+        .faq-answer{display:none;margin-top:10px;}
 
         .modal{
         display:none;
         position:fixed;
         inset:0;
         background:rgba(0,0,0,0.55);
-        backdrop-filter:blur(4px);
         justify-content:center;
         align-items:center;
-        z-index:2000;
         }
 
         .modal-content{
@@ -343,13 +191,6 @@
         border-radius:28px;
         width:90%;
         max-width:420px;
-        box-shadow:0 20px 50px rgba(0,0,0,0.2);
-        animation:fadeUp 0.4s ease;
-        }
-
-        .modal-content h3{
-        margin-bottom:15px;
-        font-size:1.7rem;
         }
 
         .modal-content input{
@@ -358,114 +199,13 @@
         padding:14px;
         border-radius:14px;
         border:1px solid #ddd;
-        font-size:1rem;
-        transition:0.3s;
         }
-
-        .modal-content input:focus{
-        outline:none;
-        border-color:var(--accent);
-        box-shadow:0 0 0 4px rgba(255,139,148,0.15);
-        }
-
-        /* FOOTER */
 
         footer{
         background:#263126;
         color:white;
         text-align:center;
         padding:70px 20px;
-        margin-top:60px;
-        border-top-left-radius:40px;
-        border-top-right-radius:40px;
-        }
-
-        footer a{
-        color:#ffd6a5;
-        text-decoration:none;
-        font-weight:600;
-        }
-
-        footer p{
-        margin-top:10px;
-        opacity:0.9;
-        }
-
-        /* ANIMATIES */
-
-        @keyframes fadeUp{
-        from{
-        opacity:0;
-        transform:translateY(30px);
-        }
-        to{
-        opacity:1;
-        transform:translateY(0);
-        }
-        }
-
-        /* RESPONSIVE */
-
-        @media(max-width:900px){
-
-        nav{
-        padding:16px 20px;
-        border-radius:20px;
-        }
-
-        nav div{
-        display:flex;
-        flex-wrap:wrap;
-        justify-content:flex-end;
-        }
-
-        nav a{
-        margin:8px;
-        font-size:0.95rem;
-        }
-
-        .hero h1{
-        font-size:3rem;
-        }
-
-        .hero-content{
-        padding:35px 25px;
-        }
-
-        h2{
-        font-size:2.2rem;
-        }
-
-        .teacher{
-        padding:35px 25px;
-        text-align:center;
-        }
-
-        .teacher img{
-        width:240px;
-        }
-
-        }
-
-        @media(max-width:600px){
-
-        .hero h1{
-        font-size:2.4rem;
-        }
-
-        .hero p{
-        font-size:1.05rem;
-        }
-
-        section{
-        padding:90px 20px;
-        }
-
-        nav{
-        top:10px;
-        width:calc(100% - 20px);
-        }
-
         }
 
     </style>
@@ -475,184 +215,42 @@
 <body>
 
 <nav>
-
     <strong>🌿 Valerie's Speelatelier</strong>
-
     <div>
         <a href="#over">Speelatelier</a>
         <a href="#overmij">Juf Valerie</a>
         <a href="#activiteiten">Activiteiten</a>
-        <a href="#galerij">Galerij</a>
-        <a href="#instagram">Instagram</a>
-        <a href="#faq">FAQ</a>
         <a onclick="openForm()">Inschrijven</a>
-
-        <a href="https://www.instagram.com/juf__valerie" target="_blank">
-            <i class="fa-brands fa-instagram"></i>
-        </a>
-
     </div>
-
 </nav>
 
 <div class="hero">
-
     <div class="hero-content">
-
         <h1>Valerie's Speelatelier</h1>
-
-        <p>Warm, rustig en speels ontdekken voor kinderen van 1,5 tot 6 jaar</p>
-
+        <p>Warm, rustig en speels ontdekken</p>
         <a onclick="openForm()" class="btn">Schrijf je in 💛</a>
-
     </div>
-
 </div>
 
 <section id="over">
-
-    <h2>Over het speelatelier</h2>
-
-    <p style="text-align:center;max-width:700px;margin:auto;font-size:1.2rem">
-
-        Ik ben Valerie, kleuterjuf en gepassioneerd door spelend leren.
-        In dit atelier krijgen kinderen de ruimte om te ontdekken,
-        voelen, creëren en zichzelf te zijn.
-
-    </p>
-
-</section>
-
-<section id="overmij">
-
-    <h2>Over Juf Valerie</h2>
-
-    <div class="teacher">
-
-        <img src="valerie.jpg">
-
-        <div>
-
-            <h3>Juf Valerie De Beuckelaer</h3>
-
-            <p><strong>Klasjuf De Gele Avontuurlijke Artiesten (K2)</strong></p>
-
-            <p>
-
-                Ik ben een juf vol energie die enorm geniet van werken met jonge kinderen.
-                Spelend leren staat centraal in mijn aanpak.
-
-            </p>
-
-        </div>
-
-    </div>
-
+    <h2>Over</h2>
+    <p style="text-align:center;">Spelend leren voor jonge kinderen.</p>
 </section>
 
 <section id="activiteiten">
-
-    <h2>Wat doen we?</h2>
+    <h2>Activiteiten</h2>
 
     <div class="grid">
 
         <div class="card">
-
             <img src="https://images.unsplash.com/photo-1607453998774-d533f65dac99">
-
             <div class="card-content">
-
-                <h3>🫧 Water & schuim</h3>
-
-                <p>Spetteren en experimenteren.</p>
-
+                <h3>Water</h3>
             </div>
-
-        </div>
-
-        <div class="card">
-
-            <img src="https://images.unsplash.com/photo-1588072432836-e10032774350">
-
-            <div class="card-content">
-
-                <h3>🎨 Verf</h3>
-
-                <p>Vrij schilderen en kliederen.</p>
-
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <img src="https://images.unsplash.com/photo-1603574670812-d24560880210">
-
-            <div class="card-content">
-
-                <h3>🌾 Sensorische bakken</h3>
-
-                <p>Rijst, pasta en schatten ontdekken.</p>
-
-            </div>
-
         </div>
 
     </div>
-
 </section>
-
-<section id="galerij">
-
-    <h2>Impressie van activiteiten</h2>
-
-    <div class="gallery">
-
-        <img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74">
-
-        <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9">
-
-        <img src="https://images.unsplash.com/photo-1588072432836-e10032774350">
-
-        <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7">
-
-    </div>
-
-</section>
-
-<section id="instagram">
-
-    <h2>Volg onze avonturen op Instagram 📸</h2>
-
-    <script src="https://apps.elfsight.com/p/platform.js" defer></script>
-
-    <div class="elfsight-app-YOURCODE"></div>
-
-</section>
-
-<section id="faq">
-
-    <h2>Veelgestelde vragen</h2>
-
-    <div class="faq-item">
-
-        <h4>Voor welke leeftijden?</h4>
-
-        <div class="faq-answer">Voor kinderen van 1,5 tot 6 jaar.</div>
-
-    </div>
-
-    <div class="faq-item">
-
-        <h4>Moeten ouders blijven?</h4>
-
-        <div class="faq-answer">Ja, ouders blijven aanwezig.</div>
-
-    </div>
-
-</section>
-
-<!-- INSCHRIJVING -->
 
 <div class="modal" id="modal">
 
@@ -660,79 +258,77 @@
 
         <h3>Inschrijving 🌿</h3>
 
-        <label>Kies een datum:</label>
         <input type="date" id="datePicker">
-
         <input type="text" id="name" placeholder="Naam">
         <input type="email" id="email" placeholder="E-mail">
 
-        <button class="btn" onclick="submitForm()">Bevestigen 💛</button>
+        <button class="btn" onclick="submitForm()">Bevestigen</button>
         <button class="btn" style="background:#aaa" onclick="closeForm()">Sluiten</button>
 
         <p id="confirm"></p>
 
     </div>
+
 </div>
 
 <footer>
-
     Valerie's Speelatelier 🌿
-
-    <br>Warm spel, zachte prikkels, grote ontdekkingen.
-
-    <p>
-
-        Volg ons op
-
-        <a href="https://www.instagram.com/juf__valerie" target="_blank">
-
-            Instagram
-
-        </a>
-
-    </p>
-
-    <p>&copy; 2026 SpeelAtelier - Valerie De Beuckelaer</p>
-
 </footer>
 
 <script>
 
+    // EMAILJS INIT
+    (function(){
+        emailjs.init("ryf0HAbDqTzY368PW");
+    })();
+
     function openForm(){
-    document.getElementById("modal").style.display="flex";
+        document.getElementById("modal").style.display="flex";
     }
 
     function closeForm(){
-    document.getElementById("modal").style.display="none";
+        document.getElementById("modal").style.display="none";
     }
 
-    function submitForm(){
+  function submitForm(){
 
-    let selectedDate=document.getElementById("datePicker").value;
-    let name=document.getElementById("name").value;
-    let email=document.getElementById("email").value;
+    let selectedDate = document.getElementById("datePicker").value;
+    let name = document.getElementById("name").value;
+    let email = document.getElementById("email").value;
 
     if(!selectedDate || !name || !email){
-    alert("Vul alles in 💛");
-    return;
+        alert("Vul alles in 💛");
+        return;
     }
 
-    let bookings=JSON.parse(localStorage.getItem("bookings")) || [];
-    bookings.push({name,email,date:selectedDate});
-    localStorage.setItem("bookings",JSON.stringify(bookings));
+    // 1. MAIL NAAR JOU (admin template)
+    emailjs.send("service_9u8ex4o", "template_m20bheg", {
+        name: name,
+        email: email,
+        date: selectedDate
+    });
 
-    document.getElementById("confirm").innerText=
-    "💛 Bedankt "+name+"! Je bent ingeschreven op "+selectedDate;
-
-    setTimeout(closeForm,2000);
-
-    }
+    // 2. MAIL NAAR KLANT (optioneel)
+    emailjs.send("service_9u8ex4o", "template_nndh15x", {
+        name: name,
+        email: email,
+        date: selectedDate
+    })
+    .then(()=>{
+        document.getElementById("confirm").innerText =
+        "💛 Inschrijving verzonden!";
+    })
+    .catch((err)=>{
+        console.log(err);
+        alert("Er ging iets mis");
+    });
+}
 
     document.querySelectorAll(".faq-item").forEach(item=>{
-    item.addEventListener("click",()=>{
-    let answer=item.querySelector(".faq-answer");
-    answer.style.display=answer.style.display==="block"?"none":"block";
-    });
+        item.addEventListener("click",()=>{
+            let a=item.querySelector(".faq-answer");
+            a.style.display=a.style.display==="block"?"none":"block";
+        });
     });
 
 </script>
