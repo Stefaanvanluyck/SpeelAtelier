@@ -237,65 +237,111 @@
           border-radius:12px;
           border:1px solid #ddd;
         }
-/* ===================== PLANNING ===================== */
-.planning-container{
+/* ===================== PLANNING (MODERN MOBILE FRIENDLY) ===================== */
+
+.planning-wrapper{
+  max-width:900px;
+  margin:auto;
   display:flex;
   flex-direction:column;
   gap:18px;
-  max-width:900px;
-  margin:auto;
 }
 
-.planning-item{
-  display:grid;
-  grid-template-columns:180px 1fr 100px;
-  align-items:center;
-  padding:20px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.75);
-  backdrop-filter:blur(10px);
-  box-shadow:var(--shadow);
+.planning-header{
+  text-align:center;
 }
 
-.datum{
-  font-weight:600;
-}
-
-.activiteit{
-  font-weight:500;
-}
-
-.tijd{
-  text-align:right;
-  color:var(--accent);
+.planning-header span{
+  font-size:1.8rem;
   font-weight:700;
 }
 
+.planning-header p{
+  opacity:0.7;
+  margin-top:6px;
+}
+
+/* CARD LOOK */
+.calendar-card{
+  background:rgba(255,255,255,0.75);
+  backdrop-filter:blur(18px);
+  border-radius:26px;
+  box-shadow:0 18px 50px rgba(0,0,0,0.10);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.5);
+}
+
+/* IFRAME MOBILE OPTIMAL */
+.calendar-card iframe{
+  width:100%;
+  height:700px;
+  border:none;
+}
+
+/* MOBILE FIX (BELANGRIJK) */
 @media(max-width:768px){
-  .planning-item{
-      grid-template-columns:1fr;
-      gap:8px;
+
+  .planning-header span{
+    font-size:1.5rem;
   }
 
-  .tijd{
-      text-align:left;
+  .calendar-card{
+    border-radius:18px;
+  }
+
+  .calendar-card iframe{
+    height:80vh; /* belangrijk: voelt als app op gsm */
   }
 }
-        /* ===================== FOOTER ===================== */
-        footer{
-          background:#223322;
-          color:white;
-          text-align:center;
-          padding:70px 20px;
-          border-top-left-radius:40px;
-          border-top-right-radius:40px;
-        }
 
-        /* ===================== RESPONSIVE ===================== */
-        @media(max-width:900px){
-          .hero h1{font-size:2.8rem}
-          .teacher img{width:240px}
-        }
+        .activity{
+  position:relative;
+  padding:10px 12px;
+  margin-top:8px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.6);
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.activity:hover{
+  background:rgba(255,255,255,0.9);
+  transform:translateY(-2px);
+}
+
+/* TOOLTIP */
+.activity::after{
+  content:attr(data-tooltip);
+  position:absolute;
+  left:50%;
+  bottom:120%;
+  transform:translateX(-50%);
+  background:#1f2a1f;
+  color:white;
+  padding:10px 12px;
+  border-radius:12px;
+  font-size:0.85rem;
+  width:220px;
+  opacity:0;
+  pointer-events:none;
+  transition:0.2s;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  text-align:center;
+  z-index:10;
+}
+
+.activity:hover::after{
+  opacity:1;
+}
+
+/* MOBILE: tooltip onder element */
+@media(max-width:768px){
+  .activity::after{
+    left:0;
+    transform:none;
+    width:100%;
+  }
+}
 
     </style>
 </head>
@@ -359,19 +405,69 @@
     </div>
 </section>
 
-
 <section id="planning">
     <h2>Speelatelier Planning</h2>
 
-    <iframe
-            src="https://calendar.app.google/nnytvSt3a84YDzsr9"
-            style="border:0"
-            width="100%"
-            height="600"
-            frameborder="0"
-            scrolling="no">
-    </iframe>
+    <div class="planning-wrapper">
+
+        <div class="week-preview">
+
+            <div class="week">
+                <h3>🗓️ Zaterdag 13 juni</h3>
+
+                <div class="activity" data-tooltip="We gaan op ontdekking in de natuur. Kinderen onderzoeken materialen, bladeren en kleine diertjes.">
+                    🌿 10:00 – 12:00 → Op onderzoek
+                </div>
+            </div>
+
+            <div class="week">
+                <h3>🗓️ Zaterdag 20 juni</h3>
+
+                <div class="activity" data-tooltip="Buiten spelen met water, modder en natuurlijke materialen. Kledij mag vuil worden :)">
+                    🌿 10:00 – 12:00 → Op onderzoek
+                </div>
+            </div>
+
+            <div class="week">
+                <h3>🗓️ Zaterdag 27 juni</h3>
+
+                <div class="activity" data-tooltip="Creatief spel in een rustige omgeving. Ideaal voor fantasie en fijne motoriek.">
+                    🌿 10:00 – 12:00 → Op onderzoek
+                </div>
+            </div>
+
+            <div class="week">
+                <h3>🗓️ Zaterdag 4 juli</h3>
+
+                <div class="activity" data-tooltip="We werken met natuurlijke materialen en ontdekken de wereld rondom ons.">
+                    🌿 10:00 – 12:00 → Op onderzoek
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 2. BOEKEN -->
+        <div class="booking-box">
+            <h3>🎟️ Reserveer je plek</h3>
+
+            <p>Klik en kies direct een moment in de kalender.</p>
+
+            <div class="booking-embed">
+                <iframe
+                        src="https://calendar.app.google/txN58uDock7DNHgv6"
+                        style="border:0"
+                        width="100%"
+                        height="650"
+                        frameborder="0"
+                        scrolling="no">
+                </iframe>
+            </div>
+        </div>
+
+    </div>
 </section>
+
+
 
 
 <section id="activiteiten">
