@@ -107,15 +107,26 @@
           overflow: visible
         }
 
+.hero {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+
+  padding: 0 20px;
+}
+
+/* MOBILE FIX */
 @media (max-width: 768px) {
   .hero {
-    padding-left: 50px;
-    padding-right: 20px;
-    justify-content: flex-start; /* 👈 belangrijk */
+    justify-content: center; /* 👈 belangrijk: NIET naar links duwen */
+    padding: 0 25px;
   }
 
   .hero-content {
-    text-align: left; /* 👈 voorkomt centrering conflict */
+    text-align: center; /* of left als je dat wil */
   }
 }
 
