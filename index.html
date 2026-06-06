@@ -107,10 +107,15 @@
           overflow: visible
         }
 
-        @media (max-width: 768px) {
+@media (max-width: 768px) {
   .hero {
-    padding-left: 30px;
-    padding-right: 30px;
+    padding-left: 50px;
+    padding-right: 20px;
+    justify-content: flex-start; /* 👈 belangrijk */
+  }
+
+  .hero-content {
+    text-align: left; /* 👈 voorkomt centrering conflict */
   }
 }
 
