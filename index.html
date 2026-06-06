@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -507,9 +509,6 @@
     </div>
 </section>
 
-
-
-
 <section id="activiteiten">
     <h2>Activiteiten</h2>
 
@@ -540,7 +539,7 @@
 
     <div class="faq-item">
         <strong>Leeftijd?</strong>
-        <div class="faq-answer">1,5 tot 6 jaar</div>
+        <div class="faq-answer">2 tot 6 jaar</div>
     </div>
 </section>
 
@@ -550,6 +549,7 @@
         <h3>Inschrijving</h3>
 
         <input type="date" id="datePicker">
+        <div id="errorMsg" style="color:red; margin-top:5px;"></div>
         <input type="text" id="name" placeholder="Naam">
         <input type="email" id="email" placeholder="Email">
 
@@ -626,6 +626,28 @@
     });
 
 </script>
+
+
+<script>
+    const picker = document.getElementById("datePicker");
+    const errorMsg = document.getElementById("errorMsg");
+
+    picker.addEventListener("input", function () {
+      const selectedDate = new Date(this.value);
+
+      // reset melding
+      errorMsg.textContent = "";
+
+      if (isNaN(selectedDate)) return;
+
+      // 6 = zaterdag
+      if (selectedDate.getDay() !== 6) {
+        errorMsg.textContent = "❌ Alleen zaterdagen zijn toegestaan.";
+        this.value = "";
+      }
+    });
+</script>
+
 
 </body>
 </html>
