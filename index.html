@@ -353,17 +353,23 @@
   width:100%;
   height:700px;
   border:none;
+  display:block;
+
+  /* BELANGRIJK VOOR GSM SCROLL */
+  touch-action:auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media(max-width:768px){
   .booking-embed iframe{
-    height:85vh; /* mobiel mooi fullscreen gevoel */
+    height:85vh;
   }
 }
 
-  .week-scroll{
-  max-height:60vh;        /* dit maakt scroll mogelijk */
-  overflow-y:auto;        /* echte verticale scroll */
+/* WEEK SCROLL (mag blijven, maar is NIET je hoofdprobleem) */
+.week-scroll{
+  max-height:60vh;
+  overflow-y:auto;
   display:flex;
   flex-direction:column;
   gap:12px;
@@ -372,7 +378,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-optioneel mooier op mobiel
+/* MOBILE VARIANT */
 @media(max-width:768px){
   .week-scroll{
     max-height:50vh;
