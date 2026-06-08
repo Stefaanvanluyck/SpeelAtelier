@@ -424,6 +424,13 @@
   font-size: 1.5rem;
 }
 
+        .btn:disabled {
+    background-color: #d9d9d9;
+    color: #888;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
     </style>
 </head>
 
@@ -461,8 +468,12 @@
 <div class="hero">
     <div class="hero-content">
         <h1>Kleine Wonderwereld</h1>
-        <p>Warm, rustig en speels ontdekken voor kinderen</p>
-        <button class="btn" onclick="openForm()">Schrijf je in 💛</button>
+        <p>
+            Onze wonderwereld is bijna klaar...
+            Nog even geduld en dan openen we de deuren voor kleine ontdekkers.
+        </p>
+        <!--p>Warm, rustig en speels ontdekken voor kinderen</p>-->
+        <button class="btn" disabled onclick="openForm()">Schrijf je in 💛</button>
     </div>
 </div>
 
@@ -647,22 +658,52 @@ Kleine Wonderwereld🌿
 
 <script>
 
-    emailjs.init("ryf0HAbDqTzY368PW");
+    // EMAILJS INIT
+    (function(){
+        emailjs.init("ryf0HAbDqTzY368PW");
+    })();
 
     /* INSCHRIJVEN */
-    function openForm(){document.getElementById("modal").style.display="flex"}
-    function closeForm(){document.getElementById("modal").style.display="none"}
+    function openForm(){
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function closeForm(){
+        document.getElementById("modal").style.display = "none";
+    }
 
     function submitForm(){
-      let d=document.getElementById("datePicker").value;
-      let n=document.getElementById("name").value;
-      let e=document.getElementById("email").value;
 
-      if(!d||!n||!e) return alert("Vul alles in");
+        let selectedDate = document.getElementById("datePicker").value;
+        let name = document.getElementById("name").value;
+        let email = document.getElementById("email").value;
 
-      emailjs.send("service_9u8ex4o","template_m20bheg",{name:n,email:e,date:d});
+        if(!selectedDate || !name || !email){
+            alert("Vul alles in 💛");
+            return;
+        }
 
-      document.getElementById("confirm").innerText="💛 Inschrijving verzonden!";
+        // 1. MAIL NAAR JOU (admin template)
+        emailjs.send("service_9u8ex4o", "template_m20bheg", {
+            name: name,
+            email: email,
+            date: selectedDate
+        });
+
+        // 2. MAIL NAAR KLANT (optioneel)
+        emailjs.send("service_9u8ex4o", "template_nndh15x", {
+            name: name,
+            email: email,
+            date: selectedDate
+        })
+        .then(() => {
+            document.getElementById("confirm").innerText =
+                "💛 Inschrijving verzonden!";
+        })
+        .catch((err) => {
+            console.log("EmailJS error:", err);
+            alert("Er ging iets mis met verzenden");
+        });
     }
 
     /* LOGIN */
