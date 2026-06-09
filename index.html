@@ -502,6 +502,82 @@
 }
 
 
+
+
+/* ===================== MOBILE OPTIMALISATIE ===================== */
+@media (max-width: 768px){
+  nav{
+    width:calc(100% - 16px);
+    padding:12px 16px;
+    border-radius:24px;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  nav div,
+  nav ul{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+  }
+
+  nav a{
+    margin-left:0;
+    font-size:0.95rem;
+  }
+
+  .hero{
+    min-height:100vh;
+    height:auto;
+    padding:120px 16px 60px;
+  }
+
+  .hero-content{
+    width:100%;
+    padding:28px 20px;
+    border-radius:24px;
+  }
+
+  .hero h1{
+    font-size:2.3rem;
+    line-height:1.1;
+  }
+
+  .hero p{
+    font-size:1rem;
+    line-height:1.5;
+    padding:0;
+  }
+
+  section{
+    padding-left:16px !important;
+    padding-right:16px !important;
+  }
+
+  img{
+    max-width:100%;
+    height:auto;
+  }
+
+  .btn{
+    width:100%;
+    max-width:320px;
+  }
+
+  iframe,
+  video{
+    width:100%;
+    height:auto;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    width:100%;
+  }
+}
+
     </style>
 </head>
 
@@ -681,25 +757,25 @@
     </div>
 </section>
 
-        <!-- BOOKING
-        <div class="booking-box">
-            <h3>🎟️ Check de planning</h3>
+<!-- BOOKING
+<div class="booking-box">
+    <h3>🎟️ Check de planning</h3>
 
-            <p>Bekijk wat er de komende tijd gepland staat.</p>
+    <p>Bekijk wat er de komende tijd gepland staat.</p>
 
-            <div class="booking-embed">
-                <iframe
-                        src="https://calendar.google.com/calendar/embed?src=6f2066df6969c30e9f91a91b00156fe9d64447b7e8e56930630ba718544c98d2%40group.calendar.google.com&ctz=Europe%2FBrussels"
-                        style="border:0"
-                        width="100%"
-                        height="650"
-                        frameborder="0"
-                        scrolling="no">
-                </iframe>
-            </div>
-        </div>-->
-
+    <div class="booking-embed">
+        <iframe
+                src="https://calendar.google.com/calendar/embed?src=6f2066df6969c30e9f91a91b00156fe9d64447b7e8e56930630ba718544c98d2%40group.calendar.google.com&ctz=Europe%2FBrussels"
+                style="border:0"
+                width="100%"
+                height="650"
+                frameborder="0"
+                scrolling="no">
+        </iframe>
     </div>
+</div>-->
+
+</div>
 <section id="galerij">
     <h2>Galerij</h2>
 
@@ -723,36 +799,36 @@
     <script src="https://widgets.sociablekit.com/instagram-feed/widget.js" defer></script>
 </section>
 
-    <section id="faq">
-        <h2>FAQ</h2>
+<section id="faq">
+    <h2>FAQ</h2>
 
-        <div class="faq-item">
-            <strong>Prijs?</strong>
-            <div class="faq-answer"> 18 euro per kind, extra kind van hetzelfde gezin = 15 euro</div>
-        </div>
+    <div class="faq-item">
+        <strong>Prijs?</strong>
+        <div class="faq-answer"> 18 euro per kind, extra kind van hetzelfde gezin = 15 euro</div>
+    </div>
 
-        <div class="faq-item">
-            <strong>Aantal?</strong>
-            <div class="faq-answer"> 12 plaatsen met max 2  (groot)ouders/begeleiders bi</div>
-        </div>
+    <div class="faq-item">
+        <strong>Aantal?</strong>
+        <div class="faq-answer"> 12 plaatsen met max 2  (groot)ouders/begeleiders bi</div>
+    </div>
 
-        <div class="faq-item">
-            <strong>Leeftijd?</strong>
-            <div class="faq-answer">2 tot 6 jaar</div>
-        </div>
+    <div class="faq-item">
+        <strong>Leeftijd?</strong>
+        <div class="faq-answer">2 tot 6 jaar</div>
+    </div>
 
-        <div class="faq-item">
-            <strong>Wanneer?</strong>
-            <div class="faq-answer">Elke zaterdag</div>
-        </div>
+    <div class="faq-item">
+        <strong>Wanneer?</strong>
+        <div class="faq-answer">Elke zaterdag</div>
+    </div>
 
-        <div class="faq-item">
-            <strong>Kledij?</strong>
-            <div class="faq-answer">
-                Praktisch: Alles wat gebruikt wordt tijdens het sensorisch speelatelier is normaal uitwasbaar, maar voor de zekerheid trek je best niet je beste kledij aan. 😊
-            </div>
+    <div class="faq-item">
+        <strong>Kledij?</strong>
+        <div class="faq-answer">
+            Praktisch: Alles wat gebruikt wordt tijdens het sensorisch speelatelier is normaal uitwasbaar, maar voor de zekerheid trek je best niet je beste kledij aan. 😊
         </div>
-    </section>
+    </div>
+</section>
 <!-- INSCHRIJVING -->
 <div class="modal" id="modal">
     <div class="modal-content">
@@ -787,7 +863,7 @@
 
 <!-- FOOTER -->
 <footer>
-Kleine Wonderwereld🌿
+    Kleine Wonderwereld🌿
 </footer>
 
 <script>
