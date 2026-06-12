@@ -398,6 +398,13 @@
        max-width: 320px;
      }
 
+     @media (max-width: 768px) {
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(40px, 1fr));
+    overflow-x: auto;
+  }
+}
+
      iframe,
      img {
        max-width: 100%;
