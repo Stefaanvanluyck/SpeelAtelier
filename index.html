@@ -408,36 +408,73 @@
           }
         }
 
-        .floating-contact {
+.floating-contact {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 18px;
+  right: 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   z-index: 9999;
 }
 
 .fc-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 18px;
-  border-radius: 40px;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 30px;
   color: white;
   font-weight: 600;
+  font-size: 0.9rem;
   text-decoration: none;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   transition: transform 0.2s, opacity 0.2s;
 }
 
 .fc-btn i {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .fc-btn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   opacity: 0.9;
+}
+
+/* MOBIEL */
+@media (max-width:768px) {
+
+  .floating-contact {
+    bottom: 14px;
+    right: 14px;
+    gap: 8px;
+  }
+
+  .fc-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    border-radius: 25px;
+  }
+
+  .fc-btn i {
+    font-size: 14px;
+  }
+}
+
+/* EXTRA KLEIN (optioneel) */
+@media (max-width:500px) {
+
+  .fc-btn span {
+    display: none;
+  }
+
+  .fc-btn {
+    width: 42px;
+    height: 42px;
+    justify-content: center;
+    padding: 0;
+  }
+
 }
       /* =========================================================
            Contact (whatsapp, telefoon)
