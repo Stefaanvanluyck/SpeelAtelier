@@ -407,6 +407,110 @@
             min-width: 700px;
           }
         }
+
+        .floating-contact {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 9999;
+}
+
+.fc-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 40px;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.fc-btn i {
+  font-size: 18px;
+}
+
+.fc-btn:hover {
+  transform: translateY(-3px);
+  opacity: 0.9;
+}
+      /* =========================================================
+           Contact (whatsapp, telefoon)
+        ========================================================= */
+
+.whatsapp {
+  background: linear-gradient(135deg, #6fcf97, #25D366);
+}
+
+
+.phone {
+  background: linear-gradient(135deg, #6fcf97, #1E57E6);
+}
+
+.mail {
+  background: linear-gradient(135deg, #6fcf97, #BD0000);
+}
+
+     /* =========================================================
+           Bekijk planning
+        ========================================================= */
+        .secondary {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+
+     /* =========================================================
+          Speelse animatie
+        ========================================================= */
+
+        .hero h1 {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+         /* =========================================================
+          Hoover effect
+        ========================================================= */
+        .gallery img {
+  transition: 0.4s;
+}
+
+.gallery img:hover {
+  transform: scale(1.08) rotate(1deg);
+}
+
+.teacher img:hover {
+  transform: scale(1.05);
+  transition: 0.3s;
+}
+
+ /* =========================================================
+         kaartjes rond prijzen
+        ========================================================= */
+.kaart {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: var(--shadow);
+  transition: 0.3s;
+}
+
+.kaart:hover {
+  transform: translateY(-6px);
+}
+
     </style>
 </head>
 
@@ -450,14 +554,18 @@
             voelen, experimenteren en verwonderd worden.
         </p>
 
-        <button class="btn" disabled>
-            Opening binnenkort 💛
+        <button class="btn" disabled onclick="openForm()">
+            Schrijf je in 💛
+        </button>
+
+        <button class="btn secondary" onclick="document.getElementById('planning').scrollIntoView({behavior:'smooth'})">
+            Bekijk planning
         </button>
     </div>
 </div>
 
 <section id="over" class="over-section">
-    <h2>Over</h2>
+    <h2>🌿 Over</h2>
 
     <img src="logosite.jpeg" alt="Logo van het sensorisch speelatelier">
 
@@ -477,7 +585,7 @@
 </section>
 
 <section id="overmij">
-    <h2>Juf Valerie</h2>
+    <h2>👩‍🏫 Juf Valerie</h2>
 
     <div class="teacher">
         <img src="Valerie.jpeg">
@@ -504,7 +612,7 @@
 </section>
 
 <section id="planning">
-    <h2>Kleine Wonderwereld Planning</h2>
+    <h2>📅 Planning</h2>
 
     <div class="calendar">
         <div class="calendar-header">September 2026</div>
@@ -518,14 +626,15 @@
             <div class="day-name">Za</div>
             <div class="day-name">Zo</div>
 
-            <!-- Lege dagen vóór 1 september -->
+            <!-- Lege dagen -->
             <div class="day empty"></div>
             <div class="day">1</div>
             <div class="day">2</div>
             <div class="day">3</div>
             <div class="day">4</div>
 
-            <div class="day event">
+            <!-- EVENT 1 -->
+            <div class="day event" data-date="2026-09-05">
                 <span class="date">5</span>
                 <div class="event-title">
                     🌿 Onderwaterwereld<br>
@@ -541,7 +650,8 @@
             <div class="day">10</div>
             <div class="day">11</div>
 
-            <div class="day event">
+            <!-- EVENT 2 -->
+            <div class="day event" data-date="2026-09-12">
                 <span class="date">12</span>
                 <div class="event-title">
                     🍦 IJssalon<br>
@@ -557,7 +667,8 @@
             <div class="day">17</div>
             <div class="day">18</div>
 
-            <div class="day event">
+            <!-- EVENT 3 -->
+            <div class="day event" data-date="2026-09-19">
                 <span class="date">19</span>
                 <div class="event-title">
                     🚜 Boerderij<br>
@@ -573,7 +684,8 @@
             <div class="day">24</div>
             <div class="day">25</div>
 
-            <div class="day event">
+            <!-- EVENT 4 -->
+            <div class="day event" data-date="2026-09-26">
                 <span class="date">26</span>
                 <div class="event-title">
                     🏗️ Bouwplaats<br>
@@ -589,8 +701,9 @@
     </div>
 </section>
 
+
 <section id="prijzen">
-    <h2>Prijzen & Praktisch</h2>
+    <h2>💛 Prijzen & Praktisch</h2>
 
     <div class="pricing-info">
 
@@ -607,20 +720,24 @@
         <div class="beurtenkaarten">
 
             <div class="kaart">
-                <img src="beurtenkaart5.jpeg" alt="5-beurtenkaart Kleine Wonderwereld">
+
                 <ul>
                     <li>5-beurtenkaart: €80</li>
                 </ul>
+                <img src="beurtenkaart5.jpeg" alt="5-beurtenkaart Kleine Wonderwereld">
             </div>
 
             <div class="kaart">
-                <img src="beurtenkaart10.jpeg" alt="10-beurtenkaart Kleine Wonderwereld">
+
                 <ul>
                     <li>10-beurtenkaart: €150</li>
                 </ul>
+                <img src="beurtenkaart10.jpeg" alt="10-beurtenkaart Kleine Wonderwereld">
             </div>
 
         </div>
+
+
 
         <p>
             Beurtenkaarten zijn ter plaatse verkrijgbaar tijdens het speelatelier.
@@ -661,7 +778,7 @@
 
 </div>
 <section id="galerij">
-    <h2>Galerij</h2>
+    <h2>🖼️ Galerij</h2>
 
     <div class="gallery">
         <img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74">
@@ -684,7 +801,7 @@
 </section>
 
 <section id="faq">
-    <h2>FAQ</h2>
+    <h2>❓ FAQ</h2>
 
     <div class="faq-item">
         <strong>Prijs?</strong>
@@ -771,9 +888,13 @@
     })();
 
     /* INSCHRIJVEN */
-    function openForm(){
-        document.getElementById("modal").style.display = "flex";
+function openForm(date = null){
+    document.getElementById("modal").style.display = "flex";
+
+    if(date){
+        document.getElementById("datePicker").value = date;
     }
+}
 
     function closeForm(){
         document.getElementById("modal").style.display = "none";
@@ -841,6 +962,53 @@
 </script>
 
 
+<!-- (AL JOUW CODE BOVEN BLIJFT IDENTIEK) -->
+
+<script>
+    const observer = new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+            if(entry.isIntersecting){
+                entry.target.classList.add("show");
+            }
+        });
+    });
+
+    document.querySelectorAll("section,.card,.teacher").forEach(el=>{
+        observer.observe(el);
+    });
+</script>
+
+<!-- ✅ FIX: klik op kalender -->
+<script>
+    document.querySelectorAll(".day.event").forEach(day => {
+        day.addEventListener("click", () => {
+
+            const date = day.getAttribute("data-date");
+            openForm(date);
+
+        });
+    });
+</script>
+
+<div class="floating-contact">
+    <a href="https://wa.me/32487670483" target="_blank" class="fc-btn whatsapp">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+    </a>
+
+    <a href="tel:+32487670483" class="fc-btn phone">
+        <i class="fas fa-phone"></i> Bel
+    </a>
+
+    <a href="mailto:stefaanvanluyck@gmail.com" class="fc-btn mail">
+        <i class="fas fa-envelope"></i> Mail
+    </a>
+</div>
+
+</body>
+</html>
+
+
+
 <script>
     const picker = document.getElementById("datePicker");
     const errorMsg = document.getElementById("errorMsg");
@@ -872,7 +1040,36 @@
     document.querySelectorAll("section,.card,.teacher").forEach(el=>{
         observer.observe(el);
     });
+
+
 </script>
+document.querySelectorAll(".day.event").forEach(day => {
+day.addEventListener("click", () => {
+
+const date = day.getAttribute("data-date");
+openForm(date);
+
+});
+});
+
+
+<div class="floating-contact">
+    <a href="https://wa.me/32487670483" target="_blank" class="fc-btn whatsapp">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+    </a>
+
+
+    <a href="tel:+32487670483" class="fc-btn phone">
+        <i class="fas fa-phone"></i> Bel
+    </a>
+
+    <a href="mailto:stefaanvanluyck@gmail.com" class="fc-btn mail">
+        <i class="fas fa-envelope"></i> Mail
+    </a>
+</div>
+
+
+
 
 </body>
 </html>
