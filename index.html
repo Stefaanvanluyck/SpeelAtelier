@@ -448,10 +448,6 @@
 }
 
 
-.phone {
-  background: linear-gradient(135deg, #6fcf97, #1E57E6);
-}
-
 .mail {
   background: linear-gradient(135deg, #6fcf97, #BD0000);
 }
@@ -902,37 +898,65 @@ function openForm(date = null){
 
     function submitForm(){
 
-        let selectedDate = document.getElementById("datePicker").value;
-        let name = document.getElementById("name").value;
-        let email = document.getElementById("email").value;
+    let selectedDate = document.getElementById("datePicker").value;
+    let name = document.getElementById("name").value;
+    let email = document.getElementById("email").value;
 
-        if(!selectedDate || !name || !email){
-            alert("Vul alles in 💛");
-            return;
-        }
-
-        // 1. MAIL NAAR JOU (admin template)
-        emailjs.send("service_9u8ex4o", "template_m20bheg", {
-            name: name,
-            email: email,
-            date: selectedDate
-        });
-
-        // 2. MAIL NAAR KLANT (optioneel)
-        emailjs.send("service_9u8ex4o", "template_nndh15x", {
-            name: name,
-            email: email,
-            date: selectedDate
-        })
-        .then(() => {
-            document.getElementById("confirm").innerText =
-                "💛 Inschrijving verzonden!";
-        })
-        .catch((err) => {
-            console.log("EmailJS error:", err);
-            alert("Er ging iets mis met verzenden");
-        });
+    if(!selectedDate || !name || !email){
+        alert("Vul alles in 💛");
+        return;
     }
+
+    // ✅ 15 minuten blokkering
+    const lastSubmission = localStorage.getItem("lastSubmissionTime");
+    const now = new Date().getTime();
+
+    if(lastSubmission && (now - lastSubmission < 15 * 60 * 1000)) {
+        alert("⏳ Je kan maar 1 keer per 15 minuten inschrijven.");
+        return;
+    }
+
+    // 1. MAIL NAAR JOU
+    emailjs.send("service_9u8ex4o", "template_m20bheg", {
+        name: name,
+        email: email,
+        date: selectedDate
+    });
+
+    // 2. MAIL NAAR KLANT
+    emailjs.send("service_9u8ex4o", "template_nndh15x", {
+        name: name,
+        email: email,
+        date: selectedDate
+    })
+    .then(() => {
+
+        // ✅ Tijd opslaan (voor blokkering)
+        localStorage.setItem("lastSubmissionTime", now);
+
+        // ✅ bevestiging tonen
+        document.getElementById("confirm").innerText =
+            "💛 Inschrijving verzonden!";
+
+        // ✅ formulier sluiten na 2 seconden
+        setTimeout(() => {
+            closeForm();
+
+            // optioneel reset formulier
+            document.getElementById("name").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("datePicker").value = "";
+            document.getElementById("confirm").innerText = "";
+
+        }, 2000);
+
+    })
+    .catch((err) => {
+        console.log("EmailJS error:", err);
+        alert("Er ging iets mis met verzenden");
+    });
+}
+
 
     /* LOGIN */
     function openLogin(){document.getElementById("loginModal").style.display="flex"}
@@ -995,9 +1019,6 @@ function openForm(date = null){
         <i class="fab fa-whatsapp"></i> WhatsApp
     </a>
 
-    <a href="tel:+32487670483" class="fc-btn phone">
-        <i class="fas fa-phone"></i> Bel
-    </a>
 
     <a href="mailto:stefaanvanluyck@gmail.com" class="fc-btn mail">
         <i class="fas fa-envelope"></i> Mail
@@ -1043,6 +1064,7 @@ function openForm(date = null){
 
 
 </script>
+<script>
 document.querySelectorAll(".day.event").forEach(day => {
 day.addEventListener("click", () => {
 
@@ -1051,17 +1073,12 @@ openForm(date);
 
 });
 });
-
-
+</script>
 <div class="floating-contact">
     <a href="https://wa.me/32487670483" target="_blank" class="fc-btn whatsapp">
         <i class="fab fa-whatsapp"></i> WhatsApp
     </a>
 
-
-    <a href="tel:+32487670483" class="fc-btn phone">
-        <i class="fas fa-phone"></i> Bel
-    </a>
 
     <a href="mailto:stefaanvanluyck@gmail.com" class="fc-btn mail">
         <i class="fas fa-envelope"></i> Mail
