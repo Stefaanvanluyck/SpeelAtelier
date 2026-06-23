@@ -1,160 +1,262 @@
 
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Inschrijvingen</title>
+    <title>Admin Dashboard</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
-            --text: #1f2937;
-            --muted: #6b7280;
-            --card: rgba(255,255,255,0.9);
-            --border: rgba(0,0,0,0.08);
-        }
+        --text: #0f172a;
+        --muted: #64748b;
+        --card: rgba(255,255,255,0.75);
+        --border: rgba(15, 23, 42, 0.08);
+    }
 
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-            color: var(--text);
+    body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        background: linear-gradient(135deg, #fce7f3, #e0f2fe, #ecfdf5);
+        min-height: 100vh;
+        padding: 14px;
+        color: var(--text);
+    }
 
-            background: linear-gradient(135deg, #fce7f3, #e0f2fe, #ecfdf5);
-            min-height: 100vh;
+    /* HEADER */
+    h1 {
+        text-align: center;
+        font-size: 24px;
+        font-weight: 900;
+        margin: 10px 0 14px;
+        letter-spacing: -0.5px;
+    }
 
-            padding: 14px;
-        }
+    /* TOPBAR */
+    #topbar {
+        display: flex;
+        justify-content: flex-end;
+        max-width: 720px;
+        margin: 0 auto 10px;
+    }
 
-        /* HEADER */
-        h1 {
-            text-align: center;
-            font-size: 22px;
-            font-weight: 900;
-            margin: 10px 0 16px;
-        }
+    .btn {
+        background: rgba(15, 23, 42, 0.9);
+        color: white;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 14px;
+    }
 
-        /* TOPBAR */
-        #topbar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-        }
+    /* FILTER */
+    #filterBar {
+        position: sticky;
+        top: 10px;
+        z-index: 10;
 
-        .btn {
-            background: rgba(17,24,39,0.9);
-            color: white;
-            border: none;
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 14px;
-        }
+        max-width: 720px;
+        margin: 0 auto 14px;
 
-        /* FILTER (IMPORTANT MOBILE UX) */
-        #filterBar {
-            position: sticky;
-            top: 10px;
-            z-index: 10;
+        background: rgba(255,255,255,0.7);
+        backdrop-filter: blur(14px);
 
-            max-width: 720px;
-            margin: 0 auto 14px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 12px;
 
-            background: var(--card);
-            backdrop-filter: blur(12px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
 
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 12px;
+    select {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(0,0,0,0.08);
+        background: white;
+    }
 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
+    /* CONTAINER */
+    #container {
+        max-width: 720px;
+        margin: 0 auto;
+        display: grid;
+        gap: 14px;
+    }
 
-        select {
-            width: 100%;
-            padding: 14px;
+    /* CARD */
+    .day {
+        background: rgba(255,255,255,0.75);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 16px;
 
-            border-radius: 12px;
-            border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
 
-            font-size: 16px; /* 🔥 belangrijk voor gsm */
-            background: white;
+    /* subtiele “accent bar” boven elke dag */
+    .day::before {
+        content: "";
+        display: block;
+        height: 4px;
+        width: 100%;
+        background: linear-gradient(90deg, #60a5fa, #a78bfa, #34d399);
+        margin: -16px -16px 12px -16px;
+    }
 
-            outline: none;
-        }
+    /* HEADER */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
 
-        /* CONTAINER */
-        #container {
-            display: grid;
-            gap: 14px;
-            max-width: 720px;
-            margin: 0 auto;
-        }
+    .date {
+        font-size: 17px;
+        font-weight: 900;
+    }
 
-        /* DAY CARD */
-        .day {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
+    .badge {
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.06);
+        font-weight: 700;
+    }
 
-            padding: 16px;
+    /* PERSON */
+    .person {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-        }
+        padding: 14px 0;
+        border-top: 1px solid rgba(15, 23, 42, 0.06);
+    }
 
-        /* HEADER */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+    .person:first-of-type {
+        border-top: none;
+    }
 
-            margin-bottom: 10px;
-        }
+    .left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
 
-        .date {
-            font-size: 16px;
-            font-weight: 900;
-        }
+    .name {
+        font-weight: 800;
+        font-size: 15px;
+    }
 
-        /* BADGE */
-        .badge {
-            font-size: 13px;
-            padding: 6px 10px;
-            border-radius: 999px;
+    .email {
+        font-size: 12px;
+        color: var(--muted);
+    }
 
-            background: rgba(0,0,0,0.06);
-            font-weight: 700;
-        }
+    /* ACTIONS (mobile-friendly groter) */
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
 
-        /* PEOPLE */
-        .person {
-            padding: 12px 0;
-            border-top: 1px solid rgba(0,0,0,0.08);
-        }
+    .small-btn {
+        border: none;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 13px;
+        cursor: pointer;
+    }
 
-        .person:first-of-type {
-            border-top: none;
-        }
+    /* betere kleurcontrasten */
+    .edit {
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        color: white;
+    }
 
+    .delete {
+        background: linear-gradient(135deg, #ef4444, #f97316);
+        color: white;
+    }
+
+    /* MODAL */
+    #modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+    }
+
+    .modal-box {
+        background: white;
+        padding: 16px;
+        border-radius: 18px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+
+    .modal-box input {
+        width: 100%;
+        padding: 12px;
+        margin: 6px 0;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+    }
+
+    .save {
+        background: #22c55e;
+        color: white;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-weight: 700;
+    }
+
+    .cancel {
+        background: #e5e7eb;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 12px;
+    }
+
+    /* EMPTY */
+    .empty {
+        text-align: center;
+        padding: 50px;
+        color: var(--muted);
+        font-size: 15px;
+    }
+
+    /* MOBILE EXTRA BOOST */
+    @media (max-width: 480px) {
         .name {
             font-size: 16px;
-            font-weight: 700;
         }
 
-        .email {
-            font-size: 13px;
-            color: var(--muted);
-            margin-top: 2px;
+        .person {
+            padding: 16px 0;
         }
 
-        /* EMPTY */
-        .empty {
-            text-align: center;
-            padding: 50px;
-            color: var(--muted);
-            font-size: 15px;
+        .small-btn {
+            padding: 10px 12px;
         }
+    }
     </style>
 </head>
 
@@ -164,7 +266,7 @@
     <button class="btn" onclick="logout()">Uitloggen</button>
 </div>
 
-<h1>📋 Inschrijvingen</h1>
+<h1>📊 Realtime Dashboard</h1>
 
 <div id="filterBar">
     <select id="dateFilter" onchange="filterData()">
@@ -174,100 +276,158 @@
 
 <div id="container"></div>
 
+<!-- MODAL -->
+<div id="modal">
+    <div class="modal-box">
+        <h3>✏️ Bewerken</h3>
+
+        <input id="editName" placeholder="Naam">
+        <input id="editEmail" placeholder="Email">
+        <input id="editDate" placeholder="Datum">
+
+        <div class="modal-actions">
+            <button class="cancel" onclick="closeModal()">Annuleer</button>
+            <button class="save" onclick="saveEdit()">Opslaan</button>
+        </div>
+    </div>
+</div>
+
+
 <script>
-    const supabaseUrl = "https://nafajvywiknelkgufpac.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck";
+    const sb = supabase.createClient(
+        "https://nafajvywiknelkgufpac.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck"
+    );
 
+    const MAX_PER_DAY = 10;
+    let allData = [];
+    let editId = null;
 
-        const sb = supabase.createClient(supabaseUrl, supabaseKey);
+    /* LOAD */
+    async function loadData() {
+        const { data } = await sb
+            .from("appointments")
+            .select("*")
+            .order("appointment_date", { ascending: false });
 
-        const MAX_PER_DAY = 10;
-        let allData = [];
+        allData = data || [];
+        setupFilter();
+        render(allData);
+    }
 
-        /* LOAD */
-        async function loadData() {
-            const { data } = await sb
-                .from("appointments")
-                .select("*")
-                .order("appointment_date", { ascending: false });
+    /* FILTER */
+    function setupFilter() {
+        const select = document.getElementById("dateFilter");
 
-            allData = data || [];
-            setupFilter();
-            render(allData);
+        const dates = [...new Set(allData.map(d => d.appointment_date))];
+
+        select.innerHTML =
+            `<option value="all">📅 Alle datums</option>` +
+            dates.map(d => `<option value="${d}">${d}</option>`).join("");
+    }
+
+    function filterData() {
+        const val = document.getElementById("dateFilter").value;
+        render(val === "all" ? allData : allData.filter(d => d.appointment_date === val));
+    }
+
+    /* RENDER */
+    function render(data) {
+        const c = document.getElementById("container");
+        c.innerHTML = "";
+
+        if (!data.length) {
+            c.innerHTML = `<div class="empty">Geen inschrijvingen</div>`;
+            return;
         }
 
-        /* FILTER */
-        function setupFilter() {
-            const select = document.getElementById("dateFilter");
+        const grouped = {};
+        data.forEach(i => {
+            if (!grouped[i.appointment_date]) grouped[i.appointment_date] = [];
+            grouped[i.appointment_date].push(i);
+        });
 
-            const dates = [...new Set(allData.map(d => d.appointment_date))];
+        Object.keys(grouped).forEach(date => {
+            const people = grouped[date];
 
-            select.innerHTML =
-                `<option value="all">📅 Alle datums</option>` +
-                dates.map(d => `<option value="${d}">${d}</option>`).join("");
-        }
+            const card = document.createElement("div");
+            card.className = "day";
 
-        function filterData() {
-            const val = document.getElementById("dateFilter").value;
+            card.innerHTML = `
+                <div class="header">
+                    <div class="date">📅 ${date}</div>
+                    <div class="badge">${people.length}/${MAX_PER_DAY}</div>
+                </div>
 
-            if (val === "all") {
-                render(allData);
-            } else {
-                render(allData.filter(d => d.appointment_date === val));
-            }
-        }
-
-        /* RENDER */
-        function render(data) {
-            const container = document.getElementById("container");
-            container.innerHTML = "";
-
-            if (!data.length) {
-                container.innerHTML = `<div class="empty">Geen inschrijvingen</div>`;
-                return;
-            }
-
-            const grouped = {};
-
-            data.forEach(item => {
-                if (!grouped[item.appointment_date]) {
-                    grouped[item.appointment_date] = [];
-                }
-                grouped[item.appointment_date].push(item);
-            });
-
-            Object.keys(grouped).forEach(date => {
-                const people = grouped[date];
-
-                const card = document.createElement("div");
-                card.className = "day";
-
-                card.innerHTML = `
-                    <div class="header">
-                        <div class="date">📅 ${date}</div>
-                        <div class="badge">${people.length}/${MAX_PER_DAY}</div>
-                    </div>
-
-                    ${people.map(p => `
-                        <div class="person">
+                ${people.map(p => `
+                    <div class="person">
+                        <div class="left">
                             <div class="name">${p.name}</div>
                             <div class="email">${p.email}</div>
                         </div>
-                    `).join("")}
-                `;
 
-                container.appendChild(card);
-            });
-        }
+                        <div class="actions">
+                            <button class="small-btn edit" onclick="openEdit('${p.id}')">✏️</button>
+                            <button class="small-btn delete" onclick="del('${p.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `).join("")}
+            `;
 
-        /* LOGOUT */
-        function logout() {
-            localStorage.removeItem("loggedIn");
-            window.location.href = "index.html";
-        }
+            c.appendChild(card);
+        });
+    }
 
+    /* DELETE */
+    async function del(id) {
+        await sb.from("appointments").delete().eq("id", id);
         loadData();
-        setInterval(loadData, 10000);
+    }
+
+    /* EDIT */
+    function openEdit(id) {
+       const item = allData.find(x => String(x.id) === String(id));
+        editId = id;
+
+        document.getElementById("editName").value = item.name;
+        document.getElementById("editEmail").value = item.email;
+        document.getElementById("editDate").value = item.appointment_date;
+
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("modal").style.display = "none";
+    }
+
+    async function saveEdit() {
+        await sb.from("appointments").update({
+            name: document.getElementById("editName").value,
+            email: document.getElementById("editEmail").value,
+            appointment_date: document.getElementById("editDate").value
+        }).eq("id", editId);
+
+        closeModal();
+        loadData();
+    }
+
+    /* REALTIME */
+    sb.channel('live')
+    .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'appointments'
+    }, loadData)
+    .subscribe();
+
+    /* INIT */
+    loadData();
+
+    /* LOGOUT */
+    function logout() {
+        localStorage.removeItem("loggedIn");
+        window.location.href = "index.html";
+    }
 </script>
 
 </body>
