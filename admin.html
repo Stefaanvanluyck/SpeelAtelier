@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -11,26 +12,27 @@
         :root {
             --text: #1f2937;
             --muted: #6b7280;
-            --card: rgba(255,255,255,0.85);
-            --border: rgba(255,255,255,0.4);
+            --card: rgba(255,255,255,0.9);
+            --border: rgba(0,0,0,0.08);
         }
 
         body {
             margin: 0;
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
             color: var(--text);
-            padding: 16px;
 
-            /* ✨ matching soft website background */
             background: linear-gradient(135deg, #fce7f3, #e0f2fe, #ecfdf5);
             min-height: 100vh;
+
+            padding: 14px;
         }
 
+        /* HEADER */
         h1 {
             text-align: center;
             font-size: 22px;
             font-weight: 900;
-            margin: 10px 0 18px;
+            margin: 10px 0 16px;
         }
 
         /* TOPBAR */
@@ -44,32 +46,41 @@
             background: rgba(17,24,39,0.9);
             color: white;
             border: none;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border-radius: 12px;
             font-weight: 700;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
+            font-size: 14px;
         }
 
-        /* FILTER */
+        /* FILTER (IMPORTANT MOBILE UX) */
         #filterBar {
+            position: sticky;
+            top: 10px;
+            z-index: 10;
+
             max-width: 720px;
             margin: 0 auto 14px;
+
             background: var(--card);
-            backdrop-filter: blur(14px);
+            backdrop-filter: blur(12px);
+
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
 
         select {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
+
             border-radius: 12px;
-            border: 1px solid rgba(0,0,0,0.08);
-            font-size: 14px;
+            border: 1px solid rgba(0,0,0,0.1);
+
+            font-size: 16px; /* 🔥 belangrijk voor gsm */
             background: white;
+
             outline: none;
         }
 
@@ -84,16 +95,12 @@
         /* DAY CARD */
         .day {
             background: var(--card);
-            backdrop-filter: blur(14px);
             border: 1px solid var(--border);
             border-radius: 18px;
-            padding: 14px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-        }
 
-        .day:hover {
-            transform: translateY(-2px);
-            transition: 0.2s ease;
+            padding: 16px;
+
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
         }
 
         /* HEADER */
@@ -101,27 +108,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+
             margin-bottom: 10px;
         }
 
         .date {
+            font-size: 16px;
             font-weight: 900;
-            font-size: 15px;
         }
 
-        /* badge softer */
+        /* BADGE */
         .badge {
-            font-size: 12px;
-            padding: 4px 10px;
+            font-size: 13px;
+            padding: 6px 10px;
             border-radius: 999px;
+
             background: rgba(0,0,0,0.06);
             font-weight: 700;
         }
 
-        /* PERSON */
+        /* PEOPLE */
         .person {
-            padding: 8px 0;
-            border-top: 1px solid rgba(0,0,0,0.06);
+            padding: 12px 0;
+            border-top: 1px solid rgba(0,0,0,0.08);
         }
 
         .person:first-of-type {
@@ -129,12 +138,12 @@
         }
 
         .name {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
         }
 
         .email {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--muted);
             margin-top: 2px;
         }
@@ -142,20 +151,9 @@
         /* EMPTY */
         .empty {
             text-align: center;
-            padding: 40px;
+            padding: 50px;
             color: var(--muted);
-            font-size: 14px;
-        }
-
-        /* MOBILE */
-        @media (max-width: 480px) {
-            body {
-                padding: 12px;
-            }
-
-            .day {
-                padding: 12px;
-            }
+            font-size: 15px;
         }
     </style>
 </head>
@@ -170,7 +168,7 @@
 
 <div id="filterBar">
     <select id="dateFilter" onchange="filterData()">
-        <option value="all">Alle datums</option>
+        <option value="all">📅 Alle datums</option>
     </select>
 </div>
 
@@ -205,7 +203,7 @@
             const dates = [...new Set(allData.map(d => d.appointment_date))];
 
             select.innerHTML =
-                `<option value="all">Alle datums</option>` +
+                `<option value="all">📅 Alle datums</option>` +
                 dates.map(d => `<option value="${d}">${d}</option>`).join("");
         }
 
