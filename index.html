@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta name="description">
     <meta property="og:title">
     <meta property="og:image">
@@ -531,15 +532,20 @@
         <a href="#galerij">Galerij</a>
         <a href="#Instagram">Instagram</a>
         <a href="#faq">FAQ</a>
-
-        <!--a onclick="openForm()">Inschrijven</a>-->
-        <!--a onclick="openLogin()">Login</a>-->
+        <a onclick="openLogin()">Login</a>
 
         <a href="https://www.instagram.com/juf__valerie" target="_blank">
             <i class="fa-brands fa-instagram"></i>
         </a>
     </div>
 </nav>
+
+<div id="adminPanel" style="display:none;">
+    <h2>Admin dashboard</h2>
+    <p>Hier komen je afspraken</p>
+
+    <div id="appointmentsList"></div>
+</div>
 
 <!-- HERO -->
 <div class="hero">
@@ -842,20 +848,7 @@
     </div>
 </div>
 
-<!-- LOGIN -->
-<!--div class="modal" id="loginModal">
-    <div class="modal-content">
-        <h3>Login beheer 🌿</h3>
 
-        <input type="text" id="loginUser" placeholder="Gebruiker">
-        <input type="password" id="loginPass" placeholder="Wachtwoord">
-
-        <button class="btn" onclick="loginForm()">Login</button>
-        <button class="btn" style="background:#999" onclick="closeLogin()">Sluiten</button>
-
-        <p id="loginStatus"></p>
-    </div>
-</div>-->
 
 <footer class="footer">
     <h3>Kleine Wonderwereld 🌿</h3>
@@ -878,118 +871,151 @@
 
 <!--MAILSENDING TO ENABLE WHEN GO LIVE-->
 
-<!--script>
+<script>
+
+    function openForm(date = null){
+        document.getElementById("modal").style.display = "flex";
+
+        if(date){
+            document.getElementById("datePicker").value = date;
+        }
+    }
 
     // EMAILJS INIT
     (function(){
         emailjs.init("ryf0HAbDqTzY368PW");
     })();
 
+    // SUPABASE INIT (FIXED: NO CONFLICTS)
+    const supabaseUrl = "https://nafajvywiknelkgufpac.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck";
+
+    const sb = supabase.createClient(supabaseUrl, supabaseKey);
+
     /* INSCHRIJVEN */
-function openForm(date = null){
-    document.getElementById("modal").style.display = "flex";
-
-    if(date){
-        document.getElementById("datePicker").value = date;
-    }
-}
-
     function closeForm(){
         document.getElementById("modal").style.display = "none";
     }
 
-    function submitForm(){
-
+    async function submitForm() {
+    const now = new Date().getTime();
     let selectedDate = document.getElementById("datePicker").value;
     let name = document.getElementById("name").value;
     let email = document.getElementById("email").value;
 
-    if(!selectedDate || !name || !email){
+    if (!selectedDate || !name || !email) {
         alert("Vul alles in 💛");
         return;
     }
 
-    // ✅ 15 minuten blokkering
-    const lastSubmission = localStorage.getItem("lastSubmissionTime");
+    // ⛔ 15 min blokkering
+    /*const lastSubmission = localStorage.getItem("lastSubmissionTime");
     const now = new Date().getTime();
 
-    if(lastSubmission && (now - lastSubmission < 15 * 60 * 1000)) {
+    /if (lastSubmission && (now - lastSubmission < 15 * 60 * 1000)) {
         alert("⏳ Je kan maar 1 keer per 15 minuten inschrijven.");
         return;
-    }
+    }*/
 
-    // 1. MAIL NAAR JOU
-    emailjs.send("service_9u8ex4o", "template_m20bheg", {
-        name: name,
-        email: email,
-        date: selectedDate
-    });
+    try {
 
-    // 2. MAIL NAAR KLANT
-    emailjs.send("service_9u8ex4o", "template_nndh15x", {
-        name: name,
-        email: email,
-        date: selectedDate
-    })
-    .then(() => {
+        // ==========================
+        // 1. CHECK AANTAL INSCHRIJVINGEN
+        // ==========================
+        const { data: existing, error: countError } = await sb
+            .from("appointments")
+            .select("*", { count: "exact", head: false })
+            .eq("appointment_date", selectedDate);
 
-        // ✅ Tijd opslaan (voor blokkering)
+        if (countError) {
+            console.error(countError);
+            alert("❌ Kon beschikbaarheid niet checken.");
+            return;
+        }
+
+        if (existing.length >= 10) {
+            alert("❌ Helaas, deze datum is volzet (max 10 inschrijvingen).");
+            return;
+        }
+
+        // ==========================
+        // 2. OPSLAAN IN SUPABASE
+        // ==========================
+        const { error: dbError } = await sb
+            .from("appointments")
+            .insert([
+                {
+                    name: name,
+                    email: email,
+                    appointment_date: selectedDate
+                }
+            ]);
+
+        if (dbError) {
+            console.error(dbError);
+            alert("❌ Database fout");
+            return;
+        }
+
+        // ==========================
+        // 3. EMAILS
+        // ==========================
+        await emailjs.send("service_9u8ex4o", "template_m20bheg", {
+            name,
+            email,
+            date: selectedDate
+        });
+
+        await emailjs.send("service_9u8ex4o", "template_nndh15x", {
+            name,
+            email,
+            date: selectedDate
+        });
+
+        // ==========================
+        // 4. SUCCESS
+        // ==========================
         localStorage.setItem("lastSubmissionTime", now);
 
-        // ✅ bevestiging tonen
         document.getElementById("confirm").innerText =
             "💛 Inschrijving verzonden!";
 
-        // ✅ formulier sluiten na 2 seconden
         setTimeout(() => {
             closeForm();
-
-            // optioneel reset formulier
             document.getElementById("name").value = "";
             document.getElementById("email").value = "";
             document.getElementById("datePicker").value = "";
             document.getElementById("confirm").innerText = "";
-
         }, 2000);
 
-    })
-    .catch((err) => {
-        console.log("EmailJS error:", err);
-        alert("Er ging iets mis met verzenden");
-    });
-}
-
-
-    /* LOGIN */
-    function openLogin(){document.getElementById("loginModal").style.display="flex"}
-    function closeLogin(){document.getElementById("loginModal").style.display="none"}
-
-    function loginForm(){
-      let u=document.getElementById("loginUser").value;
-      let p=document.getElementById("loginPass").value;
-
-      if(u==="admin" && p==="1234"){
-        localStorage.setItem("loggedIn","true");
-        document.getElementById("loginStatus").innerText="✔ Ingelogd";
-        setTimeout(closeLogin,800);
-      } else {
-        document.getElementById("loginStatus").innerText="❌ Fout";
-      }
+    } catch (err) {
+        console.error(err);
+        alert("❌ Er ging iets mis");
     }
+}
 
     /* FAQ */
     document.querySelectorAll(".faq-item").forEach(i=>{
-      i.addEventListener("click",()=>{
-        let a=i.querySelector(".faq-answer");
-        a.style.display=a.style.display==="block"?"none":"block";
-      });
+        i.addEventListener("click",()=>{
+            let a=i.querySelector(".faq-answer");
+            a.style.display=a.style.display==="block"?"none":"block";
+        });
     });
 
-</script-->>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".day.event").forEach(day => {
+            day.style.cursor = "pointer";
 
+            day.addEventListener("click", () => {
+                const date = day.dataset.date;
+                openForm(date);
+            });
+        });
+    });
 
-<!-- (AL JOUW CODE BOVEN BLIJFT IDENTIEK) -->
+</script>
 
+<!-- INTERSECTION OBSERVER (KEEP BUT SAFE) -->
 <script>
     const observer = new IntersectionObserver(entries=>{
         entries.forEach(entry=>{
@@ -1004,90 +1030,135 @@ function openForm(date = null){
     });
 </script>
 
-<!-- ✅ FIX: klik op kalender -->
+<!-- FIXED CALENDAR CLICK (KEEP ONLY ONCE) -->
 <script>
     document.querySelectorAll(".day.event").forEach(day => {
         day.addEventListener("click", () => {
-
             const date = day.getAttribute("data-date");
             openForm(date);
-
         });
     });
 </script>
 
+<!-- FLOATING CONTACT (KEEP ONCE ONLY) -->
 <div class="floating-contact">
     <a href="https://wa.me/32471390682" target="_blank" class="fc-btn whatsapp">
         <i class="fab fa-whatsapp"></i> WhatsApp
     </a>
 
-
     <a href="mailto:kleinewonderwereld2920@gmail.com" class="fc-btn mail">
         <i class="fas fa-envelope"></i> Mail
     </a>
+</div>
+
+<div class="modal" id="loginModal" style="display:none;">
+    <div class="modal-content">
+        <h3>Admin login</h3>
+
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPass" placeholder="Wachtwoord">
+
+        <button class="btn" onclick="loginForm()">Login</button>
+        <button class="btn" style="background:#999" onclick="closeLogin()">Sluiten</button>
+
+        <p id="loginStatus"></p>
+    </div>
 </div>
 
 </body>
 </html>
 
-
-
+<!-- DATE VALIDATION -->
 <script>
     const picker = document.getElementById("datePicker");
     const errorMsg = document.getElementById("errorMsg");
 
     picker.addEventListener("input", function () {
-      const selectedDate = new Date(this.value);
 
-      // reset melding
-      errorMsg.textContent = "";
+        const selectedDate = new Date(this.value);
 
-      if (isNaN(selectedDate)) return;
+        errorMsg.textContent = "";
 
-      // 6 = zaterdag
-      if (selectedDate.getDay() !== 6) {
-        errorMsg.textContent = "❌ Alleen zaterdagen zijn toegestaan.";
-        this.value = "";
-      }
+        if (isNaN(selectedDate)) return;
+
+        if (selectedDate.getDay() !== 6) {
+            errorMsg.textContent = "❌ Alleen zaterdagen zijn toegestaan.";
+            this.value = "";
+        }
     });
 </script>
+
+<!-- LOGIN -->
+
 <script>
-    const observer = new IntersectionObserver(entries=>{
-        entries.forEach(entry=>{
-            if(entry.isIntersecting){
-                entry.target.classList.add("show");
-            }
-        });
-    });
+    function openLogin(){
+        document.getElementById("loginModal").style.display = "flex";
+    }
 
-    document.querySelectorAll("section,.card,.teacher").forEach(el=>{
-        observer.observe(el);
-    });
+    function closeLogin(){
+        document.getElementById("loginModal").style.display = "none";
+    }
 
+    function loginForm(){
 
+        const email = document.getElementById("loginEmail").value;
+        const pass = document.getElementById("loginPass").value;
+
+        if(email === "admin" && pass === "1234"){
+
+            localStorage.setItem("loggedIn", "true");
+
+            window.location.href = "admin.html"; // 👈 HIER DE REDIRECT
+
+        } else {
+            document.getElementById("loginStatus").innerText = "❌ Fout login";
+        }
+    }
 </script>
+
 <script>
-document.querySelectorAll(".day.event").forEach(day => {
-day.addEventListener("click", () => {
-
-const date = day.getAttribute("data-date");
-openForm(date);
-
+    window.addEventListener("load", () => {
+if(localStorage.getItem("loggedIn") === "true"){
+document.getElementById("adminPanel").style.display = "block";
+loadAppointments();
+}
 });
-});
+
 </script>
-<div class="floating-contact">
-    <a href="https://wa.me/32471390682" target="_blank" class="fc-btn whatsapp">
-        <i class="fab fa-whatsapp"></i> WhatsApp
-    </a>
 
+<script>
 
-    <a href="mailto:kleinewonderwereld2920@gmail.com" class="fc-btn mail">
-        <i class="fas fa-envelope"></i> Mail
-    </a>
-</div>
+    async function loadAppointments() {
 
+  const { data, error } = await sb
+    .from("appointments")
+    .select("*")
+    .order("appointment_date", { ascending: true });
 
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  const container = document.getElementById("appointmentsList");
+  container.innerHTML = "";
+
+  data.forEach(app => {
+    const div = document.createElement("div");
+    div.style.padding = "10px";
+    div.style.borderBottom = "1px solid #ddd";
+
+    div.innerHTML = `
+      <strong>${app.name}</strong><br>
+      ${app.email}<br>
+      📅 ${app.appointment_date}
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+</script>
 
 
 </body>

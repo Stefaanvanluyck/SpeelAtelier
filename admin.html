@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Inschrijvingen</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f6f8f4;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        th {
+            background: #ff6f86;
+            color: white;
+        }
+
+        button {
+            padding: 6px 10px;
+            border: none;
+            background: #ff6f86;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+<button onclick="logout()" class="btn" style="background:#999;">
+    Uitloggen
+</button>
+
+<h1>📋 Inschrijvingen</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Naam</th>
+        <th>Email</th>
+        <th>Datum</th>
+        <th>Actie</th>
+    </tr>
+    </thead>
+    <tbody id="data"></tbody>
+</table>
+
+<script>
+    const supabaseUrl = "https://nafajvywiknelkgufpac.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck"; // <-- hier echte key zetten
+
+const sb = supabase.createClient(supabaseUrl, supabaseKey);
+
+let allData = [];
+
+const MAX_PER_DAY = 10;
+
+async function loadData() {
+    const { data, error } = await sb
+        .from("appointments")
+        .select("*")
+        .order("appointment_date", { ascending: false });
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    allData = data;
+
+    renderTable(data);
+    renderDateFilter(data);
+    updateCount(data);
+}
+
+/* ===== TABLE ===== */
+function renderTable(data) {
+    const table = document.getElementById("data");
+    table.innerHTML = "";
+
+    data.forEach(row => {
+
+        const countForDay = allData.filter(d => d.appointment_date === row.appointment_date).length;
+        const isFull = countForDay >= MAX_PER_DAY;
+
+        table.innerHTML += `
+            <tr style="${isFull ? 'background:#ffe6e6;' : ''}">
+                <td>${row.name}</td>
+                <td>${row.email}</td>
+                <td>
+                    ${row.appointment_date}
+                    ${isFull ? '<strong style="color:red;"> (VOLZET)</strong>' : ''}
+                </td>
+                <td>
+                    <button onclick="deleteRow('${row.id}')">Verwijder</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+/* ===== DELETE ===== */
+async function deleteRow(id) {
+    const confirmDelete = confirm("Verwijderen?");
+    if (!confirmDelete) return;
+
+    const { error } = await sb
+        .from("appointments")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        alert("Fout bij verwijderen");
+        return;
+    }
+
+    loadData();
+}
+
+/* ===== FILTER UI ===== */
+function renderDateFilter(data) {
+
+    let container = document.getElementById("filterBox");
+
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "filterBox";
+        container.style.margin = "20px 0";
+        container.style.textAlign = "center";
+
+        document.body.insertBefore(container, document.body.children[1]);
+    }
+
+    const dates = [...new Set(data.map(d => d.appointment_date))];
+
+    container.innerHTML = `
+        <label>📅 Filter op datum: </label>
+        <select id="dateFilter" onchange="filterData()">
+            <option value="all">Alle</option>
+            ${dates.map(d => {
+                const count = allData.filter(x => x.appointment_date === d).length;
+                const full = count >= MAX_PER_DAY;
+
+                return `
+                    <option value="${d}">
+                        ${d} (${count}/10) ${full ? "VOLZET" : ""}
+                    </option>
+                `;
+            }).join("")}
+        </select>
+
+        <p id="count" style="margin-top:10px;font-weight:bold;"></p>
+    `;
+}
+
+/* ===== FILTER ===== */
+function filterData() {
+    const value = document.getElementById("dateFilter").value;
+
+    if (value === "all") {
+        renderTable(allData);
+        updateCount(allData);
+        return;
+    }
+
+    const filtered = allData.filter(d => d.appointment_date === value);
+
+    renderTable(filtered);
+    updateCount(filtered);
+
+    const count = filtered.length;
+
+    if (count >= MAX_PER_DAY) {
+        alert("🚫 Deze datum is VOLZET (10/10 inschrijvingen)");
+    }
+}
+
+/* ===== COUNT ===== */
+function updateCount(data) {
+    const el = document.getElementById("count");
+
+    if (!el) return;
+
+    el.innerText = `💛 ${data.length} inschrijvingen`;
+}
+
+loadData();
+setInterval(loadData, 10000);
+</script>
+
+<script>
+    function logout(){
+        localStorage.removeItem("loggedIn");
+        window.location.href = "index.html";
+    }
+</script>
+</body>
+</html>
