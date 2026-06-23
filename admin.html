@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -7,213 +8,269 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
+        :root {
+            --text: #1f2937;
+            --muted: #6b7280;
+            --card: rgba(255,255,255,0.85);
+            --border: rgba(255,255,255,0.4);
+        }
+
         body {
-            font-family: Arial;
-            background: #f6f8f4;
-            padding: 40px;
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            color: var(--text);
+            padding: 16px;
+
+            /* ✨ matching soft website background */
+            background: linear-gradient(135deg, #fce7f3, #e0f2fe, #ecfdf5);
+            min-height: 100vh;
         }
 
         h1 {
             text-align: center;
+            font-size: 22px;
+            font-weight: 900;
+            margin: 10px 0 18px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        /* TOPBAR */
+        #topbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
         }
 
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            text-align: left;
-        }
-
-        th {
-            background: #ff6f86;
+        .btn {
+            background: rgba(17,24,39,0.9);
             color: white;
-        }
-
-        button {
-            padding: 6px 10px;
             border: none;
-            background: #ff6f86;
-            color: white;
-            border-radius: 6px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 700;
             cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        /* FILTER */
+        #filterBar {
+            max-width: 720px;
+            margin: 0 auto 14px;
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.08);
+            font-size: 14px;
+            background: white;
+            outline: none;
+        }
+
+        /* CONTAINER */
+        #container {
+            display: grid;
+            gap: 14px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        /* DAY CARD */
+        .day {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        }
+
+        .day:hover {
+            transform: translateY(-2px);
+            transition: 0.2s ease;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            font-weight: 900;
+            font-size: 15px;
+        }
+
+        /* badge softer */
+        .badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.06);
+            font-weight: 700;
+        }
+
+        /* PERSON */
+        .person {
+            padding: 8px 0;
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .person:first-of-type {
+            border-top: none;
+        }
+
+        .name {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .email {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* EMPTY */
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .day {
+                padding: 12px;
+            }
         }
     </style>
 </head>
 
 <body>
-<button onclick="logout()" class="btn" style="background:#999;">
-    Uitloggen
-</button>
+
+<div id="topbar">
+    <button class="btn" onclick="logout()">Uitloggen</button>
+</div>
 
 <h1>📋 Inschrijvingen</h1>
 
-<table>
-    <thead>
-    <tr>
-        <th>Naam</th>
-        <th>Email</th>
-        <th>Datum</th>
-        <th>Actie</th>
-    </tr>
-    </thead>
-    <tbody id="data"></tbody>
-</table>
+<div id="filterBar">
+    <select id="dateFilter" onchange="filterData()">
+        <option value="all">Alle datums</option>
+    </select>
+</div>
+
+<div id="container"></div>
 
 <script>
     const supabaseUrl = "https://nafajvywiknelkgufpac.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck"; // <-- hier echte key zetten
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck";
 
-const sb = supabase.createClient(supabaseUrl, supabaseKey);
 
-let allData = [];
+        const sb = supabase.createClient(supabaseUrl, supabaseKey);
 
-const MAX_PER_DAY = 10;
+        const MAX_PER_DAY = 10;
+        let allData = [];
 
-async function loadData() {
-    const { data, error } = await sb
-        .from("appointments")
-        .select("*")
-        .order("appointment_date", { ascending: false });
+        /* LOAD */
+        async function loadData() {
+            const { data } = await sb
+                .from("appointments")
+                .select("*")
+                .order("appointment_date", { ascending: false });
 
-    if (error) {
-        console.error(error);
-        return;
-    }
+            allData = data || [];
+            setupFilter();
+            render(allData);
+        }
 
-    allData = data;
+        /* FILTER */
+        function setupFilter() {
+            const select = document.getElementById("dateFilter");
 
-    renderTable(data);
-    renderDateFilter(data);
-    updateCount(data);
-}
+            const dates = [...new Set(allData.map(d => d.appointment_date))];
 
-/* ===== TABLE ===== */
-function renderTable(data) {
-    const table = document.getElementById("data");
-    table.innerHTML = "";
+            select.innerHTML =
+                `<option value="all">Alle datums</option>` +
+                dates.map(d => `<option value="${d}">${d}</option>`).join("");
+        }
 
-    data.forEach(row => {
+        function filterData() {
+            const val = document.getElementById("dateFilter").value;
 
-        const countForDay = allData.filter(d => d.appointment_date === row.appointment_date).length;
-        const isFull = countForDay >= MAX_PER_DAY;
+            if (val === "all") {
+                render(allData);
+            } else {
+                render(allData.filter(d => d.appointment_date === val));
+            }
+        }
 
-        table.innerHTML += `
-            <tr style="${isFull ? 'background:#ffe6e6;' : ''}">
-                <td>${row.name}</td>
-                <td>${row.email}</td>
-                <td>
-                    ${row.appointment_date}
-                    ${isFull ? '<strong style="color:red;"> (VOLZET)</strong>' : ''}
-                </td>
-                <td>
-                    <button onclick="deleteRow('${row.id}')">Verwijder</button>
-                </td>
-            </tr>
-        `;
-    });
-}
+        /* RENDER */
+        function render(data) {
+            const container = document.getElementById("container");
+            container.innerHTML = "";
 
-/* ===== DELETE ===== */
-async function deleteRow(id) {
-    const confirmDelete = confirm("Verwijderen?");
-    if (!confirmDelete) return;
+            if (!data.length) {
+                container.innerHTML = `<div class="empty">Geen inschrijvingen</div>`;
+                return;
+            }
 
-    const { error } = await sb
-        .from("appointments")
-        .delete()
-        .eq("id", id);
+            const grouped = {};
 
-    if (error) {
-        alert("Fout bij verwijderen");
-        return;
-    }
+            data.forEach(item => {
+                if (!grouped[item.appointment_date]) {
+                    grouped[item.appointment_date] = [];
+                }
+                grouped[item.appointment_date].push(item);
+            });
 
-    loadData();
-}
+            Object.keys(grouped).forEach(date => {
+                const people = grouped[date];
 
-/* ===== FILTER UI ===== */
-function renderDateFilter(data) {
+                const card = document.createElement("div");
+                card.className = "day";
 
-    let container = document.getElementById("filterBox");
+                card.innerHTML = `
+                    <div class="header">
+                        <div class="date">📅 ${date}</div>
+                        <div class="badge">${people.length}/${MAX_PER_DAY}</div>
+                    </div>
 
-    if (!container) {
-        container = document.createElement("div");
-        container.id = "filterBox";
-        container.style.margin = "20px 0";
-        container.style.textAlign = "center";
-
-        document.body.insertBefore(container, document.body.children[1]);
-    }
-
-    const dates = [...new Set(data.map(d => d.appointment_date))];
-
-    container.innerHTML = `
-        <label>📅 Filter op datum: </label>
-        <select id="dateFilter" onchange="filterData()">
-            <option value="all">Alle</option>
-            ${dates.map(d => {
-                const count = allData.filter(x => x.appointment_date === d).length;
-                const full = count >= MAX_PER_DAY;
-
-                return `
-                    <option value="${d}">
-                        ${d} (${count}/10) ${full ? "VOLZET" : ""}
-                    </option>
+                    ${people.map(p => `
+                        <div class="person">
+                            <div class="name">${p.name}</div>
+                            <div class="email">${p.email}</div>
+                        </div>
+                    `).join("")}
                 `;
-            }).join("")}
-        </select>
 
-        <p id="count" style="margin-top:10px;font-weight:bold;"></p>
-    `;
-}
+                container.appendChild(card);
+            });
+        }
 
-/* ===== FILTER ===== */
-function filterData() {
-    const value = document.getElementById("dateFilter").value;
+        /* LOGOUT */
+        function logout() {
+            localStorage.removeItem("loggedIn");
+            window.location.href = "index.html";
+        }
 
-    if (value === "all") {
-        renderTable(allData);
-        updateCount(allData);
-        return;
-    }
-
-    const filtered = allData.filter(d => d.appointment_date === value);
-
-    renderTable(filtered);
-    updateCount(filtered);
-
-    const count = filtered.length;
-
-    if (count >= MAX_PER_DAY) {
-        alert("🚫 Deze datum is VOLZET (10/10 inschrijvingen)");
-    }
-}
-
-/* ===== COUNT ===== */
-function updateCount(data) {
-    const el = document.getElementById("count");
-
-    if (!el) return;
-
-    el.innerText = `💛 ${data.length} inschrijvingen`;
-}
-
-loadData();
-setInterval(loadData, 10000);
+        loadData();
+        setInterval(loadData, 10000);
 </script>
 
-<script>
-    function logout(){
-        localStorage.removeItem("loggedIn");
-        window.location.href = "index.html";
-    }
-</script>
 </body>
 </html>
