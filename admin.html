@@ -1,433 +1,359 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Kalender</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+
     <style>
-        :root {
-        --text: #0f172a;
-        --muted: #64748b;
-        --card: rgba(255,255,255,0.75);
-        --border: rgba(15, 23, 42, 0.08);
-    }
-
-    body {
-        margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-        background: linear-gradient(135deg, #fce7f3, #e0f2fe, #ecfdf5);
-        min-height: 100vh;
-        padding: 14px;
-        color: var(--text);
-    }
-
-    /* HEADER */
-    h1 {
-        text-align: center;
-        font-size: 24px;
-        font-weight: 900;
-        margin: 10px 0 14px;
-        letter-spacing: -0.5px;
-    }
-
-    /* TOPBAR */
-    #topbar {
-        display: flex;
-        justify-content: flex-end;
-        max-width: 720px;
-        margin: 0 auto 10px;
-    }
-
-    .btn {
-        background: rgba(15, 23, 42, 0.9);
-        color: white;
-        border: none;
-        padding: 10px 14px;
-        border-radius: 14px;
-        font-weight: 700;
-        font-size: 14px;
-    }
-
-    /* FILTER */
-    #filterBar {
-        position: sticky;
-        top: 10px;
-        z-index: 10;
-
-        max-width: 720px;
-        margin: 0 auto 14px;
-
-        background: rgba(255,255,255,0.7);
-        backdrop-filter: blur(14px);
-
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 12px;
-
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    }
-
-    select {
-        width: 100%;
-        padding: 14px;
-        font-size: 16px;
-        border-radius: 14px;
-        border: 1px solid rgba(0,0,0,0.08);
-        background: white;
-    }
-
-    /* CONTAINER */
-    #container {
-        max-width: 720px;
-        margin: 0 auto;
-        display: grid;
-        gap: 14px;
-    }
-
-    /* CARD */
-    .day {
-        background: rgba(255,255,255,0.75);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 16px;
-
-        box-shadow: 0 12px 35px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
-
-    /* subtiele “accent bar” boven elke dag */
-    .day::before {
-        content: "";
-        display: block;
-        height: 4px;
-        width: 100%;
-        background: linear-gradient(90deg, #60a5fa, #a78bfa, #34d399);
-        margin: -16px -16px 12px -16px;
-    }
-
-    /* HEADER */
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-    }
-
-    .date {
-        font-size: 17px;
-        font-weight: 900;
-    }
-
-    .badge {
-        font-size: 12px;
-        padding: 6px 12px;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.06);
-        font-weight: 700;
-    }
-
-    /* PERSON */
-    .person {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        padding: 14px 0;
-        border-top: 1px solid rgba(15, 23, 42, 0.06);
-    }
-
-    .person:first-of-type {
-        border-top: none;
-    }
-
-    .left {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    .name {
-        font-weight: 800;
-        font-size: 15px;
-    }
-
-    .email {
-        font-size: 12px;
-        color: var(--muted);
-    }
-
-    /* ACTIONS (mobile-friendly groter) */
-    .actions {
-        display: flex;
-        gap: 8px;
-    }
-
-    .small-btn {
-        border: none;
-        padding: 8px 10px;
-        border-radius: 10px;
-        font-size: 13px;
-        cursor: pointer;
-    }
-
-    /* betere kleurcontrasten */
-    .edit {
-        background: linear-gradient(135deg, #3b82f6, #60a5fa);
-        color: white;
-    }
-
-    .delete {
-        background: linear-gradient(135deg, #ef4444, #f97316);
-        color: white;
-    }
-
-    /* MODAL */
-    #modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.45);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 14px;
-    }
-
-    .modal-box {
-        background: white;
-        padding: 16px;
-        border-radius: 18px;
-        width: 100%;
-        max-width: 380px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-    }
-
-    .modal-box input {
-        width: 100%;
-        padding: 12px;
-        margin: 6px 0;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 14px;
-    }
-
-    .modal-actions {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 12px;
-    }
-
-    .save {
-        background: #22c55e;
-        color: white;
-        border: none;
-        padding: 10px 14px;
-        border-radius: 12px;
-        font-weight: 700;
-    }
-
-    .cancel {
-        background: #e5e7eb;
-        border: none;
-        padding: 10px 14px;
-        border-radius: 12px;
-    }
-
-    /* EMPTY */
-    .empty {
-        text-align: center;
-        padding: 50px;
-        color: var(--muted);
-        font-size: 15px;
-    }
-
-    /* MOBILE EXTRA BOOST */
-    @media (max-width: 480px) {
-        .name {
-            font-size: 16px;
+        :root{
+            --text:#0f172a;
+            --border:rgba(15,23,42,.08);
         }
 
-        .person {
-            padding: 16px 0;
+        *{
+            box-sizing:border-box;
         }
 
-        .small-btn {
-            padding: 10px 12px;
+        body{
+            margin:0;
+            font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+            background:linear-gradient(135deg,#fce7f3,#e0f2fe,#ecfdf5);
+            min-height:100vh;
+            color:var(--text);
         }
-    }
+
+        .topbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:20px;
+        }
+
+        h1{
+            margin:0;
+            font-size:24px;
+            font-weight:900;
+        }
+
+        .btn{
+            border:none;
+            cursor:pointer;
+            padding:12px 16px;
+            border-radius:12px;
+            font-weight:700;
+        }
+
+        .logout{
+            background:#111827;
+            color:white;
+        }
+
+        #calendarWrapper{
+            max-width:1300px;
+            margin:0 auto 30px;
+            padding:15px;
+        }
+
+        #calendar{
+            background:white;
+            border-radius:20px;
+            padding:15px;
+            box-shadow:0 15px 40px rgba(0,0,0,.08);
+        }
+
+        .fc-toolbar-title{
+            font-size:1.4rem !important;
+            font-weight:800 !important;
+        }
+
+        .fc-event{
+            cursor:pointer;
+            border:none !important;
+            padding:2px;
+        }
+
+        .fc-daygrid-event{
+            border-radius:8px !important;
+        }
+
+        #modal{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.45);
+            display:none;
+            justify-content:center;
+            align-items:center;
+            z-index:999;
+            padding:15px;
+        }
+
+        .modal-box{
+            background:white;
+            width:100%;
+            max-width:420px;
+            border-radius:20px;
+            padding:20px;
+        }
+
+        .modal-box h3{
+            margin-top:0;
+        }
+
+        .modal-box input{
+            width:100%;
+            margin-bottom:10px;
+            padding:12px;
+            border-radius:10px;
+            border:1px solid #ddd;
+        }
+
+        .modal-actions{
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+        }
+
+        .save{
+            background:#22c55e;
+            color:white;
+        }
+
+        .deleteBtn{
+            background:#ef4444;
+            color:white;
+        }
+
+        .cancel{
+            background:#e5e7eb;
+        }
     </style>
 </head>
-
 <body>
 
-<div id="topbar">
-    <button class="btn" onclick="logout()">Uitloggen</button>
+<div class="topbar">
+    <h1>📅 Admin Kalender</h1>
+
+    <button class="btn logout" onclick="logout()">
+        Uitloggen
+    </button>
 </div>
 
-<h1>📊 Realtime Dashboard</h1>
-
-<div id="filterBar">
-    <select id="dateFilter" onchange="filterData()">
-        <option value="all">📅 Alle datums</option>
-    </select>
+<div id="calendarWrapper">
+    <div id="calendar"></div>
 </div>
 
-<div id="container"></div>
-
-<!-- MODAL -->
 <div id="modal">
     <div class="modal-box">
-        <h3>✏️ Bewerken</h3>
+
+        <h3>✏️ Afspraak beheren</h3>
 
         <input id="editName" placeholder="Naam">
+
         <input id="editEmail" placeholder="Email">
-        <input id="editDate" placeholder="Datum">
+
+        <input id="editDate" type="date">
 
         <div class="modal-actions">
-            <button class="cancel" onclick="closeModal()">Annuleer</button>
-            <button class="save" onclick="saveEdit()">Opslaan</button>
+
+            <button class="btn deleteBtn" onclick="deleteAppointment()">
+                Verwijderen
+            </button>
+
+            <button class="btn cancel" onclick="closeModal()">
+                Sluiten
+            </button>
+
+            <button class="btn save" onclick="saveEdit()">
+                Opslaan
+            </button>
+
         </div>
+
     </div>
 </div>
 
-
 <script>
+
     const sb = supabase.createClient(
-        "https://nafajvywiknelkgufpac.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck"
+    "https://nafajvywiknelkgufpac.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck"
     );
 
-    const MAX_PER_DAY = 10;
-    let allData = [];
-    let editId = null;
 
-    /* LOAD */
-    async function loadData() {
-        const { data } = await sb
-            .from("appointments")
-            .select("*")
-            .order("appointment_date", { ascending: false });
+        let allData = [];
+        let calendar;
+        let editId = null;
 
-        allData = data || [];
-        setupFilter();
-        render(allData);
-    }
+        async function loadData(){
 
-    /* FILTER */
-    function setupFilter() {
-        const select = document.getElementById("dateFilter");
+            const { data, error } = await sb
+                .from("appointments")
+                .select("*")
+                .order("appointment_date");
 
-        const dates = [...new Set(allData.map(d => d.appointment_date))];
+            if(error){
+                console.error(error);
+                return;
+            }
 
-        select.innerHTML =
-            `<option value="all">📅 Alle datums</option>` +
-            dates.map(d => `<option value="${d}">${d}</option>`).join("");
-    }
+            allData = data || [];
 
-    function filterData() {
-        const val = document.getElementById("dateFilter").value;
-        render(val === "all" ? allData : allData.filter(d => d.appointment_date === val));
-    }
-
-    /* RENDER */
-    function render(data) {
-        const c = document.getElementById("container");
-        c.innerHTML = "";
-
-        if (!data.length) {
-            c.innerHTML = `<div class="empty">Geen inschrijvingen</div>`;
-            return;
+            renderCalendar();
         }
 
-        const grouped = {};
-        data.forEach(i => {
-            if (!grouped[i.appointment_date]) grouped[i.appointment_date] = [];
-            grouped[i.appointment_date].push(i);
-        });
+        function renderCalendar(){
 
-        Object.keys(grouped).forEach(date => {
-            const people = grouped[date];
+            const calendarEl = document.getElementById("calendar");
 
-            const card = document.createElement("div");
-            card.className = "day";
+            const events = allData.map(item => ({
 
-            card.innerHTML = `
-                <div class="header">
-                    <div class="date">📅 ${date}</div>
-                    <div class="badge">${people.length}/${MAX_PER_DAY}</div>
-                </div>
+                id: item.id,
 
-                ${people.map(p => `
-                    <div class="person">
-                        <div class="left">
-                            <div class="name">${p.name}</div>
-                            <div class="email">${p.email}</div>
-                        </div>
+                title: item.name,
 
-                        <div class="actions">
-                            <button class="small-btn edit" onclick="openEdit('${p.id}')">✏️</button>
-                            <button class="small-btn delete" onclick="del('${p.id}')">🗑️</button>
-                        </div>
-                    </div>
-                `).join("")}
-            `;
+                start: item.appointment_date,
 
-            c.appendChild(card);
-        });
-    }
+                allDay: true,
 
-    /* DELETE */
-    async function del(id) {
-        await sb.from("appointments").delete().eq("id", id);
+                extendedProps:{
+                    email:item.email
+                }
+
+            }));
+
+            if(calendar){
+                calendar.destroy();
+            }
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+
+                locale:'nl',
+
+                initialView:'dayGridMonth',
+
+                height:'auto',
+
+                headerToolbar:{
+                    left:'prev,next today',
+                    center:'title',
+                    right:'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+
+                buttonText:{
+                    today:'Vandaag',
+                    month:'Maand',
+                    week:'Week',
+                    day:'Dag'
+                },
+
+                events:events,
+
+                eventClick:function(info){
+
+                    const event = info.event;
+
+                    editId = event.id;
+
+                    document.getElementById("editName").value =
+                        event.title;
+
+                    document.getElementById("editEmail").value =
+                        event.extendedProps.email || "";
+
+                    document.getElementById("editDate").value =
+                        event.startStr;
+
+                    document.getElementById("modal").style.display = "flex";
+                }
+            });
+
+            calendar.render();
+        }
+
+        function closeModal(){
+            document.getElementById("modal").style.display = "none";
+        }
+
+        async function saveEdit(){
+
+            const name =
+                document.getElementById("editName").value;
+
+            const email =
+                document.getElementById("editEmail").value;
+
+            const date =
+                document.getElementById("editDate").value;
+
+            const { error } = await sb
+                .from("appointments")
+                .update({
+                    name:name,
+                    email:email,
+                    appointment_date:date
+                })
+                .eq("id", editId);
+
+            if(error){
+                alert(error.message);
+                return;
+            }
+
+            closeModal();
+            loadData();
+        }
+
+        async function deleteAppointment(){
+
+            if(!confirm("Afspraak verwijderen?")){
+                return;
+            }
+
+            const { error } = await sb
+                .from("appointments")
+                .delete()
+                .eq("id", editId);
+
+            if(error){
+                alert(error.message);
+                return;
+            }
+
+            closeModal();
+            loadData();
+        }
+
+        sb.channel("appointments-live")
+        .on(
+            "postgres_changes",
+            {
+                event:"*",
+                schema:"public",
+                table:"appointments"
+            },
+            () => {
+                loadData();
+            }
+        )
+        .subscribe();
+
+        function logout(){
+
+            localStorage.removeItem("loggedIn");
+
+            window.location.href = "index.html";
+        }
+
         loadData();
-    }
 
-    /* EDIT */
-    function openEdit(id) {
-       const item = allData.find(x => String(x.id) === String(id));
-        editId = id;
-
-        document.getElementById("editName").value = item.name;
-        document.getElementById("editEmail").value = item.email;
-        document.getElementById("editDate").value = item.appointment_date;
-
-        document.getElementById("modal").style.display = "flex";
-    }
-
-    function closeModal() {
-        document.getElementById("modal").style.display = "none";
-    }
-
-    async function saveEdit() {
-        await sb.from("appointments").update({
-            name: document.getElementById("editName").value,
-            email: document.getElementById("editEmail").value,
-            appointment_date: document.getElementById("editDate").value
-        }).eq("id", editId);
-
-        closeModal();
-        loadData();
-    }
-
-    /* REALTIME */
-    sb.channel('live')
-    .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'appointments'
-    }, loadData)
-    .subscribe();
-
-    /* INIT */
-    loadData();
-
-    /* LOGOUT */
-    function logout() {
-        localStorage.removeItem("loggedIn");
-        window.location.href = "index.html";
-    }
 </script>
 
 </body>
