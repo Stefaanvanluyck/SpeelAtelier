@@ -185,13 +185,103 @@
         grid-template-columns:1fr;
     }
 }
+
+        .admin-bar{
+    max-width:1300px;
+    margin:20px auto;
+    padding:15px;
+}
+
+.admin-group{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+
+    background:rgba(255,255,255,.7);
+    backdrop-filter:blur(12px);
+
+    padding:12px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.admin-group input{
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+    outline:none;
+    font-size:14px;
+    min-width:160px;
+}
+
+.btn.danger{
+    background:linear-gradient(135deg,#ef4444,#f97316);
+    color:white;
+    box-shadow:0 10px 25px rgba(239,68,68,.25);
+    transition:.2s;
+}
+
+.btn.danger:hover{
+    transform:translateY(-2px);
+}
+
+        @media(max-width:600px){
+    .admin-group{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .admin-group input,
+    .admin-group button{
+        width:100%;
+    }
+}
     </style>
 </head>
 <body>
-<input type="date" id="blockDate">
-<input type="text" id="blockReason" placeholder="reden">
-<button onclick="addBlockedDate()">Blokkeren</button>
 
+<div class="admin-bar">
+
+    <div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:20px;">
+        <h3>📅 Booking status</h3>
+
+        <label>
+            <input type="checkbox" id="bookingToggle" onchange="updateBookingStatus()">
+            Inschrijvingen actief
+        </label>
+
+        <p id="bookingStatusText"></p>
+    </div>
+
+    <div class="admin-bar">
+
+        <div class="admin-group">
+            <input type="date" id="themeDate">
+
+            <input
+                    type="text"
+                    id="themeName"
+                    placeholder="Thema (bv. Dino's)"
+            >
+
+            <button class="btn save" onclick="saveTheme()">
+                🎨 Thema opslaan
+            </button>
+        </div>
+
+    </div>
+
+
+    <div class="admin-group">
+        <input type="date" id="blockDate">
+        <input type="text" id="blockReason" placeholder="Reden (bv. vakantie)">
+        <button class="btn danger" onclick="addBlockedDate()">
+            ⛔ Blokkeren
+        </button>
+    </div>
+
+</div>
 
 <div class="topbar">
     <h1>📅 Admin Kalender</h1>
@@ -206,16 +296,7 @@
 </div>
 
 
-<div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:20px;">
-    <h3>📅 Booking status</h3>
 
-    <label>
-        <input type="checkbox" id="bookingToggle" onchange="updateBookingStatus()">
-        Inschrijvingen actief
-    </label>
-
-    <p id="bookingStatusText"></p>
-</div>
 
 <div id="modal">
     <div class="modal-box">
@@ -302,6 +383,7 @@
         let allData = [];
         let calendar;
         let editId = null;
+        let themes = [];
 
         async function loadData(){
 
@@ -316,8 +398,11 @@
             }
 
             allData = data || [];
-          updateDashboard();
+updateDashboard();
+
 await loadBlockedDates();
+await loadThemes();
+
 renderCalendar();
         }
 
@@ -340,6 +425,40 @@ renderCalendar();
                 }
 
             }));
+            const themeEvents = themes.map(themeItem => {
+
+const parse = (str) => {
+    const [y, m, d] = str.split("-").map(Number);
+    return new Date(y, m - 1, d);
+};
+
+const format = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+const friday = parse(themeItem.date);
+
+const sunday = new Date(friday);
+sunday.setDate(friday.getDate() - 6);
+
+// FullCalendar gebruikt een exclusieve einddatum.
+// Vrijdag als end betekent tonen t.e.m. donderdag.
+const end = new Date(friday);
+
+return {
+    title: "➡️ Thema: " + themeItem.theme,
+    start: format(sunday),
+    end: format(end),
+    allDay: true,
+    backgroundColor: "#dbeafe",
+    borderColor: "#60a5fa",
+    textColor: "#1e3a8a"
+};
+});
+
+const allEvents = [
+    ...events,
+    ...themeEvents
+];
 
             if(calendar){
                 calendar.destroy();
@@ -366,7 +485,7 @@ renderCalendar();
                     day:'Dag'
                 },
 
-events: events,
+events: allEvents,
 
 dayCellDidMount: function(info) {
 
@@ -703,6 +822,59 @@ if (calendar) {
 
   calendar.addEventSource(blockedEvents);
 }
+
+
+    async function saveTheme() {
+
+    const date =
+        document.getElementById("themeDate").value;
+
+    const theme =
+        document.getElementById("themeName").value;
+
+    if (!date || !theme) {
+        alert("Datum en thema invullen");
+        return;
+    }
+
+    const { error } = await sb
+        .from("themes")
+        .upsert(
+            {
+                date,
+                theme
+            },
+            {
+                onConflict: "date"
+            }
+        );
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    alert("✅ Thema opgeslagen");
+
+    loadData();
+}
+
+
+    async function loadThemes() {
+
+    const { data, error } = await sb
+        .from("themes")
+        .select("*");
+
+    if(error){
+        console.error(error);
+        return;
+    }
+
+    themes = data || [];
+}
+
+
 </script>
 
 </body>
