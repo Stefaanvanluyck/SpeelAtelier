@@ -514,21 +514,42 @@ dayCellDidMount: function(info) {
 
 eventClick: function(info) {
 
-                    const event = info.event;
+    const event = info.event;
 
-                    editId = event.id;
+    const isTheme = event.extendedProps.type === "theme";
 
-                    document.getElementById("editName").value =
-                        event.title;
+    editMode = isTheme ? "theme" : "appointment";
 
-                    document.getElementById("editEmail").value =
-                        event.extendedProps.email || "";
+    editId = isTheme
+        ? event.extendedProps.date
+        : event.id;
 
-                    document.getElementById("editDate").value =
-                        event.startStr;
+    // titel aanpassen
+    document.querySelector("#modal h3").innerText =
+        isTheme ? "🎨 Thema beheren" : "✏️ Afspraak beheren";
 
-                    document.getElementById("modal").style.display = "flex";
-                }
+    // datum altijd zetten
+    document.getElementById("editDate").value = event.startStr;
+
+    if (isTheme) {
+
+        document.getElementById("editName").value =
+            event.extendedProps.theme || "";
+
+        document.getElementById("editEmail").style.display = "none";
+
+    } else {
+
+        document.getElementById("editName").value =
+            event.title;
+
+        document.getElementById("editEmail").style.display = "block";
+        document.getElementById("editEmail").value =
+            event.extendedProps.email || "";
+    }
+
+    document.getElementById("modal").style.display = "flex";
+}
             });
 
             calendar.render();
@@ -540,16 +561,14 @@ eventClick: function(info) {
             document.getElementById("modal").style.display = "none";
         }
 
-   async function saveEdit(){
+async function saveEdit(){
 
-    const name =
-        document.getElementById("editName").value;
+    const name = document.getElementById("editName").value;
+    const date = document.getElementById("editDate").value;
 
-    const date =
-        document.getElementById("editDate").value;
+    const isTheme = editMode === "theme";
 
-    // 🎨 THEME
-    if (editMode === "theme") {
+    if(isTheme){
 
         const { error } = await sb
             .from("themes")
@@ -557,40 +576,35 @@ eventClick: function(info) {
                 theme: name,
                 date: date
             })
-            .eq("date", editId.replace("theme-", ""));
+            .eq("date", editId);
 
-        if (error) {
+        if(error){
             alert(error.message);
             return;
         }
 
-        closeModal();
-        loadData();
-        return;
-    }
+    } else {
 
-    // 📅 APPOINTMENT
-    const email =
-        document.getElementById("editEmail").value;
+        const email = document.getElementById("editEmail").value;
 
-    const { error } = await sb
-        .from("appointments")
-        .update({
-            name:name,
-            email:email,
-            appointment_date:date
-        })
-        .eq("id", editId);
+        const { error } = await sb
+            .from("appointments")
+            .update({
+                name,
+                email,
+                appointment_date: date
+            })
+            .eq("id", editId);
 
-    if(error){
-        alert(error.message);
-        return;
+        if(error){
+            alert(error.message);
+            return;
+        }
     }
 
     closeModal();
     loadData();
 }
-
         async function deleteAppointment(){
 
             if(!confirm("Afspraak verwijderen?")){
