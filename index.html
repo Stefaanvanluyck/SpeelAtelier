@@ -15,6 +15,8 @@
     <meta name="description">
     <meta property="og:title">
     <meta property="og:image">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 
     <style>
 
@@ -508,6 +510,23 @@
   transform: translateY(-6px);
 }
 
+         /* =========================================================
+         kalender
+        ========================================================= */
+        #publicCalendar{
+    max-width:1100px;
+    margin:auto;
+    background:white;
+    padding:15px;
+    border-radius:20px;
+    box-shadow:0 10px 35px rgba(0,0,0,0.08);
+}
+
+.fc-event{
+    cursor:pointer;
+    border:none !important;
+    padding:2px;
+}
     </style>
 </head>
 
@@ -612,93 +631,9 @@
 
 <section id="planning">
     <h2>📅 Planning</h2>
+    <div id="publicCalendar"></div>
+    </section>
 
-    <div class="calendar">
-        <div class="calendar-header">September 2026</div>
-
-        <div class="calendar-grid">
-            <div class="day-name">Ma</div>
-            <div class="day-name">Di</div>
-            <div class="day-name">Wo</div>
-            <div class="day-name">Do</div>
-            <div class="day-name">Vr</div>
-            <div class="day-name">Za</div>
-            <div class="day-name">Zo</div>
-
-            <!-- Lege dagen -->
-            <div class="day empty"></div>
-            <div class="day">1</div>
-            <div class="day">2</div>
-            <div class="day">3</div>
-            <div class="day">4</div>
-
-            <!-- EVENT 1 -->
-            <div class="day event" data-date="2026-09-05">
-                <span class="date">5</span>
-                <div class="event-title">
-                    🌿 Onderwaterwereld<br>
-                    10:00 - 11:00
-                </div>
-            </div>
-
-            <div class="day">6</div>
-
-            <div class="day">7</div>
-            <div class="day">8</div>
-            <div class="day">9</div>
-            <div class="day">10</div>
-            <div class="day">11</div>
-
-            <!-- EVENT 2 -->
-            <div class="day event" data-date="2026-09-12">
-                <span class="date">12</span>
-                <div class="event-title">
-                    🍦 IJssalon<br>
-                    10:00 - 11:00
-                </div>
-            </div>
-
-            <div class="day">13</div>
-
-            <div class="day">14</div>
-            <div class="day">15</div>
-            <div class="day">16</div>
-            <div class="day">17</div>
-            <div class="day">18</div>
-
-            <!-- EVENT 3 -->
-            <div class="day event" data-date="2026-09-19">
-                <span class="date">19</span>
-                <div class="event-title">
-                    🚜 Boerderij<br>
-                    10:00 - 11:00
-                </div>
-            </div>
-
-            <div class="day">20</div>
-
-            <div class="day">21</div>
-            <div class="day">22</div>
-            <div class="day">23</div>
-            <div class="day">24</div>
-            <div class="day">25</div>
-
-            <!-- EVENT 4 -->
-            <div class="day event" data-date="2026-09-26">
-                <span class="date">26</span>
-                <div class="event-title">
-                    🏗️ Bouwplaats<br>
-                    10:00 - 11:00
-                </div>
-            </div>
-
-            <div class="day">27</div>
-            <div class="day">28</div>
-            <div class="day">29</div>
-            <div class="day">30</div>
-        </div>
-    </div>
-</section>
 
 
 <section id="prijzen">
@@ -865,149 +800,193 @@
 
 <!--MAILSENDING TO ENABLE WHEN GO LIVE-->
 
-<!--script>
+<script>
 
-    function openForm(date = null){
-        document.getElementById("modal").style.display = "flex";
+    async function openForm(date = null){
 
-        if(date){
-            document.getElementById("datePicker").value = date;
-        }
-    }
-
-    // EMAILJS INIT
-    (function(){
-        emailjs.init("ryf0HAbDqTzY368PW");
-    })();
-
-    // SUPABASE INIT (FIXED: NO CONFLICTS)
-    const supabaseUrl = "https://nafajvywiknelkgufpac.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck";
-
-    const sb = supabase.createClient(supabaseUrl, supabaseKey);
-
-    /* INSCHRIJVEN */
-    function closeForm(){
-        document.getElementById("modal").style.display = "none";
-    }
-
-    async function submitForm() {
-    const now = new Date().getTime();
-    let selectedDate = document.getElementById("datePicker").value;
-    let name = document.getElementById("name").value;
-    let email = document.getElementById("email").value;
-
-    if (!selectedDate || !name || !email) {
-        alert("Vul alles in 💛");
+      if (!(await isBookingEnabled())) {
+        alert("⛔ Inschrijvingen zijn gesloten.");
         return;
+      }
+
+      document.getElementById("modal").style.display = "flex";
+
+      if(date){
+        document.getElementById("datePicker").value = date;
+      }
     }
 
-    // ⛔ 15 min blokkering
-    /*const lastSubmission = localStorage.getItem("lastSubmissionTime");
-    const now = new Date().getTime();
+        // EMAILJS INIT
+        (function(){
+            emailjs.init("ryf0HAbDqTzY368PW");
+        })();
 
-    /if (lastSubmission && (now - lastSubmission < 15 * 60 * 1000)) {
-        alert("⏳ Je kan maar 1 keer per 15 minuten inschrijven.");
-        return;
-    }*/
+        // SUPABASE INIT (FIXED: NO CONFLICTS)
+        const supabaseUrl = "https://nafajvywiknelkgufpac.supabase.co";
+        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck";
 
-    try {
+        const sb = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // ==========================
-        // 1. CHECK AANTAL INSCHRIJVINGEN
-        // ==========================
-        const { data: existing, error: countError } = await sb
-            .from("appointments")
-            .select("*", { count: "exact", head: false })
-            .eq("appointment_date", selectedDate);
-
-        if (countError) {
-            console.error(countError);
-            alert("❌ Kon beschikbaarheid niet checken.");
-            return;
+        /* INSCHRIJVEN */
+        function closeForm(){
+            document.getElementById("modal").style.display = "none";
         }
 
-        if (existing.length >= 10) {
-            alert("❌ Helaas, deze datum is volzet (max 10 inschrijvingen).");
-            return;
-        }
 
-        // ==========================
-        // 2. OPSLAAN IN SUPABASE
-        // ==========================
-        const { error: dbError } = await sb
-            .from("appointments")
-            .insert([
-                {
-                    name: name,
-                    email: email,
-                    appointment_date: selectedDate
-                }
-            ]);
 
-        if (dbError) {
-            console.error(dbError);
-            alert("❌ Database fout");
-            return;
-        }
+    async function isBookingEnabled() {
+      const { data } = await sb
+        .from("settings")
+        .select("value")
+        .eq("key", "booking_enabled")
+        .single();
 
-        // ==========================
-        // 3. EMAILS
-        // ==========================
-        await emailjs.send("service_9u8ex4o", "template_m20bheg", {
-            name,
-            email,
-            date: selectedDate
-        });
-
-        await emailjs.send("service_9u8ex4o", "template_nndh15x", {
-            name,
-            email,
-            date: selectedDate
-        });
-
-        // ==========================
-        // 4. SUCCESS
-        // ==========================
-        localStorage.setItem("lastSubmissionTime", now);
-
-        document.getElementById("confirm").innerText =
-            "💛 Inschrijving verzonden!";
-
-        setTimeout(() => {
-            closeForm();
-            document.getElementById("name").value = "";
-            document.getElementById("email").value = "";
-            document.getElementById("datePicker").value = "";
-            document.getElementById("confirm").innerText = "";
-        }, 2000);
-
-    } catch (err) {
-        console.error(err);
-        alert("❌ Er ging iets mis");
+      return data?.value === true;
     }
+
+
+async function isDateBlocked(date) {
+    const { data, error } = await sb
+        .from("blocked_dates")
+        .select("*")
+        .eq("date", date)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Blocked check error:", error);
+        return false;
+    }
+
+    return !!data;
 }
 
-    /* FAQ */
-    document.querySelectorAll(".faq-item").forEach(i=>{
-        i.addEventListener("click",()=>{
-            let a=i.querySelector(".faq-answer");
-            a.style.display=a.style.display==="block"?"none":"block";
-        });
-    });
+        async function submitForm() {
+        const now = new Date().getTime();
+        let selectedDate = document.getElementById("datePicker").value;
+        let name = document.getElementById("name").value;
+        let email = document.getElementById("email").value;
 
-    document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll(".day.event").forEach(day => {
-            day.style.cursor = "pointer";
+    if (!(await isBookingEnabled())) {
+      alert("⛔ Inschrijvingen zijn momenteel gesloten.");
+      return;
+    }
+        if (!selectedDate || !name || !email) {
+            alert("Vul alles in 💛");
+            return;
+        }
 
-            day.addEventListener("click", () => {
-                const date = day.dataset.date;
-                openForm(date);
+        // ⛔ 15 min blokkering
+        /*const lastSubmission = localStorage.getItem("lastSubmissionTime");
+        const now = new Date().getTime();
+
+        /if (lastSubmission && (now - lastSubmission < 15 * 60 * 1000)) {
+            alert("⏳ Je kan maar 1 keer per 15 minuten inschrijven.");
+            return;
+        }*/
+
+        try {
+
+            // ==========================
+            // 1. CHECK AANTAL INSCHRIJVINGEN
+            // ==========================
+            const { data: existing, error: countError } = await sb
+                .from("appointments")
+                .select("*", { count: "exact", head: false })
+                .eq("appointment_date", selectedDate);
+
+            if (countError) {
+                console.error(countError);
+                alert("❌ Kon beschikbaarheid niet checken.");
+                return;
+            }
+
+const blocked = await isDateBlocked(selectedDate);
+
+if (blocked) {
+    alert("⛔ Deze datum is geblokkeerd.");
+    return;
+}
+            if (existing.length >= 10) {
+                alert("❌ Helaas, deze datum is volzet (max 10 inschrijvingen).");
+                return;
+            }
+
+            // ==========================
+            // 2. OPSLAAN IN SUPABASE
+            // ==========================
+            const { error: dbError } = await sb
+                .from("appointments")
+                .insert([
+                    {
+                        name: name,
+                        email: email,
+                        appointment_date: selectedDate
+                    }
+                ]);
+
+            if (dbError) {
+                console.error(dbError);
+                alert("❌ Database fout");
+                return;
+            }
+
+            // ==========================
+            // 3. EMAILS
+            // ==========================
+            await emailjs.send("service_9u8ex4o", "template_m20bheg", {
+                name,
+                email,
+                date: selectedDate
+            });
+
+            await emailjs.send("service_9u8ex4o", "template_nndh15x", {
+                name,
+                email,
+                date: selectedDate
+            });
+
+            // ==========================
+            // 4. SUCCESS
+            // ==========================
+            localStorage.setItem("lastSubmissionTime", now);
+
+            document.getElementById("confirm").innerText =
+                "💛 Inschrijving verzonden!";
+
+            setTimeout(() => {
+                closeForm();
+                document.getElementById("name").value = "";
+                document.getElementById("email").value = "";
+                document.getElementById("datePicker").value = "";
+                document.getElementById("confirm").innerText = "";
+            }, 2000);
+
+        } catch (err) {
+            console.error(err);
+            alert("❌ Er ging iets mis");
+        }
+    }
+
+        /* FAQ */
+        document.querySelectorAll(".faq-item").forEach(i=>{
+            i.addEventListener("click",()=>{
+                let a=i.querySelector(".faq-answer");
+                a.style.display=a.style.display==="block"?"none":"block";
             });
         });
-    });
 
-</script>-->
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".day.event").forEach(day => {
+                day.style.cursor = "pointer";
+
+                day.addEventListener("click", () => {
+                    const date = day.dataset.date;
+                    openForm(date);
+                });
+            });
+        });
+
+</script>
 
 <!-- INTERSECTION OBSERVER (KEEP BUT SAFE) -->
 <script>
@@ -1151,9 +1130,161 @@ loadAppointments();
     container.appendChild(div);
   });
 }
-
 </script>
+<script>
+    let publicCalendar;
 
+    document.addEventListener("DOMContentLoaded", async () => {
+        await loadPublicCalendar();
+    });
 
+    async function loadPublicCalendar() {
+        try {
+            const container = document.getElementById("publicCalendar");
+            if (!container) {
+                console.error("❌ publicCalendar niet gevonden");
+                return;
+            }
+
+            // =========================
+            // DATA OPHALEN
+            // =========================
+            const { data: appointments, error } = await sb
+                .from("appointments")
+                .select("*");
+
+            if (error) {
+                console.error("Appointments error:", error);
+                return;
+            }
+
+            const { data: blocked, error: blockedError } = await sb
+                .from("blocked_dates")
+                .select("*");
+
+            if (blockedError) {
+                console.error("Blocked error:", blockedError);
+            }
+
+            const MAX = 10;
+
+            // =========================
+            // COUNT PER DAG
+            // =========================
+            const counts = {};
+
+            (appointments || []).forEach(a => {
+                const date = a.appointment_date;
+                counts[date] = (counts[date] || 0) + 1;
+            });
+
+            // =========================
+            // BLOCKED SET
+            // =========================
+            const blockedSet = new Set((blocked || []).map(b => b.date));
+
+            // =========================
+            // EVENTS GENEREREN (BELANGRIJK FIX)
+            // → ALLE ZATERDAGEN TONEN
+            // =========================
+            const events = [];
+
+            const start = new Date();
+            const end = new Date();
+            end.setMonth(end.getMonth() + 6); // 6 maanden vooruit
+
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+
+                // alleen zaterdagen
+                if (d.getDay() !== 6) continue;
+
+                const dateStr = d.toISOString().split("T")[0];
+
+                const booked = counts[dateStr] || 0;
+
+                // blocked
+                if (blockedSet.has(dateStr)) {
+                    events.push({
+                        title: "⛔ Geblokkeerd",
+                        start: dateStr,
+                        allDay: true,
+                        backgroundColor: "#ef4444",
+                        borderColor: "#ef4444",
+                        textColor: "#fff"
+                    });
+                    continue;
+                }
+
+                // vol / beschikbaar
+                if (booked >= MAX) {
+                    events.push({
+                        title: "Volzet",
+                        start: dateStr,
+                        allDay: true,
+                        backgroundColor: "#ef4444",
+                        borderColor: "#ef4444",
+                        textColor: "#fff"
+                    });
+                } else {
+                    events.push({
+                        title: `Beschikbaar (${MAX - booked})`,
+                        start: dateStr,
+                        allDay: true,
+                        backgroundColor: "#2ecc71",
+                        borderColor: "#2ecc71",
+                        textColor: "#fff"
+                    });
+                }
+            }
+
+            // =========================
+            // CALENDAR RESET
+            // =========================
+            if (publicCalendar) {
+                publicCalendar.destroy();
+            }
+
+            publicCalendar = new FullCalendar.Calendar(container, {
+                locale: "nl",
+                initialView: "dayGridMonth",
+                height: "auto",
+
+                headerToolbar: {
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,timeGridWeek"
+                },
+
+                events,
+
+                eventClick: function(info) {
+                    const title = info.event.title;
+
+                    if (title.startsWith("Beschikbaar")) {
+                        openForm(info.event.startStr);
+                    } else {
+                        alert("❌ Niet beschikbaar");
+                    }
+                },
+
+                dateClick: function(info) {
+                    const event = events.find(e => e.start === info.dateStr);
+
+                    if (event?.title === "⛔ Geblokkeerd") {
+                        alert("⛔ Deze dag is geblokkeerd");
+                        return;
+                    }
+
+                    openForm(info.dateStr);
+                }
+            });
+
+            publicCalendar.render();
+
+        } catch (err) {
+            console.error("❌ Calendar crash:", err);
+        }
+    }
+</script>
 </body>
 </html>

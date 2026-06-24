@@ -188,6 +188,10 @@
     </style>
 </head>
 <body>
+<input type="date" id="blockDate">
+<input type="text" id="blockReason" placeholder="reden">
+<button onclick="addBlockedDate()">Blokkeren</button>
+
 
 <div class="topbar">
     <h1>📅 Admin Kalender</h1>
@@ -199,6 +203,18 @@
 
 <div id="calendarWrapper">
     <div id="calendar"></div>
+</div>
+
+
+<div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:20px;">
+    <h3>📅 Booking status</h3>
+
+    <label>
+        <input type="checkbox" id="bookingToggle" onchange="updateBookingStatus()">
+        Inschrijvingen actief
+    </label>
+
+    <p id="bookingStatusText"></p>
 </div>
 
 <div id="modal">
@@ -271,6 +287,8 @@
 
     </div>
 
+
+
 </div>
 
 <script>
@@ -280,7 +298,7 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck"
     );
 
-
+        let blockedDates = [];
         let allData = [];
         let calendar;
         let editId = null;
@@ -298,9 +316,9 @@
             }
 
             allData = data || [];
-            updateDashboard();
-
-            renderCalendar();
+          updateDashboard();
+await loadBlockedDates();
+renderCalendar();
         }
 
         function renderCalendar(){
@@ -348,9 +366,22 @@
                     day:'Dag'
                 },
 
-                events:events,
+events: events,
 
-                eventClick:function(info){
+dayCellDidMount: function(info) {
+
+   const dateStr = info.date.toLocaleDateString("en-CA");
+
+    const blocked = blockedDates.find(d => d.date === dateStr);
+
+    if (blocked) {
+        info.el.style.backgroundColor = "#fee2e2";
+        info.el.style.color = "#fee2e2";
+        info.el.title = "⛔ " + blocked.reason;
+    }
+},
+
+eventClick: function(info) {
 
                     const event = info.event;
 
@@ -370,6 +401,8 @@
             });
 
             calendar.render();
+            renderBlockedDates();
+
         }
 
         function closeModal(){
@@ -578,7 +611,98 @@ function updateDashboard(){
         `).join("");
 }
 
+async function loadBookingStatus() {
+  const { data, error } = await sb
+    .from("settings")
+    .select("*")
+    .eq("key", "booking_enabled")
+    .single();
 
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const enabled = data.value;
+
+  document.getElementById("bookingToggle").checked = enabled;
+  document.getElementById("bookingStatusText").innerText =
+    enabled ? "✅ Inschrijvingen staan AAN" : "⛔ Inschrijvingen staan UIT";
+}
+
+async function updateBookingStatus() {
+  const enabled = document.getElementById("bookingToggle").checked;
+
+  const { error } = await sb
+    .from("settings")
+    .upsert(
+      {
+        key: "booking_enabled",
+        value: enabled
+      },
+      {
+        onConflict: "key"
+      }
+    );
+
+  if (error) {
+    console.error(error);
+    alert("Toggle fout");
+    return;
+  }
+
+  loadBookingStatus();
+}
+
+async function addBlockedDate() {
+  const date = document.getElementById("blockDate").value;
+  const reason = document.getElementById("blockReason").value;
+
+  const { error } = await sb
+    .from("blocked_dates")
+    .insert({ date, reason });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  loadData();
+}
+
+
+
+async function loadBlockedDates() {
+  const { data, error } = await sb
+    .from("blocked_dates")
+    .select("*");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  blockedDates = data || [];
+
+  // als calendar al bestaat → refresh overlay
+if (calendar) {
+    renderBlockedDates();
+}
+}
+
+
+    function renderBlockedDates() {
+
+  const blockedEvents = blockedDates.map(d => ({
+    title: "⛔ " + d.reason,
+    start: d.date,
+    allDay: true,
+    display: "background",
+    color: "#ef4444"
+  }));
+
+  calendar.addEventSource(blockedEvents);
+}
 </script>
 
 </body>
