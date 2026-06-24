@@ -860,6 +860,10 @@ async function isDateBlocked(date) {
     return !!data;
 }
 
+const selected = new Date(selectedDate);
+
+
+
         async function submitForm() {
         const now = new Date().getTime();
         let selectedDate = document.getElementById("datePicker").value;
@@ -1249,6 +1253,7 @@ loadAppointments();
                 initialView: "dayGridMonth",
                 height: "auto",
 
+
                 headerToolbar: {
                     left: "prev,next today",
                     center: "title",
@@ -1268,6 +1273,14 @@ loadAppointments();
                 },
 
                 dateClick: function(info) {
+                    const d = new Date(info.dateStr);
+
+        if (d.getDay() !== 6) {
+            alert("❌ Alleen zaterdagen zijn beschikbaar");
+            return;
+        }
+
+
                     const event = events.find(e => e.start === info.dateStr);
 
                     if (event?.title === "⛔ Geblokkeerd") {
