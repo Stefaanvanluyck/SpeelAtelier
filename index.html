@@ -565,6 +565,22 @@
     font-size: 11px;
   }
 }
+  #publicCalendar {
+  max-width: 100%;
+  overflow-x: auto;   /* 👈 dit is de key */
+}
+
+/* FullCalendar wrapper mag niet knijpen */
+.fc {
+  min-width: 900px;   /* of 1000px voor meer ruimte */
+}
+
+/* extra: voorkomt dat cells samendrukken */
+.fc-view-harness {
+  min-width: 900px;
+}
+
+
     </style>
 </head>
 
@@ -730,23 +746,6 @@
     </div>
 </section>
 
-<!-- BOOKING
-<div class="booking-box">
-    <h3>🎟️ Check de planning</h3>
-
-    <p>Bekijk wat er de komende tijd gepland staat.</p>
-
-    <div class="booking-embed">
-        <iframe
-                src="https://calendar.google.com/calendar/embed?src=6f2066df6969c30e9f91a91b00156fe9d64447b7e8e56930630ba718544c98d2%40group.calendar.google.com&ctz=Europe%2FBrussels"
-                style="border:0"
-                width="100%"
-                height="650"
-                frameborder="0"
-                scrolling="no">
-        </iframe>
-    </div>
-</div>-->
 
 </div>
 <section id="galerij">
@@ -1114,19 +1113,31 @@ if (blocked) {
         document.getElementById("loginModal").style.display = "none";
     }
 
-    function loginForm(){
+    async function loginForm(){
 
         const email = document.getElementById("loginEmail").value;
         const pass = document.getElementById("loginPass").value;
 
-        if(email === "admin" && pass === "kleinewonderwereld@2920"){
+        try {
+            const { data, error } = await sb.auth.signInWithPassword({
+                email: email,
+                password: pass
+            });
 
+            if (error) {
+                console.error(error);
+                document.getElementById("loginStatus").innerText = "❌ Fout login";
+                return;
+            }
+
+            // LOGIN OK
             localStorage.setItem("loggedIn", "true");
 
-            window.location.href = "admin.html"; // 👈 HIER DE REDIRECT
+            window.location.href = "admin.html";
 
-        } else {
-            document.getElementById("loginStatus").innerText = "❌ Fout login";
+        } catch (err) {
+            console.error(err);
+            document.getElementById("loginStatus").innerText = "❌ Er ging iets mis";
         }
     }
 </script>
@@ -1208,6 +1219,14 @@ loadAppointments();
                 console.error("Blocked error:", blockedError);
             }
 
+            const { data: themes, error: themeError } = await sb
+    .from("themes")   // <-- jouw tabelnaam (pas aan indien anders)
+    .select("*");
+
+if (themeError) {
+    console.error("Theme error:", themeError);
+}
+
             const MAX = 10;
 
             // =========================
@@ -1277,7 +1296,30 @@ loadAppointments();
                         textColor: "#fff"
                     });
                 }
-            }
+                }
+
+// ⭐ THEMA’S HIER TOEVOEGEN
+const format = (d) => d.toISOString().split("T")[0];
+
+(themes || []).forEach(t => {
+    const friday = new Date(t.date);
+
+    const start = new Date(friday);
+    start.setDate(friday.getDate() - 6);
+
+    const end = new Date(friday);
+    end.setDate(friday.getDate() + 0);
+
+    events.push({
+        title: "🎨 " + t.theme,
+        start: format(start),
+        end: format(end),
+        allDay: true,
+        backgroundColor: "#8b5cf6",
+        borderColor: "#6d28d9",
+        textColor: "#fff"
+    });
+            });
 
             // =========================
             // CALENDAR RESET
@@ -1339,6 +1381,7 @@ loadAppointments();
             console.error("❌ Calendar crash:", err);
         }
     }
+
 </script>
 </body>
 </html>
