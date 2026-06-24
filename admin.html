@@ -281,6 +281,7 @@
     </div>
 
 
+
     <div class="admin-group">
         <input type="date" id="blockDate">
         <input type="text" id="blockReason" placeholder="Reden (bv. vakantie)">
@@ -386,6 +387,7 @@
         let calendar;
         let editId = null;
         let themes = [];
+        let editMode = "appointment"; // of "theme"
 
         async function loadData(){
 
@@ -453,7 +455,15 @@ return {
     allDay: true,
     backgroundColor: "#dbeafe",
     borderColor: "#60a5fa",
-    textColor: "#1e3a8a"
+    textColor: "#1e3a8a",
+
+  extendedProps: {
+    type: "theme",
+    theme: themeItem.theme,
+    date: themeItem.date
+}
+
+
 };
 });
 
@@ -530,34 +540,56 @@ eventClick: function(info) {
             document.getElementById("modal").style.display = "none";
         }
 
-        async function saveEdit(){
+   async function saveEdit(){
 
-            const name =
-                document.getElementById("editName").value;
+    const name =
+        document.getElementById("editName").value;
 
-            const email =
-                document.getElementById("editEmail").value;
+    const date =
+        document.getElementById("editDate").value;
 
-            const date =
-                document.getElementById("editDate").value;
+    // 🎨 THEME
+    if (editMode === "theme") {
 
-            const { error } = await sb
-                .from("appointments")
-                .update({
-                    name:name,
-                    email:email,
-                    appointment_date:date
-                })
-                .eq("id", editId);
+        const { error } = await sb
+            .from("themes")
+            .update({
+                theme: name,
+                date: date
+            })
+            .eq("date", editId.replace("theme-", ""));
 
-            if(error){
-                alert(error.message);
-                return;
-            }
-
-            closeModal();
-            loadData();
+        if (error) {
+            alert(error.message);
+            return;
         }
+
+        closeModal();
+        loadData();
+        return;
+    }
+
+    // 📅 APPOINTMENT
+    const email =
+        document.getElementById("editEmail").value;
+
+    const { error } = await sb
+        .from("appointments")
+        .update({
+            name:name,
+            email:email,
+            appointment_date:date
+        })
+        .eq("id", editId);
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    closeModal();
+    loadData();
+}
 
         async function deleteAppointment(){
 
