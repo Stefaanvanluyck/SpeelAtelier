@@ -261,12 +261,13 @@
           transform: translateY(-4px);
         }
 
-        .faq-answer {
-          display: none;
-          margin-top: 10px;
-          opacity: 0.8;
-        }
+     .faq-answer {
+    display: none;
+}
 
+.faq-item.open .faq-answer {
+    display: block;
+}
         /* =========================================================
            MODAL
         ========================================================= */
@@ -897,7 +898,7 @@ async function isDateBlocked(date) {
     return !!data;
 }
 
-const selected = new Date(selectedDate);
+/*const selected = new Date(selectedDate);*/
 
 
 
@@ -1007,14 +1008,6 @@ if (blocked) {
             alert("❌ Er ging iets mis");
         }
     }
-
-        /* FAQ */
-        document.querySelectorAll(".faq-item").forEach(i=>{
-            i.addEventListener("click",()=>{
-                let a=i.querySelector(".faq-answer");
-                a.style.display=a.style.display==="block"?"none":"block";
-            });
-        });
 
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".day.event").forEach(day => {
@@ -1148,6 +1141,14 @@ if(localStorage.getItem("loggedIn") === "true"){
 document.getElementById("adminPanel").style.display = "block";
 loadAppointments();
 }
+});
+
+    document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".faq-item").forEach(item => {
+        item.addEventListener("click", () => {
+            item.classList.toggle("open");
+        });
+    });
 });
 
 </script>
