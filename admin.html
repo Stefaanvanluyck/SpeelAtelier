@@ -186,10 +186,26 @@
     }
 }
 
-        .admin-bar{
-    max-width:1300px;
-    margin:20px auto;
-    padding:15px;
+.admin-section {
+    max-width: 1300px;
+    margin: 20px auto;
+    padding: 15px;
+}
+
+.admin-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+
+    background: rgba(255,255,255,.7);
+    backdrop-filter: blur(12px);
+
+    padding: 12px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+
+    width: 100%;
 }
 
 .admin-group{
@@ -237,12 +253,68 @@
         width:100%;
     }
 }
+
+
+        .booking-status-card{
+    max-width:1300px;
+    margin:20px auto;
+    padding:20px;
+    border-radius:20px;
+    background:linear-gradient(135deg,#ffffff,#f8fafc);
+    box-shadow:0 15px 40px rgba(0,0,0,.08);
+    border:1px solid rgba(15,23,42,.06);
+}
+
+.booking-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.booking-header h2{
+    margin:0;
+    font-size:20px;
+    font-weight:900;
+}
+
+.status-badge{
+    padding:6px 12px;
+    border-radius:999px;
+    font-weight:800;
+    font-size:12px;
+}
+
+.status-badge.on{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.status-badge.off{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.toggle-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:600;
+    margin-top:10px;
+}
+
+.status-text{
+    margin-top:10px;
+    font-size:14px;
+    color:#64748b;
+}
+
     </style>
 </head>
 <body>
 
 <div class="topbar">
-    <h1>📅 Admin Kalender</h1>
+    <h1>📅 Admin Tool</h1>
 
     <button class="btn logout" onclick="logout()">
         Uitloggen
@@ -251,46 +323,36 @@
 
 <div class="admin-bar">
 
-    <div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:20px;">
-        <h3>📅 Booking status</h3>
+    <div class="booking-status-card">
+        <div class="booking-header">
+            <h2>📅 Inschrijvingen</h2>
+            <span id="bookingStatusBadge" class="status-badge"></span>
+        </div>
 
-        <label>
+        <label class="toggle-row">
             <input type="checkbox" id="bookingToggle" onchange="updateBookingStatus()">
-            Inschrijvingen actief
+            <span>Inschrijvingen activeren</span>
         </label>
 
-        <p id="bookingStatusText"></p>
+        <p id="bookingStatusText" class="status-text"></p>
     </div>
 
-    <div class="admin-bar">
+    <div class="admin-section">
 
+        <div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:20px;">
         <div class="admin-group">
             <input type="date" id="themeDate">
+            <input type="text" id="themeName" placeholder="Thema (bv. Dino's)">
+            <button class="btn save" onclick="saveTheme()">🎨 Thema opslaan</button>
+        </div>
 
-            <input
-                    type="text"
-                    id="themeName"
-                    placeholder="Thema (bv. Dino's)"
-            >
-
-            <button class="btn save" onclick="saveTheme()">
-                🎨 Thema opslaan
-            </button>
+        <div class="admin-group">
+            <input type="date" id="blockDate">
+            <input type="text" id="blockReason" placeholder="Reden (bv. vakantie)">
+            <button class="btn danger" onclick="addBlockedDate()">⛔ Blokkeren</button>
         </div>
 
     </div>
-
-
-
-    <div class="admin-group">
-        <input type="date" id="blockDate">
-        <input type="text" id="blockReason" placeholder="Reden (bv. vakantie)">
-        <button class="btn danger" onclick="addBlockedDate()">
-            ⛔ Blokkeren
-        </button>
-    </div>
-
-</div>
 
 
 
@@ -496,7 +558,6 @@ dayCellDidMount: function(info) {
 eventClick: function(info) {
 
     const event = info.event;
-
     const isTheme = event.extendedProps.type === "theme";
 
     editMode = isTheme ? "theme" : "appointment";
@@ -505,11 +566,9 @@ eventClick: function(info) {
         ? event.extendedProps.date
         : event.id;
 
-    // titel aanpassen
     document.querySelector("#modal h3").innerText =
         isTheme ? "🎨 Thema beheren" : "✏️ Afspraak beheren";
 
-    // datum altijd zetten
     document.getElementById("editDate").value = event.startStr;
 
     if (isTheme) {
@@ -528,6 +587,10 @@ eventClick: function(info) {
         document.getElementById("editEmail").value =
             event.extendedProps.email || "";
     }
+
+    // 👇 HIER PLAATS JE HET
+    document.querySelector(".deleteBtn").onclick =
+        isTheme ? deleteTheme : deleteAppointment;
 
     document.getElementById("modal").style.display = "flex";
 }
@@ -586,25 +649,51 @@ async function saveEdit(){
     closeModal();
     loadData();
 }
-        async function deleteAppointment(){
+       async function deleteAppointment(){
 
-            if(!confirm("Afspraak verwijderen?")){
-                return;
-            }
+    if(!confirm("Afspraak verwijderen?")){
+        return;
+    }
 
-            const { error } = await sb
-                .from("appointments")
-                .delete()
-                .eq("id", editId);
+    if(editMode === "theme"){
+        alert("Je kan geen thema verwijderen via deze knop.");
+        return;
+    }
 
-            if(error){
-                alert(error.message);
-                return;
-            }
+    const { error } = await sb
+        .from("appointments")
+        .delete()
+        .eq("id", editId);
 
-            closeModal();
-            loadData();
-        }
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    closeModal();
+    loadData();
+}
+
+async function deleteTheme(){
+
+    if(!confirm("Thema verwijderen?")){
+        return;
+    }
+
+    const { error } = await sb
+        .from("themes")
+        .delete()
+        .eq("date", editId);
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    closeModal();
+    loadData();
+}
+
 
         sb.channel("appointments-live")
         .on(
