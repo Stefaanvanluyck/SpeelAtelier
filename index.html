@@ -1300,27 +1300,16 @@ if (themeError) {
                 }
 
 // ⭐ THEMA’S HIER TOEVOEGEN
-const format = (d) => d.toISOString().split("T")[0];
-
 (themes || []).forEach(t => {
-    const friday = new Date(t.date);
-
-    const start = new Date(friday);
-    start.setDate(friday.getDate() - 6);
-
-    const end = new Date(friday);
-    end.setDate(friday.getDate() + 0);
-
     events.push({
         title: "🎨 " + t.theme,
-        start: format(start),
-        end: format(end),
+        start: t.date,
         allDay: true,
         backgroundColor: "#8b5cf6",
         borderColor: "#6d28d9",
         textColor: "#fff"
     });
-            });
+});
 
             // =========================
             // CALENDAR RESET
