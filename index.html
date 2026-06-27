@@ -1274,12 +1274,12 @@ if (themeError) {
             // =========================
             const events = [];
 
-            start.setMonth(8); // september (0 = jan, 8 = sep)
-            start.setDate(1);
+const start = new Date();
+start.setMonth(8); // september (0 = jan, 8 = sep)
+start.setDate(1);
 
-            const end = new Date(start);
-               end.setMonth(end.getMonth() + 1);
-            const start = new Date();
+const end = new Date(start);
+end.setMonth(end.getMonth() + 1);
 
             for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
 
