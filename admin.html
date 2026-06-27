@@ -725,11 +725,11 @@ function updateDashboard(){
     document.getElementById("totalAppointments").textContent =
         allData.length;
 
-    const uniqueEmails =
-        new Set(allData.map(x => x.email));
+    const uniqueNames =
+        new Set(allData.map(x => x.name));
 
     document.getElementById("uniquePeople").textContent =
-        uniqueEmails.size;
+        uniqueNames.size;
 
     const now = new Date();
 
