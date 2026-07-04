@@ -57,18 +57,21 @@
             color:white;
         }
 
-        #calendarWrapper{
-            max-width:1300px;
-            margin:0 auto 30px;
-            padding:15px;
-        }
+      #calendarWrapper{
+    max-width:1300px;
+    margin:0 auto 30px;
+    padding:15px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
 
-        #calendar{
-            background:white;
-            border-radius:20px;
-            padding:15px;
-            box-shadow:0 15px 40px rgba(0,0,0,.08);
-        }
+      #calendar{
+    background:white;
+    border-radius:20px;
+    padding:15px;
+    box-shadow:0 15px 40px rgba(0,0,0,.08);
+    min-width:900px;
+}
 
         .fc-toolbar-title{
             font-size:1.4rem !important;
@@ -415,6 +418,16 @@
         <div class="stat-card">
             <div class="stat-label">Unieke personen</div>
             <div class="stat-value" id="uniquePeople">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">💶 Totale inkomsten</div>
+            <div class="stat-value" id="totalRevenue">€0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">💶 Deze maand</div>
+            <div class="stat-value" id="monthRevenue">€0</div>
         </div>
 
     </div>
@@ -774,6 +787,50 @@ function updateDashboard(){
 
     renderMonthlyChart();
     renderTopUsers();
+
+
+    // Inkomsten berekenen
+let totalRevenue = 0;
+let monthRevenue = 0;
+
+const groupedBookings = {};
+
+allData.forEach(item => {
+    const key = item.email + "_" + item.appointment_date;
+
+    if (!groupedBookings[key]) {
+        groupedBookings[key] = [];
+    }
+
+    groupedBookings[key].push(item);
+});
+
+Object.values(groupedBookings).forEach(group => {
+
+    group.forEach((booking, index) => {
+
+        const amount = index === 0 ? 18 : 15;
+
+        totalRevenue += amount;
+
+        const d = new Date(booking.appointment_date);
+
+        if (
+            d.getMonth() === now.getMonth() &&
+            d.getFullYear() === now.getFullYear()
+        ) {
+            monthRevenue += amount;
+        }
+
+    });
+
+});
+
+document.getElementById("totalRevenue").textContent =
+    "€" + totalRevenue;
+
+document.getElementById("monthRevenue").textContent =
+    "€" + monthRevenue;
 }
 
 
