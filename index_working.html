@@ -259,10 +259,18 @@
         }
 
         .faq-answer {
-          display: none;
-          margin-top: 10px;
-          opacity: 0.8;
-        }
+    display: none;
+    margin-top: 5px;
+}
+
+.faq-item.open .faq-answer {
+    display: block;
+}
+
+.faq-item {
+    cursor: pointer;
+    margin-bottom: 10px;
+}
 
         /* =========================================================
            MODAL
@@ -1087,7 +1095,13 @@ function openForm(date = null){
     </a>
 </div>
 
-
+<script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.addEventListener('click', () => {
+            item.classList.toggle('open');
+        });
+    });
+</script>
 
 
 </body>
