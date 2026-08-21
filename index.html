@@ -354,6 +354,26 @@ flex-wrap: wrap;
         }
 
         /* =========================================================
+           PROGRESS BAR
+        ========================================================= */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+        /* =========================================================
            FOOTER
         ========================================================= */
         .footer {
@@ -833,7 +853,9 @@ flex-wrap: wrap;
         <input type="text" id="name" placeholder="Naam">
         <input type="email" id="email" placeholder="Email">
 
-        <button class="btn" onclick="submitForm()">Bevestigen</button>
+        <button class="btn" id="submitBtn" onclick="submitForm()">
+            Bevestigen
+        </button>
         <button class="btn" style="background:#999" onclick="closeForm()">Sluiten</button>
 
         <p id="confirm"></p>
@@ -927,112 +949,190 @@ async function isDateBlocked(date) {
 
 
 
-        async function submitForm() {
-        const now = new Date().getTime();
-        let selectedDate = document.getElementById("datePicker").value;
-        let name = document.getElementById("name").value;
-        let email = document.getElementById("email").value;
+let isSubmitting = false;
+
+async function submitForm() {
+
+    // 🛑 Voorkom dubbele klikken / dubbele inschrijvingen
+    if (isSubmitting) {
+        return;
+    }
+
+    const submitBtn = document.getElementById("submitBtn");
+    const confirmMsg = document.getElementById("confirm");
+
+    const selectedDate = document.getElementById("datePicker").value;
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+
+    // ==========================
+    // VALIDATIE
+    // ==========================
 
     if (!(await isBookingEnabled())) {
-      alert("⛔ Inschrijvingen zijn momenteel gesloten.");
-      return;
+        alert("⛔ Inschrijvingen zijn momenteel gesloten.");
+        return;
     }
-        if (!selectedDate || !name || !email) {
-            alert("Vul alles in 💛");
+
+    if (!selectedDate || !name || !email) {
+        alert("Vul alles in 💛");
+        return;
+    }
+
+    // ==========================
+    // 🚀 START VERZENDING
+    // ==========================
+
+    isSubmitting = true;
+
+    // Knop onmiddellijk uitschakelen
+    submitBtn.disabled = true;
+
+    // Spinner + tekst
+    submitBtn.innerHTML = `
+        <span class="loading-spinner"></span>
+        Inschrijving wordt verzonden...
+    `;
+
+    confirmMsg.innerText = "";
+    confirmMsg.style.color = "#555";
+
+    try {
+
+        // ==========================
+        // 1. CHECK AANTAL INSCHRIJVINGEN
+        // ==========================
+
+        const { data: existing, error: countError } = await sb
+            .from("appointments")
+            .select("*")
+            .eq("appointment_date", selectedDate);
+
+        if (countError) {
+            console.error(countError);
+            throw new Error("Kon beschikbaarheid niet controleren.");
+        }
+
+        // ==========================
+        // 2. CHECK GEBLOKKEERDE DATUM
+        // ==========================
+
+        const blocked = await isDateBlocked(selectedDate);
+
+        if (blocked) {
+            alert("⛔ Deze datum is geblokkeerd.");
             return;
         }
 
-        // ⛔ 15 min blokkering
-        /*const lastSubmission = localStorage.getItem("lastSubmissionTime");
-        const now = new Date().getTime();
+        // ==========================
+        // 3. CHECK MAX 10
+        // ==========================
 
-        /if (lastSubmission && (now - lastSubmission < 15 * 60 * 1000)) {
-            alert("⏳ Je kan maar 1 keer per 15 minuten inschrijven.");
+        if (existing.length >= 10) {
+            alert("❌ Helaas, deze datum is volzet (max 10 inschrijvingen).");
             return;
-        }*/
+        }
 
-        try {
+        // ==========================
+        // 4. OPSLAAN IN SUPABASE
+        // ==========================
 
-            // ==========================
-            // 1. CHECK AANTAL INSCHRIJVINGEN
-            // ==========================
-            const { data: existing, error: countError } = await sb
-                .from("appointments")
-                .select("*", { count: "exact", head: false })
-                .eq("appointment_date", selectedDate);
+        const { error: dbError } = await sb
+            .from("appointments")
+            .insert([
+                {
+                    name: name,
+                    email: email,
+                    appointment_date: selectedDate
+                }
+            ]);
 
-            if (countError) {
-                console.error(countError);
-                alert("❌ Kon beschikbaarheid niet checken.");
-                return;
+        if (dbError) {
+            console.error(dbError);
+            throw new Error("Database fout.");
+        }
+
+        // ==========================
+        // 5. EMAIL NAAR KLANT
+        // ==========================
+
+        await emailjs.send(
+            "service_9u8ex4o",
+            "template_m20bheg",
+            {
+                name,
+                email,
+                date: selectedDate
             }
+        );
 
-const blocked = await isDateBlocked(selectedDate);
+        // ==========================
+        // 6. EMAIL NAAR VALERIE
+        // ==========================
 
-if (blocked) {
-    alert("⛔ Deze datum is geblokkeerd.");
-    return;
+        await emailjs.send(
+            "service_9u8ex4o",
+            "template_nndh15x",
+            {
+                name,
+                email,
+                date: selectedDate
+            }
+        );
+
+        // ==========================
+        // 7. SUCCES
+        // ==========================
+
+        localStorage.setItem(
+            "lastSubmissionTime",
+            new Date().getTime()
+        );
+
+        confirmMsg.innerText = "💛 Inschrijving verzonden!";
+        confirmMsg.style.color = "#2e8b57";
+
+        // Knop blijft disabled
+        submitBtn.innerHTML = "✓ Inschrijving bevestigd";
+
+        // Modal sluiten na korte vertraging
+        setTimeout(() => {
+
+            closeForm();
+
+            document.getElementById("name").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("datePicker").value = "";
+
+            confirmMsg.innerText = "";
+
+            // Klaar voor volgende inschrijving
+            isSubmitting = false;
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "Bevestigen";
+
+        }, 1200);
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("❌ Er ging iets mis. Probeer opnieuw.");
+
+        // ==========================
+        // 🔄 FOUT → KNOP OPNIEUW ACTIEF
+        // ==========================
+
+        isSubmitting = false;
+
+        submitBtn.disabled = false;
+
+        submitBtn.innerHTML = "Bevestigen";
+
+        confirmMsg.innerText = "";
+    }
 }
-            if (existing.length >= 10) {
-                alert("❌ Helaas, deze datum is volzet (max 10 inschrijvingen).");
-                return;
-            }
-
-            // ==========================
-            // 2. OPSLAAN IN SUPABASE
-            // ==========================
-            const { error: dbError } = await sb
-                .from("appointments")
-                .insert([
-                    {
-                        name: name,
-                        email: email,
-                        appointment_date: selectedDate
-                    }
-                ]);
-
-            if (dbError) {
-                console.error(dbError);
-                alert("❌ Database fout");
-                return;
-            }
-
-            // ==========================
-            // 3. EMAILS
-            // ==========================
-            await emailjs.send("service_9u8ex4o", "template_m20bheg", {
-                name,
-                email,
-                date: selectedDate
-            });
-
-            await emailjs.send("service_9u8ex4o", "template_nndh15x", {
-                name,
-                email,
-                date: selectedDate
-            });
-
-            // ==========================
-            // 4. SUCCESS
-            // ==========================
-            localStorage.setItem("lastSubmissionTime", now);
-
-            document.getElementById("confirm").innerText =
-                "💛 Inschrijving verzonden!";
-
-            setTimeout(() => {
-                closeForm();
-                document.getElementById("name").value = "";
-                document.getElementById("email").value = "";
-                document.getElementById("datePicker").value = "";
-                document.getElementById("confirm").innerText = "";
-            }, 500);
-
-        } catch (err) {
-            console.error(err);
-            alert("❌ Er ging iets mis");
-        }
-    }
 
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".day.event").forEach(day => {
