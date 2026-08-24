@@ -850,7 +850,7 @@ flex-wrap: wrap;
 
         <input type="date" id="datePicker">
         <div id="errorMsg" style="color:red; margin-top:5px;"></div>
-        <input type="text" id="name" placeholder="Naam">
+        <input type="text" id="name" placeholder="Naam kind">
         <input type="email" id="email" placeholder="Email">
 
         <button class="btn" id="submitBtn" onclick="submitForm()">
@@ -1311,195 +1311,319 @@ loadAppointments();
 }
 </script>
 <script>
-    let publicCalendar;
+      let publicCalendar;
 
-    document.addEventListener("DOMContentLoaded", async () => {
-        await loadPublicCalendar();
-    });
+      document.addEventListener("DOMContentLoaded", async () => {
+          await loadPublicCalendar();
+      });
 
-    async function loadPublicCalendar() {
-        try {
-            const container = document.getElementById("publicCalendar");
-            if (!container) {
-                console.error("❌ publicCalendar niet gevonden");
-                return;
-            }
+      async function loadPublicCalendar() {
+          try {
+              const container = document.getElementById("publicCalendar");
 
-            // =========================
-            // DATA OPHALEN
-            // =========================
-            const { data: appointments, error } = await sb
-                .from("appointments")
-                .select("*");
+              if (!container) {
+                  console.error("❌ publicCalendar niet gevonden");
+                  return;
+              }
 
-            if (error) {
-                console.error("Appointments error:", error);
-                return;
-            }
+              // =========================
+              // DATA OPHALEN
+              // =========================
+              const { data: appointments, error } = await sb
+                  .from("appointments")
+                  .select("*");
 
-            const { data: blocked, error: blockedError } = await sb
-                .from("blocked_dates")
-                .select("*");
+              if (error) {
+                  console.error("Appointments error:", error);
+                  return;
+              }
 
-            if (blockedError) {
-                console.error("Blocked error:", blockedError);
-            }
+              const { data: blocked, error: blockedError } = await sb
+                  .from("blocked_dates")
+                  .select("*");
 
-            const { data: themes, error: themeError } = await sb
-    .from("themes")   // <-- jouw tabelnaam (pas aan indien anders)
-    .select("*");
+              if (blockedError) {
+                  console.error("Blocked error:", blockedError);
+              }
 
-if (themeError) {
-    console.error("Theme error:", themeError);
-}
+              const { data: themes, error: themeError } = await sb
+                  .from("themes")
+                  .select("*");
 
-            const MAX = 10;
+              if (themeError) {
+                  console.error("Theme error:", themeError);
+              }
 
-            // =========================
-            // COUNT PER DAG
-            // =========================
-            const counts = {};
+              const MAX = 10;
 
-            (appointments || []).forEach(a => {
-                const date = a.appointment_date;
-                counts[date] = (counts[date] || 0) + 1;
-            });
+              // =========================
+              // COUNT PER DAG
+              // =========================
+              const counts = {};
 
-            // =========================
-            // BLOCKED SET
-            // =========================
-            const blockedSet = new Set((blocked || []).map(b => b.date));
+              (appointments || []).forEach(a => {
+                  const date = a.appointment_date;
+                  counts[date] = (counts[date] || 0) + 1;
+              });
 
-            // =========================
-            // EVENTS GENEREREN (BELANGRIJK FIX)
-            // → ALLE ZATERDAGEN TONEN
-            // =========================
-            const events = [];
+              // =========================
+              // BLOCKED SET
+              // =========================
+              const blockedSet = new Set(
+                  (blocked || []).map(b => b.date)
+              );
 
-const start = new Date();
-start.setMonth(8); // september (0 = jan, 8 = sep)
-start.setDate(1);
+              // =========================
+              // THEMA'S PER DATUM
+              // =========================
+              const themesMap = {};
 
-const end = new Date(start);
-end.setMonth(end.getMonth() + 1);
+              (themes || []).forEach(t => {
 
-            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                  if (
+                      t.date &&
+                      t.theme &&
+                      String(t.theme).trim() !== ""
+                  ) {
+                      themesMap[t.date] = String(t.theme).trim();
+                  }
 
-                // alleen zaterdagen
-                if (d.getDay() !== 6) continue;
+              });
 
-                const dateStr = d.toISOString().split("T")[0];
+              // =========================
+              // EVENTS GENEREREN
+              // =========================
+              const events = [];
 
-                const booked = counts[dateStr] || 0;
+              const start = new Date();
+              start.setMonth(8); // september
+              start.setDate(1);
+              start.setHours(12, 0, 0, 0);
 
-                // blocked
-                if (blockedSet.has(dateStr)) {
-                    events.push({
-                        title: "⛔ Geblokkeerd",
-                        start: dateStr,
-                        allDay: true,
-                        backgroundColor: "#ef4444",
-                        borderColor: "#ef4444",
-                        textColor: "#fff"
-                    });
-                    continue;
-                }
+              const end = new Date(start);
+              end.setMonth(end.getMonth() + 1);
 
-                // vol / beschikbaar
-                if (booked >= MAX) {
-                    events.push({
-                        title: "Volzet",
-                        start: dateStr,
-                        allDay: true,
-                        backgroundColor: "#ef4444",
-                        borderColor: "#ef4444",
-                        textColor: "#fff"
-                    });
-                } else {
-                    events.push({
-                        title: `Beschikbaar (${MAX - booked})`,
-                        start: dateStr,
-                        allDay: true,
-                        backgroundColor: "#2ecc71",
-                        borderColor: "#2ecc71",
-                        textColor: "#fff"
-                    });
-                }
-                }
+              for (
+                  let d = new Date(start);
+                  d <= end;
+                  d.setDate(d.getDate() + 1)
+              ) {
 
-// ⭐ THEMA’S HIER TOEVOEGEN
-(themes || []).forEach(t => {
-    events.push({
-        title: "🎨 " + t.theme,
-        start: t.date,
-        allDay: true,
-        backgroundColor: "#8b5cf6",
-        borderColor: "#6d28d9",
-        textColor: "#fff"
-    });
-});
+                  // Alleen zaterdagen
+                  if (d.getDay() !== 6) {
+                      continue;
+                  }
 
-            // =========================
-            // CALENDAR RESET
-            // =========================
-            if (publicCalendar) {
-                publicCalendar.destroy();
-            }
+                  // Lokale datum in YYYY-MM-DD
+                  const year = d.getFullYear();
+                  const month = String(
+                      d.getMonth() + 1
+                  ).padStart(2, "0");
 
-            publicCalendar = new FullCalendar.Calendar(container, {
-                locale: "nl",
-                initialView: "dayGridMonth",
-                height: "auto",
-                expandRows: true,   // 🔥 belangrijk voor mobiel
-                contentHeight: "auto",
-                aspectRatio: 1.2,
+                  const day = String(
+                      d.getDate()
+                  ).padStart(2, "0");
 
+                  const dateStr = `${year}-${month}-${day}`;
 
-                headerToolbar: {
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek"
-                },
+                  const booked = counts[dateStr] || 0;
 
-                events,
+                  // Thema voor deze zaterdag
+                  const theme = themesMap[dateStr];
 
-                eventClick: function(info) {
-                    const title = info.event.title;
+                  // =====================================
+                  // GEEN THEMA = NIET KLIKBAAR
+                  // =====================================
+                  if (!theme) {
 
-                    if (title.startsWith("Beschikbaar")) {
-                        openForm(info.event.startStr);
-                    } else {
-                        alert("❌ Niet beschikbaar");
-                    }
-                },
+                      events.push({
+                          title: "Geen sessie",
+                          start: dateStr,
+                          allDay: true,
+                          backgroundColor: "#d1d5db",
+                          borderColor: "#d1d5db",
+                          textColor: "#6b7280",
+                          extendedProps: {
+                              bookable: false,
+                              reason: "no-theme"
+                          }
+                      });
 
-                dateClick: function(info) {
-                    const d = new Date(info.dateStr);
+                      continue;
+                  }
 
-        if (d.getDay() !== 6) {
-            alert("❌ Alleen zaterdagen zijn beschikbaar");
-            return;
-        }
+                  // =====================================
+                  // GEBLOKKEERD
+                  // =====================================
+                  if (blockedSet.has(dateStr)) {
 
+                      events.push({
+                          title: "⛔ Geblokkeerd",
+                          start: dateStr,
+                          allDay: true,
+                          backgroundColor: "#ef4444",
+                          borderColor: "#ef4444",
+                          textColor: "#fff",
+                          extendedProps: {
+                              bookable: false,
+                              reason: "blocked"
+                          }
+                      });
 
-                    const event = events.find(e => e.start === info.dateStr);
+                      continue;
+                  }
 
-                    if (event?.title === "⛔ Geblokkeerd") {
-                        alert("⛔ Deze dag is geblokkeerd");
-                        return;
-                    }
+                  // =====================================
+                  // THEMA TONEN
+                  // =====================================
+                  events.push({
+                      title: "🎨 " + theme,
+                      start: dateStr,
+                      allDay: true,
+                      backgroundColor: "#8b5cf6",
+                      borderColor: "#6d28d9",
+                      textColor: "#fff",
+                      extendedProps: {
+                          bookable: false,
+                          reason: "theme"
+                      }
+                  });
 
-                    openForm(info.dateStr);
-                }
-            });
+                  // =====================================
+                  // VOLZET
+                  // =====================================
+                  if (booked >= MAX) {
 
-            publicCalendar.render();
+                      events.push({
+                          title: "Volzet",
+                          start: dateStr,
+                          allDay: true,
+                          backgroundColor: "#ef4444",
+                          borderColor: "#ef4444",
+                          textColor: "#fff",
+                          extendedProps: {
+                              bookable: false,
+                              reason: "full"
+                          }
+                      });
 
-        } catch (err) {
-            console.error("❌ Calendar crash:", err);
-        }
-    }
+                  } else {
 
+                      // =====================================
+                      // BESCHIKBAAR
+                      // Alleen beschikbaar wanneer er een thema is
+                      // =====================================
+                      events.push({
+                          title: `Beschikbaar (${MAX - booked})`,
+                          start: dateStr,
+                          allDay: true,
+                          backgroundColor: "#2ecc71",
+                          borderColor: "#2ecc71",
+                          textColor: "#fff",
+                          extendedProps: {
+                              bookable: true,
+                              theme: theme
+                          }
+                      });
+                  }
+              }
+
+              // =========================
+              // CALENDAR RESET
+              // =========================
+              if (publicCalendar) {
+                  publicCalendar.destroy();
+              }
+
+              // =========================
+              // FULLCALENDAR
+              // =========================
+              publicCalendar = new FullCalendar.Calendar(
+                  container,
+                  {
+                      locale: "nl",
+
+                      initialView: "dayGridMonth",
+
+                      height: "auto",
+
+                      expandRows: true,
+
+                      contentHeight: "auto",
+
+                      aspectRatio: 1.2,
+
+                      headerToolbar: {
+                          left: "prev,next today",
+                          center: "title",
+                          right: "dayGridMonth,timeGridWeek"
+                      },
+
+                      events: events,
+
+                      // =========================
+                      // KLIK OP EVENT
+                      // =========================
+                      eventClick: function(info) {
+
+                          // Alleen groene beschikbaar-event
+                          if (
+                              info.event.extendedProps.bookable === true
+                          ) {
+                              openForm(info.event.startStr);
+                          }
+
+                      },
+
+                      // =========================
+                      // KLIK OP DAG
+                      // =========================
+                      dateClick: function(info) {
+
+                          const clickedDate = info.dateStr;
+
+                          const clicked = new Date(
+                              clickedDate + "T12:00:00"
+                          );
+
+                          // Alleen zaterdag
+                          if (clicked.getDay() !== 6) {
+                              return;
+                          }
+
+                          // Geen thema = NIET KLIKBAAR
+                          if (!themesMap[clickedDate]) {
+                              return;
+                          }
+
+                          // Geblokkeerd = NIET KLIKBAAR
+                          if (blockedSet.has(clickedDate)) {
+                              return;
+                          }
+
+                          // Volzet = NIET KLIKBAAR
+                          if (
+                              (counts[clickedDate] || 0) >= MAX
+                          ) {
+                              return;
+                          }
+
+                          // Alleen zaterdag met thema
+                          // en beschikbare plaatsen
+                          openForm(clickedDate);
+                      }
+                  }
+              );
+
+              publicCalendar.render();
+
+          } catch (err) {
+              console.error(
+                  "❌ Calendar crash:",
+                  err
+              );
+          }
+      }
 </script>
 </body>
 </html>
