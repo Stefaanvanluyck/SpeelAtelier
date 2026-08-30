@@ -4,1052 +4,2411 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Admin Tool</title>
+    <title>Kleine Wonderwereld – Admin</title>
+
+    <link rel="icon" sizes="32x32" href="favicon.png">
+    <link rel="icon" sizes="192x192" href="favicon.png">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <link
+            href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
+            rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        :root{
-            --text:#0f172a;
-            --border:rgba(15,23,42,.08);
+        * {
+            box-sizing: border-box;
         }
 
-        *{
-            box-sizing:border-box;
+        :root {
+            --bg: #f6f8f4;
+            --card: rgba(255,255,255,.86);
+            --text: #1f2a1f;
+            --muted: #6b7280;
+            --accent: #ff6f86;
+            --accent-light: #fff0f3;
+            --green: #22a06b;
+            --green-light: #eaf8f0;
+            --red: #dc3545;
+            --red-light: #fff0f1;
+            --blue: #4f7cff;
+            --blue-light: #eef3ff;
+            --purple: #8b5cf6;
+            --shadow: 0 18px 50px rgba(0,0,0,.09);
+            --border: rgba(31,42,31,.10);
         }
 
-        body{
-            margin:0;
-            font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-            background:linear-gradient(135deg,#fce7f3,#e0f2fe,#ecfdf5);
-            min-height:100vh;
-            color:var(--text);
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Poppins", Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left,#ffeef1,transparent 35%),
+                radial-gradient(circle at bottom right,#e9f7e9,transparent 35%),
+                var(--bg);
         }
 
-        .topbar{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:20px;
+        button,
+        input,
+        select {
+            font: inherit;
         }
 
-        h1{
-            margin:0;
-            font-size:24px;
-            font-weight:900;
+        button {
+            cursor: pointer;
         }
 
-        .btn{
-            border:none;
-            cursor:pointer;
-            padding:12px 16px;
-            border-radius:12px;
-            font-weight:700;
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 16px 24px;
+            background: rgba(255,255,255,.78);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 5px 25px rgba(0,0,0,.05);
         }
 
-        .logout{
-            background:#111827;
-            color:white;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-      #calendarWrapper{
-    max-width:1300px;
-    margin:0 auto 30px;
-    padding:15px;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-}
-
-      #calendar{
-    background:white;
-    border-radius:20px;
-    padding:15px;
-    box-shadow:0 15px 40px rgba(0,0,0,.08);
-    min-width:900px;
-}
-
-        .fc-toolbar-title{
-            font-size:1.4rem !important;
-            font-weight:800 !important;
+        .brand h1 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 800;
         }
 
-        .fc-event{
-            cursor:pointer;
-            border:none !important;
-            padding:2px;
+        .brand small {
+            display: block;
+            color: var(--muted);
+            font-size: .75rem;
         }
 
-        .fc-daygrid-event{
-            border-radius:8px !important;
+        .btn {
+            border: 0;
+            border-radius: 999px;
+            padding: 11px 17px;
+            font-weight: 700;
+            transition: .2s;
         }
 
-        #modal{
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,.45);
-            display:none;
-            justify-content:center;
-            align-items:center;
-            z-index:999;
-            padding:15px;
+        .btn:hover {
+            transform: translateY(-2px);
         }
 
-        .modal-box{
-            background:white;
-            width:100%;
-            max-width:420px;
-            border-radius:20px;
-            padding:20px;
+        .btn-primary {
+            color: white;
+            background: linear-gradient(135deg,var(--accent),#ffb199);
+            box-shadow: 0 10px 25px rgba(255,111,134,.25);
         }
 
-        .modal-box h3{
-            margin-top:0;
+        .btn-green {
+            color: white;
+            background: linear-gradient(135deg,#20a464,#37c985);
         }
 
-        .modal-box input{
-            width:100%;
-            margin-bottom:10px;
-            padding:12px;
-            border-radius:10px;
-            border:1px solid #ddd;
+        .btn-red {
+            color: white;
+            background: linear-gradient(135deg,#e53935,#f97316);
         }
 
-        .modal-actions{
-            display:flex;
-            justify-content:space-between;
-            gap:10px;
+        .btn-gray {
+            color: #374151;
+            background: #e5e7eb;
         }
 
-        .save{
-            background:#22c55e;
-            color:white;
+        .btn-dark {
+            color: white;
+            background: #1f2937;
         }
 
-        .deleteBtn{
-            background:#ef4444;
-            color:white;
+        .page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
         }
 
-        .cancel{
-            background:#e5e7eb;
+        .status-card,
+        .admin-card,
+        .dashboard-card {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
         }
 
-        #dashboard{
-    max-width:1300px;
-    margin:20px auto;
-}
+        .status-card {
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
 
-.stats-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:15px;
-    margin-bottom:20px;
-}
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
 
-.stat-card{
-    background:white;
-    padding:20px;
-    border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
+        .status-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
 
-.stat-label{
-    color:#64748b;
-    font-size:14px;
-}
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 13px;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 800;
+        }
 
-.stat-value{
-    font-size:34px;
-    font-weight:900;
-    margin-top:8px;
-}
+        .status-badge.on {
+            color: #166534;
+            background: #dcfce7;
+        }
 
-.dashboard-grid{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:20px;
-    margin-bottom:25px;
-}
+        .status-badge.off {
+            color: #991b1b;
+            background: #fee2e2;
+        }
 
-.dashboard-card{
-    background:white;
-    padding:20px;
-    border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            font-weight: 600;
+        }
 
-@media(max-width:900px){
-    .dashboard-grid{
-        grid-template-columns:1fr;
-    }
-}
+        .toggle-row input {
+            width: 19px;
+            height: 19px;
+            accent-color: var(--accent);
+        }
 
-.admin-section {
-    max-width: 1300px;
-    margin: 20px auto;
-    padding: 15px;
-}
+        .status-text {
+            margin: 9px 0 0;
+            color: var(--muted);
+            font-size: .9rem;
+        }
 
-.admin-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
+        .admin-card {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
 
-    background: rgba(255,255,255,.7);
-    backdrop-filter: blur(12px);
+        .admin-card h2 {
+            margin: 0 0 14px;
+            font-size: 1.15rem;
+        }
 
-    padding: 12px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+        .admin-actions {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
 
-    width: 100%;
-}
+        .admin-actions input {
+            width: 100%;
+            min-width: 0;
+            padding: 11px 13px;
+            border: 1px solid #d9dde4;
+            border-radius: 12px;
+            background: white;
+            outline: none;
+        }
 
-.admin-group{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    align-items:center;
+        .admin-actions input:focus,
+        .form-grid input:focus,
+        .form-grid select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255,111,134,.12);
+        }
 
-    background:rgba(255,255,255,.7);
-    backdrop-filter:blur(12px);
+        .calendar-wrapper {
+            overflow-x: auto;
+            margin-bottom: 25px;
+        }
 
-    padding:12px;
-    border-radius:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
+        #calendar {
+            min-width: 900px;
+            background: white;
+            padding: 15px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
 
-.admin-group input{
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid #e5e7eb;
-    outline:none;
-    font-size:14px;
-    min-width:160px;
-}
+        .fc {
+            font-family: "Poppins", Arial, sans-serif;
+        }
 
-.btn.danger{
-    background:linear-gradient(135deg,#ef4444,#f97316);
-    color:white;
-    box-shadow:0 10px 25px rgba(239,68,68,.25);
-    transition:.2s;
-}
+        .fc-toolbar-title {
+            font-size: 1.35rem !important;
+            font-weight: 800 !important;
+        }
 
-.btn.danger:hover{
-    transform:translateY(-2px);
-}
+        .fc-button {
+            border: 0 !important;
+            border-radius: 9px !important;
+            font-weight: 600 !important;
+        }
 
-        @media(max-width:600px){
-    .admin-group{
-        flex-direction:column;
-        align-items:stretch;
-    }
+        .fc-event {
+            border: 0 !important;
+            border-radius: 7px !important;
+            padding: 3px 5px !important;
+            cursor: pointer;
+        }
 
-    .admin-group input,
-    .admin-group button{
-        width:100%;
-    }
-}
+        .fc-event-title {
+            white-space: normal !important;
+            overflow-wrap: anywhere;
+            line-height: 1.25;
+            font-weight: 600;
+        }
 
+        .fc-daygrid-day {
+            cursor: pointer;
+        }
 
-        .booking-status-card{
-    max-width:1300px;
-    margin:20px auto;
-    padding:20px;
-    border-radius:20px;
-    background:linear-gradient(135deg,#ffffff,#f8fafc);
-    box-shadow:0 15px 40px rgba(0,0,0,.08);
-    border:1px solid rgba(15,23,42,.06);
-}
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 0 0 22px;
+            color: var(--muted);
+            font-size: .85rem;
+        }
 
-.booking-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-}
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-.booking-header h2{
-    margin:0;
-    font-size:20px;
-    font-weight:900;
-}
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
 
-.status-badge{
-    padding:6px 12px;
-    border-radius:999px;
-    font-weight:800;
-    font-size:12px;
-}
+        .dot.booking { background: var(--accent); }
+        .dot.theme { background: var(--purple); }
+        .dot.blocked { background: var(--red); }
 
-.status-badge.on{
-    background:#dcfce7;
-    color:#166534;
-}
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(190px,1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
 
-.status-badge.off{
-    background:#fee2e2;
-    color:#991b1b;
-}
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
 
-.toggle-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-weight:600;
-    margin-top:10px;
-}
+        .stat-label {
+            color: var(--muted);
+            font-size: .84rem;
+        }
 
-.status-text{
-    margin-top:10px;
-    font-size:14px;
-    color:#64748b;
-}
+        .stat-value {
+            margin-top: 7px;
+            font-size: 2rem;
+            line-height: 1.1;
+            font-weight: 900;
+        }
 
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .dashboard-card {
+            padding: 20px;
+            background: white;
+        }
+
+        .dashboard-card h3 {
+            margin: 0 0 15px;
+            font-size: 1rem;
+        }
+
+        #topUsers > div {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            background: rgba(0,0,0,.5);
+        }
+
+        .modal-box {
+            width: min(560px,100%);
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 25px;
+            background: rgba(255,255,255,.98);
+            border-radius: 25px;
+            box-shadow: 0 30px 90px rgba(0,0,0,.25);
+        }
+
+        .modal-box h3 {
+            margin: 0 0 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-field label {
+            font-size: .82rem;
+            font-weight: 700;
+            color: #4b5563;
+        }
+
+        .form-grid input,
+        .form-grid select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d9dde4;
+            border-radius: 11px;
+            background: white;
+            outline: none;
+        }
+
+        .children-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+        }
+
+        .children-box h4 {
+            margin: 0 0 10px;
+        }
+
+        .children-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modal-actions-right {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .details {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 15px;
+            font-size: .9rem;
+        }
+
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 5px 0;
+        }
+
+        .details-row span:first-child {
+            color: var(--muted);
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 5000;
+            max-width: 360px;
+            padding: 14px 17px;
+            border-radius: 14px;
+            color: white;
+            background: #1f2937;
+            box-shadow: 0 15px 40px rgba(0,0,0,.2);
+            opacity: 0;
+            transform: translateY(15px);
+            pointer-events: none;
+            transition: .25s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: none;
+        }
+
+        .toast.error {
+            background: #b91c1c;
+        }
+
+        .loading {
+            opacity: .6;
+            pointer-events: none;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .topbar {
+                padding: 13px 15px;
+            }
+
+            .brand h1 {
+                font-size: 1.1rem;
+            }
+
+            .page {
+                padding: 15px;
+            }
+
+            .form-grid,
+            .children-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-field.full {
+                grid-column: auto;
+            }
+
+            .modal-box {
+                padding: 20px;
+            }
+
+            .stat-value {
+                font-size: 1.7rem;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<div class="topbar">
-    <h1>📅 Admin Tool</h1>
+<header class="topbar">
+    <div class="brand">
+        <div>
+            <h1>🌿 Kleine Wonderwereld</h1>
+            <small>Administratie</small>
+        </div>
+    </div>
 
-    <button class="btn logout" onclick="logout()">
+    <button class="btn btn-dark" onclick="logout()">
         Uitloggen
     </button>
-</div>
+</header>
 
-<div class="admin-bar">
+<main class="page">
 
-    <div class="booking-status-card">
-        <div class="booking-header">
+    <!-- INSCHRIJVINGEN AAN/UIT -->
+    <section class="status-card">
+        <div class="status-header">
             <h2>📅 Inschrijvingen</h2>
-            <span id="bookingStatusBadge" class="status-badge"></span>
+            <span id="bookingStatusBadge" class="status-badge off">
+                Controleren...
+            </span>
         </div>
 
         <label class="toggle-row">
-            <input type="checkbox" id="bookingToggle" onchange="updateBookingStatus()">
+            <input
+                    type="checkbox"
+                    id="bookingToggle"
+                    onchange="updateBookingStatus()">
             <span>Inschrijvingen activeren</span>
         </label>
 
         <p id="bookingStatusText" class="status-text"></p>
-    </div>
+    </section>
 
-    <div class="admin-section">
+    <!-- THEMA'S / BLOKKEREN -->
+    <section class="admin-card">
+        <h2>🎨 Thema's & geblokkeerde data</h2>
 
-        <div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:20px;">
-        <div class="admin-group">
+        <div class="admin-actions">
             <input type="date" id="themeDate">
-            <input type="text" id="themeName" placeholder="Thema (bv. Dino's)">
-            <button class="btn save" onclick="saveTheme()">🎨 Thema opslaan</button>
+            <input
+                    type="text"
+                    id="themeName"
+                    placeholder="Thema, bv. Dino's">
+            <button class="btn btn-primary" onclick="saveTheme()">
+                🎨 Thema opslaan
+            </button>
         </div>
 
-        <div class="admin-group">
+        <div class="admin-actions">
             <input type="date" id="blockDate">
-            <input type="text" id="blockReason" placeholder="Reden (bv. vakantie)">
-            <button class="btn danger" onclick="addBlockedDate()">⛔ Blokkeren</button>
+            <input
+                    type="text"
+                    id="blockReason"
+                    placeholder="Reden, bv. vakantie">
+            <button class="btn btn-red" onclick="addBlockedDate()">
+                ⛔ Datum blokkeren
+            </button>
         </div>
+    </section>
 
+    <!-- LEGENDE -->
+    <div class="legend">
+        <span><i class="dot booking"></i> Inschrijving</span>
+        <span><i class="dot theme"></i> Thema</span>
+        <span><i class="dot blocked"></i> Geblokkeerde datum</span>
     </div>
 
+    <!-- KALENDER -->
+    <div class="calendar-wrapper">
+        <div id="calendar"></div>
+    </div>
 
+    <!-- DASHBOARD -->
+    <section id="dashboard">
 
-<div id="calendarWrapper">
-    <div id="calendar"></div>
-</div>
+        <div class="stats-grid">
 
+            <div class="stat-card">
+                <div class="stat-label">Totaal inschrijvingen</div>
+                <div class="stat-value" id="totalAppointments">0</div>
+            </div>
 
+            <div class="stat-card">
+                <div class="stat-label">Deze maand</div>
+                <div class="stat-value" id="monthAppointments">0</div>
+            </div>
 
+            <div class="stat-card">
+                <div class="stat-label">Groei t.o.v. vorige maand</div>
+                <div class="stat-value" id="growthPercentage">0%</div>
+            </div>
 
-<div id="modal">
+            <div class="stat-card">
+                <div class="stat-label">Unieke personen</div>
+                <div class="stat-value" id="uniquePeople">0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">👶 Totaal kinderen</div>
+                <div class="stat-value" id="totalChildren">0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">💶 Totale inkomsten</div>
+                <div class="stat-value" id="totalRevenue">€0,00</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">💶 Inkomsten deze maand</div>
+                <div class="stat-value" id="monthRevenue">€0,00</div>
+            </div>
+
+        </div>
+
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card">
+                <h3>📈 Inschrijvingen per maand</h3>
+                <canvas id="monthlyChart"></canvas>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>🏆 Meest ingeschreven personen</h3>
+                <div id="topUsers"></div>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<!-- APPOINTMENT/THEME MODAL -->
+<div class="modal" id="editModal">
     <div class="modal-box">
 
-        <h3>✏️ Afspraak beheren</h3>
+        <h3 id="modalTitle">✏️ Afspraak beheren</h3>
 
-        <input id="editName" placeholder="Naam">
+        <div id="appointmentEditor">
 
-        <input id="editEmail" placeholder="Email">
+            <div class="form-grid">
 
-        <input id="editDate" type="date">
+                <div class="form-field">
+                    <label for="editName">Naam ouder</label>
+                    <input id="editName" type="text">
+                </div>
+
+                <div class="form-field">
+                    <label for="editEmail">E-mail</label>
+                    <input id="editEmail" type="email">
+                </div>
+
+                <div class="form-field">
+                    <label for="editDate">Datum</label>
+                    <input id="editDate" type="date">
+                </div>
+
+                <div class="form-field">
+                    <label for="editChildrenCount">Aantal kinderen</label>
+                    <select id="editChildrenCount">
+                        <option value="1">1 kind</option>
+                        <option value="2">2 kinderen</option>
+                        <option value="3">3 kinderen</option>
+                        <option value="4">4 kinderen</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="editAmount">Bedrag (€)</label>
+                    <input id="editAmount" type="number" min="0" step="0.01">
+                </div>
+
+                <div class="form-field">
+                    <label for="editPaymentMethod">Betaalmethode</label>
+                    <select id="editPaymentMethod">
+                        <option value="onsite">Ter plaatse – cash/Payconiq</option>
+                        <option value="online">Online – Mollie</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="editPaymentStatus">Betaalstatus</label>
+                    <select id="editPaymentStatus">
+                        <option value="pending">Pending / open</option>
+                        <option value="paid">Paid / betaald</option>
+                        <option value="paidout">Paid out</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="failed">Failed</option>
+                        <option value="expired">Expired</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="children-box">
+                <h4>👶 Namen kinderen</h4>
+
+                <div class="children-grid">
+                    <div class="form-field">
+                        <label for="editChild1">Kind 1</label>
+                        <input id="editChild1" type="text">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="editChild2">Kind 2</label>
+                        <input id="editChild2" type="text">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="editChild3">Kind 3</label>
+                        <input id="editChild3" type="text">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="editChild4">Kind 4</label>
+                        <input id="editChild4" type="text">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="themeEditor" style="display:none;">
+            <div class="form-grid">
+                <div class="form-field full">
+                    <label for="editThemeName">Thema</label>
+                    <input id="editThemeName" type="text">
+                </div>
+
+                <div class="form-field full">
+                    <label for="editThemeDate">Datum</label>
+                    <input id="editThemeDate" type="date">
+                </div>
+            </div>
+        </div>
 
         <div class="modal-actions">
 
-            <button class="btn deleteBtn" onclick="deleteAppointment()">
-                Verwijderen
+            <button
+                    class="btn btn-red"
+                    id="deleteButton"
+                    onclick="deleteCurrentItem()">
+                🗑️ Verwijderen
             </button>
 
-            <button class="btn cancel" onclick="closeModal()">
-                Sluiten
-            </button>
+            <div class="modal-actions-right">
+                <button
+                        class="btn btn-gray"
+                        onclick="closeEditModal()">
+                    Sluiten
+                </button>
 
-            <button class="btn save" onclick="saveEdit()">
-                Opslaan
-            </button>
+                <button
+                        class="btn btn-primary"
+                        onclick="saveCurrentItem()">
+                    💾 Opslaan
+                </button>
+            </div>
 
         </div>
 
     </div>
 </div>
 
-<div id="dashboard">
-
-    <div class="stats-grid">
-
-        <div class="stat-card">
-            <div class="stat-label">Totaal inschrijvingen</div>
-            <div class="stat-value" id="totalAppointments">0</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">Deze maand</div>
-            <div class="stat-value" id="monthAppointments">0</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">Groei t.o.v. vorige maand</div>
-            <div class="stat-value" id="growthPercentage">0%</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">Unieke personen</div>
-            <div class="stat-value" id="uniquePeople">0</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">💶 Totale inkomsten</div>
-            <div class="stat-value" id="totalRevenue">€0</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">💶 Deze maand</div>
-            <div class="stat-value" id="monthRevenue">€0</div>
-        </div>
-
-    </div>
-
-    <div class="dashboard-grid">
-
-        <div class="dashboard-card">
-            <h3>📈 Inschrijvingen per maand</h3>
-            <canvas id="monthlyChart"></canvas>
-        </div>
-
-        <div class="dashboard-card">
-            <h3>🏆 Top ingeschreven personen</h3>
-            <div id="topUsers"></div>
-        </div>
-
-    </div>
-
-
-
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
+    /* =========================================================
+       CONFIGURATION
+    ========================================================= */
+
+    const SUPABASE_URL =
+        "https://nafajvywiknelkgufpac.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck";
+
+    /*
+     * De key hierboven wordt hieronder opnieuw exact opgebouwd om
+     * eventuele formattering/whitespace in de HTML te vermijden.
+     */
+    const SUPABASE_ANON_KEY_CLEAN =
+        SUPABASE_ANON_KEY.replace(/\s/g, "");
 
     const sb = supabase.createClient(
-    "https://nafajvywiknelkgufpac.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck"
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY_CLEAN
     );
 
-        let blockedDates = [];
-        let allData = [];
-        let calendar;
-        let editId = null;
-        let themes = [];
-        let editMode = "appointment"; // of "theme"
+    const MAX_CHILDREN = 10;
 
-        async function loadData(){
+    let allData = [];
+    let themes = [];
+    let blockedDates = [];
+    let calendar = null;
+    let monthlyChart = null;
 
-            const { data, error } = await sb
-                .from("appointments")
-                .select("*")
-                .order("appointment_date");
+    let editMode = "appointment";
+    let editId = null;
 
-            if(error){
-                console.error(error);
+    /* =========================================================
+       HELPERS
+    ========================================================= */
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById("toast");
+
+        toast.textContent = message;
+        toast.className =
+            "toast show" + (isError ? " error" : "");
+
+        clearTimeout(showToast.timer);
+
+        showToast.timer = setTimeout(() => {
+            toast.classList.remove("show");
+        }, 3500);
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function formatEuro(value) {
+        const amount = Number(value || 0);
+
+        return amount.toLocaleString("nl-BE", {
+            style: "currency",
+            currency: "EUR"
+        });
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) {
+            return "";
+        }
+
+        const parts = String(dateString).split("-");
+
+        if (parts.length !== 3) {
+            return dateString;
+        }
+
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function calculateAmount(childrenCount) {
+        const count = Number(childrenCount || 1);
+
+        if (count <= 0) {
+            return 0;
+        }
+
+        return 18 + Math.max(0, count - 1) * 15;
+    }
+
+    function getChildren(item) {
+        return [
+            item.child1,
+            item.child2,
+            item.child3,
+            item.child4
+        ].filter(Boolean);
+    }
+
+    function getAppointmentChildrenCount(item) {
+        const count = Number(item.children_count);
+
+        if (Number.isFinite(count) && count > 0) {
+            return count;
+        }
+
+        return getChildren(item).length || 1;
+    }
+
+    /*
+     * De index.html gebruikt:
+     * - pending voor onsite
+     * - paid/paidout/open voor effectieve online betalingen
+     *
+     * Geannuleerde/mislukte/expired Mollie records tellen niet mee
+     * voor de bezetting.
+     */
+    function isActiveBooking(item) {
+        const status =
+            String(item.payment_status || "")
+                .toLowerCase();
+
+        return [
+            "",
+            "pending",
+            "paid",
+            "paidout",
+            "open"
+        ].includes(status);
+    }
+
+    function getStoredAmount(item) {
+        const amount = Number(item.amount);
+
+        if (Number.isFinite(amount) && amount >= 0) {
+            return amount;
+        }
+
+        return calculateAmount(
+            getAppointmentChildrenCount(item)
+        );
+    }
+
+    /* =========================================================
+       AUTH
+    ========================================================= */
+
+    async function requireLogin() {
+        const {
+            data,
+            error
+        } = await sb.auth.getSession();
+
+        if (error) {
+            console.error(error);
+            window.location.href = "index.html";
+            return false;
+        }
+
+        if (!data?.session) {
+            localStorage.removeItem("loggedIn");
+            window.location.href = "index.html";
+            return false;
+        }
+
+        return true;
+    }
+
+    async function logout() {
+        await sb.auth.signOut();
+
+        localStorage.removeItem("loggedIn");
+
+        window.location.href = "index.html";
+    }
+
+    /* =========================================================
+       LOAD EVERYTHING
+    ========================================================= */
+
+    async function loadData() {
+        try {
+            const [
+                appointmentsResult,
+                themesResult,
+                blockedResult
+            ] = await Promise.all([
+                sb
+                    .from("appointments")
+                    .select("*")
+                    .order("appointment_date", {
+                        ascending: true
+                    }),
+
+                sb
+                    .from("themes")
+                    .select("*")
+                    .order("date", {
+                        ascending: true
+                    }),
+
+                sb
+                    .from("blocked_dates")
+                    .select("*")
+                    .order("date", {
+                        ascending: true
+                    })
+            ]);
+
+            if (appointmentsResult.error) {
+                throw appointmentsResult.error;
+            }
+
+            if (themesResult.error) {
+                throw themesResult.error;
+            }
+
+            if (blockedResult.error) {
+                throw blockedResult.error;
+            }
+
+            allData = appointmentsResult.data || [];
+            themes = themesResult.data || [];
+            blockedDates = blockedResult.data || [];
+
+            updateDashboard();
+            renderCalendar();
+
+        } catch (error) {
+            console.error("Load error:", error);
+
+            showToast(
+                "De gegevens konden niet worden geladen: " +
+                (error.message || "onbekende fout"),
+                true
+            );
+        }
+    }
+
+    /* =========================================================
+       BOOKING STATUS
+    ========================================================= */
+
+    async function loadBookingStatus() {
+        const {
+            data,
+            error
+        } = await sb
+            .from("settings")
+            .select("value")
+            .eq("key", "booking_enabled")
+            .maybeSingle();
+
+        if (error) {
+            console.error(error);
+
+            document.getElementById(
+                "bookingStatusText"
+            ).textContent =
+                "⚠️ De inschrijvingsstatus kon niet worden geladen.";
+
+            return;
+        }
+
+        const enabled =
+            data?.value === true;
+
+        const toggle =
+            document.getElementById("bookingToggle");
+
+        const badge =
+            document.getElementById("bookingStatusBadge");
+
+        const text =
+            document.getElementById("bookingStatusText");
+
+        toggle.checked = enabled;
+
+        badge.className =
+            "status-badge " +
+            (enabled ? "on" : "off");
+
+        badge.textContent =
+            enabled ? "AAN" : "UIT";
+
+        text.textContent =
+            enabled
+                ? "✅ Inschrijvingen staan AAN."
+                : "⛔ Inschrijvingen staan UIT.";
+    }
+
+    async function updateBookingStatus() {
+        const toggle =
+            document.getElementById("bookingToggle");
+
+        const enabled = toggle.checked;
+
+        toggle.disabled = true;
+
+        const {
+            error
+        } = await sb
+            .from("settings")
+            .upsert(
+                {
+                    key: "booking_enabled",
+                    value: enabled
+                },
+                {
+                    onConflict: "key"
+                }
+            );
+
+        toggle.disabled = false;
+
+        if (error) {
+            console.error(error);
+
+            toggle.checked = !enabled;
+
+            showToast(
+                "De inschrijvingsstatus kon niet worden aangepast.",
+                true
+            );
+
+            return;
+        }
+
+        await loadBookingStatus();
+
+        showToast(
+            enabled
+                ? "Inschrijvingen zijn geopend."
+                : "Inschrijvingen zijn gesloten."
+        );
+    }
+
+    /* =========================================================
+       CALENDAR
+    ========================================================= */
+
+    function renderCalendar() {
+        const calendarEl =
+            document.getElementById("calendar");
+
+        if (calendar) {
+            calendar.destroy();
+        }
+
+        const events = [];
+
+        /*
+         * Thema's
+         */
+        themes.forEach(theme => {
+            if (!theme.date || !theme.theme) {
                 return;
             }
 
-            allData = data || [];
-updateDashboard();
-
-await loadBlockedDates();
-await loadThemes();
-
-renderCalendar();
-        }
-
-        function renderCalendar(){
-
-            const calendarEl = document.getElementById("calendar");
-
-            const events = allData.map(item => ({
-
-                id: item.id,
-
-                title: item.name,
-
-                start: item.appointment_date,
-
+            events.push({
+                id: "theme-" + theme.date,
+                title: "🎨 " + theme.theme,
+                start: theme.date,
                 allDay: true,
 
-                extendedProps:{
-                    email:item.email
+                backgroundColor: "#8b5cf6",
+                borderColor: "#8b5cf6",
+                textColor: "#ffffff",
+
+                extendedProps: {
+                    type: "theme",
+                    themeId: theme.id ?? null,
+                    theme: theme.theme,
+                    date: theme.date
                 }
+            });
+        });
 
-            }));
-            const themeEvents = themes.map(themeItem => {
+        /*
+         * Inschrijvingen
+         *
+         * Eén kalender-event per reservatie.
+         * Zo zie je in de admin alle reservaties afzonderlijk.
+         */
+        allData.forEach(item => {
+            const childrenCount =
+                getAppointmentChildrenCount(item);
 
+            const children =
+                getChildren(item);
 
+            const childText =
+                children.length
+                    ? " – " + children.join(", ")
+                    : "";
 
-return {
-    title: "➡️ Thema: " + themeItem.theme,
-    start: themeItem.date,
-    allDay: true,
-    backgroundColor: "#dbeafe",
-    borderColor: "#60a5fa",
-    textColor: "#1e3a8a",
-    extendedProps: {
-        type: "theme",
-        theme: themeItem.theme,
-        date: themeItem.date
-    }
-};
-});
+            const status =
+                String(item.payment_status || "")
+                    .toLowerCase();
 
-const allEvents = [
-    ...events,
-    ...themeEvents
-];
+            let backgroundColor = "#ff6f86";
 
-            if(calendar){
-                calendar.destroy();
+            if (
+                status === "paid" ||
+                status === "paidout"
+            ) {
+                backgroundColor = "#22a06b";
+            } else if (
+                status === "cancelled" ||
+                status === "failed" ||
+                status === "expired"
+            ) {
+                backgroundColor = "#9ca3af";
             }
 
-            calendar = new FullCalendar.Calendar(calendarEl, {
+            events.push({
+                id: String(item.id),
+                title:
+                    "👤 " +
+                    (item.name || "Onbekend") +
+                    " (" +
+                    childrenCount +
+                    ")" +
+                    childText,
 
-                locale:'nl',
+                start: item.appointment_date,
+                allDay: true,
 
-                initialView:'dayGridMonth',
+                backgroundColor,
+                borderColor: backgroundColor,
+                textColor: "#ffffff",
 
-                height:'auto',
-
-                headerToolbar:{
-                    left:'prev,next today',
-                    center:'title',
-                    right:'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-
-                buttonText:{
-                    today:'Vandaag',
-                    month:'Maand',
-                    week:'Week',
-                    day:'Dag'
-                },
-
-events: allEvents,
-
-dayCellDidMount: function(info) {
-
-   const dateStr = info.date.toLocaleDateString("en-CA");
-
-    const blocked = blockedDates.find(d => d.date === dateStr);
-
-    if (blocked) {
-        info.el.style.backgroundColor = "#fee2e2";
-        info.el.style.color = "#fee2e2";
-        info.el.title = "⛔ " + blocked.reason;
-    }
-},
-
-eventClick: function(info) {
-
-    const event = info.event;
-    const isTheme = event.extendedProps.type === "theme";
-
-    editMode = isTheme ? "theme" : "appointment";
-
-    editId = isTheme
-        ? event.extendedProps.date
-        : event.id;
-
-    document.querySelector("#modal h3").innerText =
-        isTheme ? "🎨 Thema beheren" : "✏️ Afspraak beheren";
-
-    document.getElementById("editDate").value = event.startStr;
-
-    if (isTheme) {
-
-        document.getElementById("editName").value =
-            event.extendedProps.theme || "";
-
-        document.getElementById("editEmail").style.display = "none";
-
-    } else {
-
-        document.getElementById("editName").value =
-            event.title;
-
-        document.getElementById("editEmail").style.display = "block";
-        document.getElementById("editEmail").value =
-            event.extendedProps.email || "";
-    }
-
-    // 👇 HIER PLAATS JE HET
-    document.querySelector(".deleteBtn").onclick =
-        isTheme ? deleteTheme : deleteAppointment;
-
-    document.getElementById("modal").style.display = "flex";
-}
+                extendedProps: {
+                    type: "appointment",
+                    appointment: item
+                }
             });
+        });
 
-            calendar.render();
-            renderBlockedDates();
+        /*
+         * Geblokkeerde data als achtergrond.
+         */
+        blockedDates.forEach(blocked => {
+            if (!blocked.date) {
+                return;
+            }
 
-        }
+            events.push({
+                id: "blocked-" + blocked.date,
+                title:
+                    "⛔ " +
+                    (blocked.reason || "Geblokkeerd"),
 
-        function closeModal(){
-            document.getElementById("modal").style.display = "none";
-        }
+                start: blocked.date,
+                allDay: true,
 
-async function saveEdit(){
+                backgroundColor: "rgba(220,53,69,.18)",
+                borderColor: "#dc3545",
+                textColor: "#991b1b",
 
-    const name = document.getElementById("editName").value;
-    const date = document.getElementById("editDate").value;
+                extendedProps: {
+                    type: "blocked",
+                    blockedId: blocked.id ?? null,
+                    date: blocked.date,
+                    reason: blocked.reason || ""
+                }
+            });
+        });
 
-    const isTheme = editMode === "theme";
+        calendar =
+            new FullCalendar.Calendar(
+                calendarEl,
+                {
+                    locale: "nl",
 
-    if(isTheme){
+                    initialView: "dayGridMonth",
 
-        const { error } = await sb
-            .from("themes")
-            .update({
-                theme: name,
-                date: date
-            })
-            .eq("date", editId);
+                    height: "auto",
 
-        if(error){
-            alert(error.message);
+                    contentHeight: "auto",
+
+                    expandRows: true,
+
+                    fixedWeekCount: false,
+
+                    firstDay: 1,
+
+                    headerToolbar: {
+                        left: "prev,next today",
+                        center: "title",
+                        right:
+                            "dayGridMonth,timeGridWeek,timeGridDay"
+                    },
+
+                    buttonText: {
+                        today: "Vandaag",
+                        month: "Maand",
+                        week: "Week",
+                        day: "Dag"
+                    },
+
+                    events,
+
+                    eventClick: function(info) {
+                        const type =
+                            info.event.extendedProps.type;
+
+                        if (type === "appointment") {
+                            openAppointmentEditor(
+                                info.event.extendedProps.appointment
+                            );
+                        } else if (type === "theme") {
+                            openThemeEditor(
+                                info.event.extendedProps
+                            );
+                        } else if (type === "blocked") {
+                            openBlockedEditor(
+                                info.event.extendedProps
+                            );
+                        }
+                    }
+                }
+            );
+
+        calendar.render();
+    }
+
+    /* =========================================================
+       THEME
+    ========================================================= */
+
+    async function saveTheme() {
+        const date =
+            document.getElementById("themeDate").value.trim();
+
+        const theme =
+            document.getElementById("themeName").value.trim();
+
+        if (!date || !theme) {
+            showToast(
+                "Vul zowel een datum als een thema in.",
+                true
+            );
             return;
         }
 
-    } else {
+        const {
+            error
+        } = await sb
+            .from("themes")
+            .upsert(
+                {
+                    date,
+                    theme
+                },
+                {
+                    onConflict: "date"
+                }
+            );
 
-        const email = document.getElementById("editEmail").value;
+        if (error) {
+            console.error(error);
 
-        const { error } = await sb
+            showToast(
+                "Thema opslaan mislukt: " + error.message,
+                true
+            );
+
+            return;
+        }
+
+        document.getElementById("themeDate").value = "";
+        document.getElementById("themeName").value = "";
+
+        showToast("✅ Thema opgeslagen.");
+
+        await loadData();
+    }
+
+    function openThemeEditor(theme) {
+        editMode = "theme";
+        editId = theme.themeId;
+
+        document.getElementById("modalTitle").textContent =
+            "🎨 Thema beheren";
+
+        document.getElementById(
+            "appointmentEditor"
+        ).style.display = "none";
+
+        document.getElementById(
+            "themeEditor"
+        ).style.display = "block";
+
+        document.getElementById(
+            "editThemeName"
+        ).value = theme.theme || "";
+
+        document.getElementById(
+            "editThemeDate"
+        ).value = theme.date || "";
+
+        document.getElementById(
+            "deleteButton"
+        ).textContent = "🗑️ Thema verwijderen";
+
+        document.getElementById(
+            "editModal"
+        ).style.display = "flex";
+    }
+
+    /* =========================================================
+       BLOCKED DATE
+    ========================================================= */
+
+    async function addBlockedDate() {
+        const date =
+            document.getElementById("blockDate").value.trim();
+
+        const reason =
+            document.getElementById("blockReason").value.trim();
+
+        if (!date) {
+            showToast(
+                "Selecteer eerst een datum.",
+                true
+            );
+            return;
+        }
+
+        const {
+            error
+        } = await sb
+            .from("blocked_dates")
+            .upsert(
+                {
+                    date,
+                    reason: reason || "Geblokkeerd"
+                },
+                {
+                    onConflict: "date"
+                }
+            );
+
+        if (error) {
+            console.error(error);
+
+            showToast(
+                "Datum blokkeren mislukt: " + error.message,
+                true
+            );
+
+            return;
+        }
+
+        document.getElementById("blockDate").value = "";
+        document.getElementById("blockReason").value = "";
+
+        showToast("⛔ Datum geblokkeerd.");
+
+        await loadData();
+    }
+
+    function openBlockedEditor(blocked) {
+        editMode = "blocked";
+        editId = blocked.blockedId;
+
+        document.getElementById("modalTitle").textContent =
+            "⛔ Geblokkeerde datum";
+
+        document.getElementById(
+            "appointmentEditor"
+        ).style.display = "none";
+
+        document.getElementById(
+            "themeEditor"
+        ).style.display = "block";
+
+        document.getElementById(
+            "editThemeName"
+        ).value = blocked.reason || "Geblokkeerd";
+
+        document.getElementById(
+            "editThemeDate"
+        ).value = blocked.date || "";
+
+        document.getElementById(
+            "deleteButton"
+        ).textContent = "🗑️ Blokkering verwijderen";
+
+        document.getElementById(
+            "editModal"
+        ).style.display = "flex";
+    }
+
+    /* =========================================================
+       APPOINTMENT EDITOR
+    ========================================================= */
+
+    function openAppointmentEditor(item) {
+        editMode = "appointment";
+        editId = item.id;
+
+        document.getElementById("modalTitle").textContent =
+            "✏️ Inschrijving beheren";
+
+        document.getElementById(
+            "appointmentEditor"
+        ).style.display = "block";
+
+        document.getElementById(
+            "themeEditor"
+        ).style.display = "none";
+
+        document.getElementById("editName").value =
+            item.name || "";
+
+        document.getElementById("editEmail").value =
+            item.email || "";
+
+        document.getElementById("editDate").value =
+            item.appointment_date || "";
+
+        const childrenCount =
+            getAppointmentChildrenCount(item);
+
+        document.getElementById(
+            "editChildrenCount"
+        ).value = String(
+            Math.min(4, Math.max(1, childrenCount))
+        );
+
+        document.getElementById("editAmount").value =
+            getStoredAmount(item).toFixed(2);
+
+        document.getElementById(
+            "editPaymentMethod"
+        ).value =
+            item.payment_method || "onsite";
+
+        document.getElementById(
+            "editPaymentStatus"
+        ).value =
+            item.payment_status || "pending";
+
+        document.getElementById("editChild1").value =
+            item.child1 || "";
+
+        document.getElementById("editChild2").value =
+            item.child2 || "";
+
+        document.getElementById("editChild3").value =
+            item.child3 || "";
+
+        document.getElementById("editChild4").value =
+            item.child4 || "";
+
+        document.getElementById(
+            "deleteButton"
+        ).textContent = "🗑️ Inschrijving verwijderen";
+
+        document.getElementById(
+            "editModal"
+        ).style.display = "flex";
+    }
+
+    function closeEditModal() {
+        document.getElementById(
+            "editModal"
+        ).style.display = "none";
+
+        editId = null;
+    }
+
+    /* =========================================================
+       SAVE CURRENT ITEM
+    ========================================================= */
+
+    async function saveCurrentItem() {
+        if (editMode === "appointment") {
+            await saveAppointment();
+            return;
+        }
+
+        if (editMode === "theme") {
+            await saveThemeEdit();
+            return;
+        }
+
+        if (editMode === "blocked") {
+            await saveBlockedEdit();
+            return;
+        }
+    }
+
+    async function saveAppointment() {
+        const name =
+            document.getElementById("editName")
+                .value.trim();
+
+        const email =
+            document.getElementById("editEmail")
+                .value.trim();
+
+        const date =
+            document.getElementById("editDate")
+                .value;
+
+        const childrenCount =
+            Number(
+                document.getElementById(
+                    "editChildrenCount"
+                ).value
+            );
+
+        const amount =
+            Number(
+                document.getElementById(
+                    "editAmount"
+                ).value
+            );
+
+        const paymentMethod =
+            document.getElementById(
+                "editPaymentMethod"
+            ).value;
+
+        const paymentStatus =
+            document.getElementById(
+                "editPaymentStatus"
+            ).value;
+
+        if (!name || !email || !date) {
+            showToast(
+                "Naam, e-mail en datum zijn verplicht.",
+                true
+            );
+            return;
+        }
+
+        if (
+            !Number.isFinite(childrenCount) ||
+            childrenCount < 1 ||
+            childrenCount > 4
+        ) {
+            showToast(
+                "Het aantal kinderen moet tussen 1 en 4 liggen.",
+                true
+            );
+            return;
+        }
+
+        if (!Number.isFinite(amount) || amount < 0) {
+            showToast(
+                "Het bedrag is ongeldig.",
+                true
+            );
+            return;
+        }
+
+        const payload = {
+            name,
+            email,
+            appointment_date: date,
+            children_count: childrenCount,
+
+            child1:
+                document.getElementById("editChild1")
+                    .value.trim() || null,
+
+            child2:
+                document.getElementById("editChild2")
+                    .value.trim() || null,
+
+            child3:
+                document.getElementById("editChild3")
+                    .value.trim() || null,
+
+            child4:
+                document.getElementById("editChild4")
+                    .value.trim() || null,
+
+            amount,
+            payment_method: paymentMethod,
+            payment_status: paymentStatus
+        };
+
+        const {
+            error
+        } = await sb
             .from("appointments")
-            .update({
-                name,
-                email,
-                appointment_date: date
-            })
+            .update(payload)
             .eq("id", editId);
 
-        if(error){
-            alert(error.message);
+        if (error) {
+            console.error(error);
+
+            showToast(
+                "Inschrijving opslaan mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+        }
+
+        closeEditModal();
+
+        showToast("✅ Inschrijving opgeslagen.");
+
+        await loadData();
+    }
+
+    async function saveThemeEdit() {
+        const name =
+            document.getElementById(
+                "editThemeName"
+            ).value.trim();
+
+        const date =
+            document.getElementById(
+                "editThemeDate"
+            ).value;
+
+        if (!name || !date) {
+            showToast(
+                "Vul datum en thema in.",
+                true
+            );
+            return;
+        }
+
+        /*
+         * Thema's hebben normaal geen aparte ID nodig:
+         * date is de unieke sleutel volgens index.html.
+         */
+        const oldDate =
+            themes.find(theme =>
+                String(theme.id) === String(editId)
+            )?.date;
+
+        let query;
+
+        if (oldDate) {
+            query = sb
+                .from("themes")
+                .update({
+                    date,
+                    theme: name
+                })
+                .eq("date", oldDate);
+        } else {
+            /*
+             * Fallback voor bestaande theme-events waarbij
+             * geen id beschikbaar is.
+             */
+            query = sb
+                .from("themes")
+                .update({
+                    date,
+                    theme: name
+                })
+                .eq("date", document.getElementById(
+                    "editThemeDate"
+                ).dataset.oldDate || date);
+        }
+
+        const {
+            error
+        } = await query;
+
+        if (error) {
+            console.error(error);
+
+            showToast(
+                "Thema opslaan mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+        }
+
+        closeEditModal();
+
+        showToast("✅ Thema aangepast.");
+
+        await loadData();
+    }
+
+    async function saveBlockedEdit() {
+        const date =
+            document.getElementById(
+                "editThemeDate"
+            ).value;
+
+        const reason =
+            document.getElementById(
+                "editThemeName"
+            ).value.trim();
+
+        if (!date) {
+            showToast(
+                "Selecteer een datum.",
+                true
+            );
+            return;
+        }
+
+        const oldDate =
+            blockedDates.find(item =>
+                String(item.id) === String(editId)
+            )?.date;
+
+        const {
+            error
+        } = await sb
+            .from("blocked_dates")
+            .update({
+                date,
+                reason: reason || "Geblokkeerd"
+            })
+            .eq(
+                "date",
+                oldDate || date
+            );
+
+        if (error) {
+            console.error(error);
+
+            showToast(
+                "Blokkering opslaan mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+        }
+
+        closeEditModal();
+
+        showToast("✅ Geblokkeerde datum aangepast.");
+
+        await loadData();
+    }
+
+    /* =========================================================
+       DELETE CURRENT ITEM
+    ========================================================= */
+
+    async function deleteCurrentItem() {
+        if (editMode === "appointment") {
+            await deleteAppointment();
+            return;
+        }
+
+        if (editMode === "theme") {
+            await deleteTheme();
+            return;
+        }
+
+        if (editMode === "blocked") {
+            await deleteBlockedDate();
             return;
         }
     }
 
-    closeModal();
-    loadData();
-}
-       async function deleteAppointment(){
+    async function deleteAppointment() {
+        if (!confirm(
+            "Deze inschrijving definitief verwijderen?"
+        )) {
+            return;
+        }
 
-    if(!confirm("Afspraak verwijderen?")){
-        return;
+        const {
+            error
+        } = await sb
+            .from("appointments")
+            .delete()
+            .eq("id", editId);
+
+        if (error) {
+            console.error(error);
+
+            showToast(
+                "Verwijderen mislukt: " + error.message,
+                true
+            );
+
+            return;
+        }
+
+        closeEditModal();
+
+        showToast("🗑️ Inschrijving verwijderd.");
+
+        await loadData();
     }
 
-    if(editMode === "theme"){
-        alert("Je kan geen thema verwijderen via deze knop.");
-        return;
+    async function deleteTheme() {
+        if (!confirm(
+            "Dit thema definitief verwijderen?"
+        )) {
+            return;
+        }
+
+        const theme =
+            themes.find(item =>
+                String(item.id) === String(editId)
+            );
+
+        if (!theme?.date) {
+            showToast(
+                "Het thema kon niet worden gevonden.",
+                true
+            );
+            return;
+        }
+
+        const {
+            error
+        } = await sb
+            .from("themes")
+            .delete()
+            .eq("date", theme.date);
+
+        if (error) {
+            console.error(error);
+
+            showToast(
+                "Thema verwijderen mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+        }
+
+        closeEditModal();
+
+        showToast("🗑️ Thema verwijderd.");
+
+        await loadData();
     }
 
-    const { error } = await sb
-        .from("appointments")
-        .delete()
-        .eq("id", editId);
+    async function deleteBlockedDate() {
+        if (!confirm(
+            "Deze blokkering verwijderen?"
+        )) {
+            return;
+        }
 
-    if(error){
-        alert(error.message);
-        return;
+        const blocked =
+            blockedDates.find(item =>
+                String(item.id) === String(editId)
+            );
+
+        if (!blocked?.date) {
+            showToast(
+                "De blokkering kon niet worden gevonden.",
+                true
+            );
+            return;
+        }
+
+        const {
+            error
+        } = await sb
+            .from("blocked_dates")
+            .delete()
+            .eq("date", blocked.date);
+
+        if (error) {
+            console.error(error);
+
+            showToast(
+                "Blokkering verwijderen mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+        }
+
+        closeEditModal();
+
+        showToast("🗑️ Blokkering verwijderd.");
+
+        await loadData();
     }
 
-    closeModal();
-    loadData();
-}
+    /* =========================================================
+       DASHBOARD
+    ========================================================= */
 
-async function deleteTheme(){
+    function updateDashboard() {
+        const now = new Date();
 
-    if(!confirm("Thema verwijderen?")){
-        return;
+        const thisMonth =
+            allData.filter(item => {
+                const d =
+                    new Date(
+                        item.appointment_date +
+                        "T12:00:00"
+                    );
+
+                return (
+                    d.getMonth() === now.getMonth() &&
+                    d.getFullYear() === now.getFullYear()
+                );
+            });
+
+        const previousMonthDate =
+            new Date(
+                now.getFullYear(),
+                now.getMonth() - 1,
+                1
+            );
+
+        const previousMonth =
+            allData.filter(item => {
+                const d =
+                    new Date(
+                        item.appointment_date +
+                        "T12:00:00"
+                    );
+
+                return (
+                    d.getMonth() ===
+                        previousMonthDate.getMonth() &&
+                    d.getFullYear() ===
+                        previousMonthDate.getFullYear()
+                );
+            });
+
+        const growth =
+            previousMonth.length > 0
+                ? Math.round(
+                    (
+                        (
+                            thisMonth.length -
+                            previousMonth.length
+                        ) /
+                        previousMonth.length
+                    ) * 100
+                )
+                : 0;
+
+        const uniqueEmails =
+            new Set(
+                allData
+                    .map(item =>
+                        String(item.email || "")
+                            .trim()
+                            .toLowerCase()
+                    )
+                    .filter(Boolean)
+            );
+
+        const totalChildren =
+            allData.reduce(
+                (total, item) =>
+                    total +
+                    getAppointmentChildrenCount(item),
+                0
+            );
+
+        const totalRevenue =
+            allData.reduce(
+                (total, item) =>
+                    total + getStoredAmount(item),
+                0
+            );
+
+        const monthRevenue =
+            thisMonth.reduce(
+                (total, item) =>
+                    total + getStoredAmount(item),
+                0
+            );
+
+        document.getElementById(
+            "totalAppointments"
+        ).textContent =
+            allData.length;
+
+        document.getElementById(
+            "monthAppointments"
+        ).textContent =
+            thisMonth.length;
+
+        document.getElementById(
+            "growthPercentage"
+        ).textContent =
+            growth + "%";
+
+        document.getElementById(
+            "uniquePeople"
+        ).textContent =
+            uniqueEmails.size;
+
+        document.getElementById(
+            "totalChildren"
+        ).textContent =
+            totalChildren;
+
+        document.getElementById(
+            "totalRevenue"
+        ).textContent =
+            formatEuro(totalRevenue);
+
+        document.getElementById(
+            "monthRevenue"
+        ).textContent =
+            formatEuro(monthRevenue);
+
+        renderMonthlyChart();
+        renderTopUsers();
     }
 
-    const { error } = await sb
-        .from("themes")
-        .delete()
-        .eq("date", editId);
+    function renderMonthlyChart() {
+        const months = {};
 
-    if(error){
-        alert(error.message);
-        return;
+        allData.forEach(item => {
+            const d =
+                new Date(
+                    item.appointment_date +
+                    "T12:00:00"
+                );
+
+            const key =
+                d.getFullYear() +
+                "-" +
+                String(
+                    d.getMonth() + 1
+                ).padStart(2, "0");
+
+            months[key] =
+                (months[key] || 0) + 1;
+        });
+
+        const labels =
+            Object.keys(months).sort();
+
+        const values =
+            labels.map(label =>
+                months[label]
+            );
+
+        if (monthlyChart) {
+            monthlyChart.destroy();
+        }
+
+        monthlyChart =
+            new Chart(
+                document.getElementById(
+                    "monthlyChart"
+                ),
+                {
+                    type: "line",
+
+                    data: {
+                        labels,
+
+                        datasets: [{
+                            label:
+                                "Inschrijvingen",
+
+                            data: values,
+
+                            tension: .35,
+
+                            fill: false
+                        }]
+                    },
+
+                    options: {
+                        responsive: true,
+
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        },
+
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                }
+            );
     }
 
-    closeModal();
-    loadData();
-}
+    function renderTopUsers() {
+        const counts = {};
 
+        allData.forEach(item => {
+            const key =
+                String(
+                    item.email ||
+                    item.name ||
+                    "Onbekend"
+                )
+                    .trim()
+                    .toLowerCase();
 
-        sb.channel("appointments-live")
+            if (!counts[key]) {
+                counts[key] = {
+                    name:
+                        item.name ||
+                        "Onbekend",
+
+                    count: 0
+                };
+            }
+
+            counts[key].count++;
+        });
+
+        const top =
+            Object.values(counts)
+                .sort(
+                    (a, b) =>
+                        b.count - a.count
+                )
+                .slice(0, 10);
+
+        const container =
+            document.getElementById("topUsers");
+
+        if (!top.length) {
+            container.innerHTML =
+                "<p style='color:#6b7280'>Nog geen inschrijvingen.</p>";
+            return;
+        }
+
+        container.innerHTML =
+            top.map(user => `
+                <div>
+                    <span>
+                        ${escapeHtml(user.name)}
+                    </span>
+                    <strong>
+                        ${user.count}
+                    </strong>
+                </div>
+            `).join("");
+    }
+
+    /* =========================================================
+       REALTIME
+    ========================================================= */
+
+    sb.channel("admin-live")
         .on(
             "postgres_changes",
             {
-                event:"*",
-                schema:"public",
-                table:"appointments"
+                event: "*",
+                schema: "public",
+                table: "appointments"
             },
             () => {
                 loadData();
             }
         )
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "themes"
+            },
+            () => {
+                loadData();
+            }
+        )
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "blocked_dates"
+            },
+            () => {
+                loadData();
+            }
+        )
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "settings"
+            },
+            () => {
+                loadBookingStatus();
+            }
+        )
         .subscribe();
 
-        function logout(){
+    /* =========================================================
+       MODAL CLICK OUTSIDE / ESC
+    ========================================================= */
 
-            localStorage.removeItem("loggedIn");
-
-            window.location.href = "index.html";
-        }
-
-        loadData();
-
-    let monthlyChart;
-
-function updateDashboard(){
-
-    document.getElementById("totalAppointments").textContent =
-        allData.length;
-
-    const uniqueNames =
-        new Set(allData.map(x => x.name));
-
-    document.getElementById("uniquePeople").textContent =
-        uniqueNames.size;
-
-    const now = new Date();
-
-    const thisMonth =
-        allData.filter(x => {
-
-            const d = new Date(x.appointment_date);
-
-            return d.getMonth() === now.getMonth()
-                && d.getFullYear() === now.getFullYear();
-
-        });
-
-    document.getElementById("monthAppointments").textContent =
-        thisMonth.length;
-
-    const previousMonth = new Date();
-    previousMonth.setMonth(previousMonth.getMonth() - 1);
-
-    const prevMonthCount =
-        allData.filter(x => {
-
-            const d = new Date(x.appointment_date);
-
-            return d.getMonth() === previousMonth.getMonth()
-                && d.getFullYear() === previousMonth.getFullYear();
-
-        }).length;
-
-    let growth = 0;
-
-    if(prevMonthCount > 0){
-        growth =
-            Math.round(
-                ((thisMonth.length - prevMonthCount) /
-                prevMonthCount) * 100
-            );
-    }
-
-    document.getElementById("growthPercentage").textContent =
-        growth + "%";
-
-    renderMonthlyChart();
-    renderTopUsers();
-
-
-    // Inkomsten berekenen
-let totalRevenue = 0;
-let monthRevenue = 0;
-
-const groupedBookings = {};
-
-allData.forEach(item => {
-    const key = item.email + "_" + item.appointment_date;
-
-    if (!groupedBookings[key]) {
-        groupedBookings[key] = [];
-    }
-
-    groupedBookings[key].push(item);
-});
-
-Object.values(groupedBookings).forEach(group => {
-
-    group.forEach((booking, index) => {
-
-        const amount = index === 0 ? 18 : 15;
-
-        totalRevenue += amount;
-
-        const d = new Date(booking.appointment_date);
-
-        if (
-            d.getMonth() === now.getMonth() &&
-            d.getFullYear() === now.getFullYear()
-        ) {
-            monthRevenue += amount;
-        }
-
-    });
-
-});
-
-document.getElementById("totalRevenue").textContent =
-    "€" + totalRevenue;
-
-document.getElementById("monthRevenue").textContent =
-    "€" + monthRevenue;
-}
-
-
-    function renderMonthlyChart(){
-
-    const months = {};
-
-    allData.forEach(item => {
-
-        const d = new Date(item.appointment_date);
-
-        const key =
-            d.getFullYear() + "-" +
-            String(d.getMonth()+1).padStart(2,'0');
-
-        months[key] =
-            (months[key] || 0) + 1;
-    });
-
-    const labels = Object.keys(months);
-    const values = Object.values(months);
-
-    if(monthlyChart){
-        monthlyChart.destroy();
-    }
-
-    monthlyChart = new Chart(
-        document.getElementById("monthlyChart"),
-        {
-            type:'line',
-
-            data:{
-                labels,
-                datasets:[{
-                    label:'Inschrijvingen',
-                    data:values,
-                    tension:.35
-                }]
+    document.getElementById(
+        "editModal"
+    ).addEventListener(
+        "click",
+        function(event) {
+            if (event.target === this) {
+                closeEditModal();
             }
         }
     );
-}
 
-
-    function renderTopUsers(){
-
-    const counts = {};
-
-    allData.forEach(item => {
-
-        counts[item.name] =
-            (counts[item.name] || 0) + 1;
-
-    });
-
-    const top =
-        Object.entries(counts)
-            .sort((a,b) => b[1]-a[1])
-            .slice(0,10);
-
-    document.getElementById("topUsers").innerHTML =
-        top.map(user => `
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                padding:10px 0;
-                border-bottom:1px solid #eee;
-            ">
-                <span>${user[0]}</span>
-                <strong>${user[1]}</strong>
-            </div>
-        `).join("");
-}
-
-async function loadBookingStatus() {
-  const { data, error } = await sb
-    .from("settings")
-    .select("*")
-    .eq("key", "booking_enabled")
-    .single();
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  const enabled = data.value;
-
-  document.getElementById("bookingToggle").checked = enabled;
-  document.getElementById("bookingStatusText").innerText =
-    enabled ? "✅ Inschrijvingen staan AAN" : "⛔ Inschrijvingen staan UIT";
-}
-
-async function updateBookingStatus() {
-  const enabled = document.getElementById("bookingToggle").checked;
-
-  const { error } = await sb
-    .from("settings")
-    .upsert(
-      {
-        key: "booking_enabled",
-        value: enabled
-      },
-      {
-        onConflict: "key"
-      }
+    document.addEventListener(
+        "keydown",
+        function(event) {
+            if (event.key === "Escape") {
+                closeEditModal();
+            }
+        }
     );
 
-  if (error) {
-    console.error(error);
-    alert("Toggle fout");
-    return;
-  }
+    /*
+     * Bedrag automatisch aanpassen bij wijziging van
+     * aantal kinderen. De beheerder kan het bedrag daarna
+     * nog steeds handmatig aanpassen.
+     */
+    document.getElementById(
+        "editChildrenCount"
+    ).addEventListener(
+        "change",
+        function() {
+            const current =
+                Number(
+                    document.getElementById(
+                        "editAmount"
+                    ).value
+                );
 
-  loadBookingStatus();
-}
+            const calculated =
+                calculateAmount(this.value);
 
-async function addBlockedDate() {
-  const date = document.getElementById("blockDate").value;
-  const reason = document.getElementById("blockReason").value;
-
-  const { error } = await sb
-    .from("blocked_dates")
-    .insert({ date, reason });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  loadData();
-}
-
-
-
-async function loadBlockedDates() {
-  const { data, error } = await sb
-    .from("blocked_dates")
-    .select("*");
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  blockedDates = data || [];
-
-  // als calendar al bestaat → refresh overlay
-if (calendar) {
-    renderBlockedDates();
-}
-}
-
-
-    function renderBlockedDates() {
-
-  const blockedEvents = blockedDates.map(d => ({
-    title: "⛔ " + d.reason,
-    start: d.date,
-    allDay: true,
-    display: "background",
-    color: "#ef4444"
-  }));
-
-  calendar.addEventSource(blockedEvents);
-}
-
-
-    async function saveTheme() {
-
-    const date =
-        document.getElementById("themeDate").value;
-
-    const theme =
-        document.getElementById("themeName").value;
-
-    if (!date || !theme) {
-        alert("Datum en thema invullen");
-        return;
-    }
-
-    const { error } = await sb
-        .from("themes")
-        .upsert(
-            {
-                date,
-                theme
-            },
-            {
-                onConflict: "date"
+            /*
+             * Alleen automatisch aanpassen als het huidige
+             * bedrag leeg is of overeenkomt met de standaardprijs.
+             */
+            if (
+                !Number.isFinite(current) ||
+                current === 0 ||
+                [18,33,48,63].includes(current)
+            ) {
+                document.getElementById(
+                    "editAmount"
+                ).value =
+                    calculated.toFixed(2);
             }
-        );
+        }
+    );
 
-    if (error) {
-        alert(error.message);
-        return;
-    }
+    /* =========================================================
+       INIT
+    ========================================================= */
 
-    alert("✅ Thema opgeslagen");
+    document.addEventListener(
+        "DOMContentLoaded",
+        async function() {
 
-    loadData();
-}
+            const loggedIn =
+                await requireLogin();
 
+            if (!loggedIn) {
+                return;
+            }
 
-    async function loadThemes() {
-
-    const { data, error } = await sb
-        .from("themes")
-        .select("*");
-
-    if(error){
-        console.error(error);
-        return;
-    }
-
-    themes = data || [];
-}
-
-
+            await Promise.all([
+                loadBookingStatus(),
+                loadData()
+            ]);
+        }
+    );
 </script>
 
 </body>
