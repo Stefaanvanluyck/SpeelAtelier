@@ -1,8 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
     <title>Kleine Wonderwereld – Admin</title>
 
@@ -38,6 +40,8 @@
             --blue: #4f7cff;
             --blue-light: #eef3ff;
             --purple: #8b5cf6;
+            --orange: #f59e0b;
+            --orange-light: #fff7df;
             --shadow: 0 18px 50px rgba(0,0,0,.09);
             --border: rgba(31,42,31,.10);
         }
@@ -96,6 +100,13 @@
             font-size: .75rem;
         }
 
+        .topbar-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
         .btn {
             border: 0;
             border-radius: 999px;
@@ -132,6 +143,11 @@
         .btn-dark {
             color: white;
             background: #1f2937;
+        }
+
+        .btn-blue {
+            color: white;
+            background: linear-gradient(135deg,#4f7cff,#6d91ff);
         }
 
         .page {
@@ -236,7 +252,9 @@
 
         .admin-actions input:focus,
         .form-grid input:focus,
-        .form-grid select:focus {
+        .form-grid select:focus,
+        .search-input:focus,
+        .filter-select:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(255,111,134,.12);
         }
@@ -312,6 +330,38 @@
         .dot.booking { background: var(--accent); }
         .dot.theme { background: var(--purple); }
         .dot.blocked { background: var(--red); }
+        .dot.paid { background: var(--green); }
+        .dot.pending { background: var(--orange); }
+
+        /* =====================================================
+           DASHBOARD
+        ===================================================== */
+
+        .dashboard-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-heading h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .dashboard-heading p {
+            margin: 3px 0 0;
+            color: var(--muted);
+            font-size: .85rem;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
 
         .stats-grid {
             display: grid;
@@ -326,6 +376,31 @@
             padding: 20px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            right: -25px;
+            bottom: -35px;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: rgba(255,111,134,.07);
+        }
+
+        .stat-card.green::after {
+            background: rgba(34,160,107,.09);
+        }
+
+        .stat-card.orange::after {
+            background: rgba(245,158,11,.10);
+        }
+
+        .stat-card.blue::after {
+            background: rgba(79,124,255,.09);
         }
 
         .stat-label {
@@ -338,6 +413,12 @@
             font-size: 2rem;
             line-height: 1.1;
             font-weight: 900;
+        }
+
+        .stat-sub {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: .75rem;
         }
 
         .dashboard-grid {
@@ -357,6 +438,14 @@
             font-size: 1rem;
         }
 
+        .dashboard-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         #topUsers > div {
             display: flex;
             justify-content: space-between;
@@ -364,6 +453,170 @@
             padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
+
+        /* =====================================================
+           PAYMENT OVERVIEW
+           ===================================================== */
+
+        .payment-overview {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .payment-box {
+            padding: 15px;
+            border-radius: 17px;
+            border: 1px solid #eee;
+        }
+
+        .payment-box.expected {
+            background: var(--blue-light);
+        }
+
+        .payment-box.paid {
+            background: var(--green-light);
+        }
+
+        .payment-box.open {
+            background: var(--orange-light);
+        }
+
+        .payment-box-label {
+            font-size: .78rem;
+            color: var(--muted);
+        }
+
+        .payment-box-value {
+            margin-top: 5px;
+            font-size: 1.25rem;
+            font-weight: 900;
+        }
+
+        /* =====================================================
+           SEARCH / BOOKINGS
+           ===================================================== */
+
+        .booking-tools {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px 14px;
+            border: 1px solid #d9dde4;
+            border-radius: 12px;
+            outline: none;
+            background: white;
+        }
+
+        .filter-select {
+            padding: 12px 14px;
+            border: 1px solid #d9dde4;
+            border-radius: 12px;
+            outline: none;
+            background: white;
+        }
+
+        .booking-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .booking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 14px;
+            border: 1px solid #ececec;
+            border-radius: 16px;
+            background: #fafafa;
+            transition: .2s;
+        }
+
+        .booking-item:hover {
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
+        }
+
+        .booking-main {
+            min-width: 0;
+        }
+
+        .booking-name {
+            font-weight: 800;
+        }
+
+        .booking-meta {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: .78rem;
+            line-height: 1.5;
+        }
+
+        .booking-side {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .booking-amount {
+            font-weight: 900;
+        }
+
+        .payment-pill {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: .7rem;
+            font-weight: 800;
+        }
+
+        .payment-pill.paid {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .payment-pill.pending {
+            color: #92400e;
+            background: #fef3c7;
+        }
+
+        .payment-pill.cancelled,
+        .payment-pill.failed,
+        .payment-pill.expired {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .payment-pill.other {
+            color: #374151;
+            background: #e5e7eb;
+        }
+
+        .empty-state {
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+            border: 1px dashed #d9dde4;
+            border-radius: 15px;
+        }
+
+        .result-count {
+            margin-bottom: 10px;
+            color: var(--muted);
+            font-size: .8rem;
+        }
+
+        /* =====================================================
+           MODAL
+           ===================================================== */
 
         .modal {
             display: none;
@@ -512,11 +765,24 @@
             .admin-actions {
                 grid-template-columns: 1fr;
             }
+
+            .payment-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-item {
+                align-items: flex-start;
+            }
         }
 
         @media (max-width: 600px) {
             .topbar {
                 padding: 13px 15px;
+            }
+
+            .topbar-actions {
+                width: 100%;
+                justify-content: flex-end;
             }
 
             .brand h1 {
@@ -543,8 +809,19 @@
             .stat-value {
                 font-size: 1.7rem;
             }
+
+            .booking-item {
+                flex-direction: column;
+            }
+
+            .booking-side {
+                width: 100%;
+                text-align: left;
+            }
         }
     </style>
+
+
 </head>
 
 <body>
@@ -557,20 +834,35 @@
         </div>
     </div>
 
-    <button class="btn btn-dark" onclick="logout()">
-        Uitloggen
-    </button>
+
+    <div class="topbar-actions">
+        <button class="btn btn-gray" onclick="refreshDashboard()">
+            🔄 Vernieuwen
+        </button>
+
+        <button class="btn btn-green" onclick="exportCSV()">
+            📥 CSV
+        </button>
+
+        <button class="btn btn-dark" onclick="logout()">
+            Uitloggen
+        </button>
+    </div>
+
+
 </header>
 
 <main class="page">
+
 
     <!-- INSCHRIJVINGEN AAN/UIT -->
     <section class="status-card">
         <div class="status-header">
             <h2>📅 Inschrijvingen</h2>
+
             <span id="bookingStatusBadge" class="status-badge off">
-                Controleren...
-            </span>
+            Controleren...
+        </span>
         </div>
 
         <label class="toggle-row">
@@ -590,10 +882,12 @@
 
         <div class="admin-actions">
             <input type="date" id="themeDate">
+
             <input
                     type="text"
                     id="themeName"
                     placeholder="Thema, bv. Dino's">
+
             <button class="btn btn-primary" onclick="saveTheme()">
                 🎨 Thema opslaan
             </button>
@@ -601,10 +895,12 @@
 
         <div class="admin-actions">
             <input type="date" id="blockDate">
+
             <input
                     type="text"
                     id="blockReason"
                     placeholder="Reden, bv. vakantie">
+
             <button class="btn btn-red" onclick="addBlockedDate()">
                 ⛔ Datum blokkeren
             </button>
@@ -616,6 +912,8 @@
         <span><i class="dot booking"></i> Inschrijving</span>
         <span><i class="dot theme"></i> Thema</span>
         <span><i class="dot blocked"></i> Geblokkeerde datum</span>
+        <span><i class="dot paid"></i> Betaald</span>
+        <span><i class="dot pending"></i> Nog te betalen</span>
     </div>
 
     <!-- KALENDER -->
@@ -626,165 +924,546 @@
     <!-- DASHBOARD -->
     <section id="dashboard">
 
+        <div class="dashboard-heading">
+            <div>
+                <h2>📊 Dashboard</h2>
+                <p>Overzicht van inschrijvingen, kinderen en betalingen</p>
+            </div>
+
+            <div class="dashboard-actions">
+                <button class="btn btn-blue" onclick="exportCSV()">
+                    📥 Exporteer inschrijvingen
+                </button>
+            </div>
+        </div>
+
+        <!-- HOOFDSTATISTIEKEN -->
         <div class="stats-grid">
 
             <div class="stat-card">
                 <div class="stat-label">Totaal inschrijvingen</div>
                 <div class="stat-value" id="totalAppointments">0</div>
+                <div class="stat-sub">Alle reservaties</div>
             </div>
 
-            <div class="stat-card">
+            <div class="stat-card blue">
                 <div class="stat-label">Deze maand</div>
                 <div class="stat-value" id="monthAppointments">0</div>
+                <div class="stat-sub" id="monthAppointmentsSub">
+                    Reservaties deze maand
+                </div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-label">Groei t.o.v. vorige maand</div>
                 <div class="stat-value" id="growthPercentage">0%</div>
+                <div class="stat-sub">Op basis van aantal inschrijvingen</div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-label">Unieke personen</div>
                 <div class="stat-value" id="uniquePeople">0</div>
+                <div class="stat-sub">Unieke e-mailadressen</div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-label">👶 Totaal kinderen</div>
                 <div class="stat-value" id="totalChildren">0</div>
+                <div class="stat-sub">Alle actieve reservaties</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-label">💶 Totale inkomsten</div>
-                <div class="stat-value" id="totalRevenue">€0,00</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-label">💶 Inkomsten deze maand</div>
-                <div class="stat-value" id="monthRevenue">€0,00</div>
+            <div class="stat-card blue">
+                <div class="stat-label">📅 Komende inschrijvingen</div>
+                <div class="stat-value" id="upcomingAppointments">0</div>
+                <div class="stat-sub">Vanaf vandaag</div>
             </div>
 
         </div>
 
+        <!-- BETALINGEN -->
+        <h3 style="margin:0 0 12px;">💶 Financieel overzicht</h3>
+
+        <div class="stats-grid">
+
+            <div class="stat-card blue">
+                <div class="stat-label">💰 Verwachte omzet</div>
+                <div class="stat-value" id="totalExpectedRevenue">
+                    €0,00
+                </div>
+                <div class="stat-sub">
+                    Alle actieve inschrijvingen
+                </div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="stat-label">✅ Effectief betaald</div>
+                <div class="stat-value" id="totalPaidRevenue">
+                    €0,00
+                </div>
+                <div class="stat-sub">
+                    Paid + Paid out
+                </div>
+            </div>
+
+            <div class="stat-card orange">
+                <div class="stat-label">⏳ Nog te ontvangen</div>
+                <div class="stat-value" id="totalOutstandingRevenue">
+                    €0,00
+                </div>
+                <div class="stat-sub" id="outstandingCountSub">
+                    0 openstaande betalingen
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">💳 Betalingen ontvangen</div>
+                <div class="stat-value" id="paidAppointments">
+                    0
+                </div>
+                <div class="stat-sub">
+                    Betaalde inschrijvingen
+                </div>
+            </div>
+
+            <div class="stat-card orange">
+                <div class="stat-label">⏳ Betalingen open</div>
+                <div class="stat-value" id="pendingAppointments">
+                    0
+                </div>
+                <div class="stat-sub">
+                    Nog te betalen
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">❌ Geannuleerd / mislukt</div>
+                <div class="stat-value" id="cancelledAppointments">
+                    0
+                </div>
+                <div class="stat-sub">
+                    Cancelled, failed of expired
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MAAND FINANCIEEL -->
+        <div class="dashboard-card" style="margin-bottom:20px;">
+
+            <h3>📅 Deze maand – financieel</h3>
+
+            <div class="payment-overview">
+
+                <div class="payment-box expected">
+                    <div class="payment-box-label">
+                        Verwacht
+                    </div>
+
+                    <div
+                            class="payment-box-value"
+                            id="monthExpectedRevenue">
+                        €0,00
+                    </div>
+                </div>
+
+                <div class="payment-box paid">
+                    <div class="payment-box-label">
+                        Effectief betaald
+                    </div>
+
+                    <div
+                            class="payment-box-value"
+                            id="monthPaidRevenue">
+                        €0,00
+                    </div>
+                </div>
+
+                <div class="payment-box open">
+                    <div class="payment-box-label">
+                        Nog te ontvangen
+                    </div>
+
+                    <div
+                            class="payment-box-value"
+                            id="monthOutstandingRevenue">
+                        €0,00
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- GRAFIEK + TOP USERS -->
         <div class="dashboard-grid">
 
             <div class="dashboard-card">
-                <h3>📈 Inschrijvingen per maand</h3>
+
+                <div class="dashboard-card-header">
+                    <h3>📈 Inschrijvingen & betalingen per maand</h3>
+                </div>
+
                 <canvas id="monthlyChart"></canvas>
+
             </div>
 
             <div class="dashboard-card">
+
                 <h3>🏆 Meest ingeschreven personen</h3>
+
                 <div id="topUsers"></div>
+
+            </div>
+
+        </div>
+
+        <!-- KOMENDE INSCHRIJVINGEN -->
+        <div class="dashboard-card" style="margin-bottom:20px;">
+
+            <div class="dashboard-card-header">
+
+                <div>
+                    <h3 style="margin-bottom:3px;">
+                        👶 Komende inschrijvingen
+                    </h3>
+
+                    <div
+                            style="color:#6b7280;font-size:.78rem;">
+                        De eerstvolgende reservaties
+                    </div>
+                </div>
+
+                <button
+                        class="btn btn-gray"
+                        onclick="showAllUpcoming()">
+                    Alles tonen
+                </button>
+
+            </div>
+
+            <div
+                    id="upcomingList"
+                    class="booking-list">
+            </div>
+
+        </div>
+
+        <!-- ALLE INSCHRIJVINGEN / ZOEKEN -->
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+                    <h3 style="margin-bottom:3px;">
+                        🔎 Inschrijvingen zoeken
+                    </h3>
+
+                    <div
+                            style="color:#6b7280;font-size:.78rem;">
+                        Zoek op ouder, e-mail of kind
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="booking-tools">
+
+                <input
+                        type="search"
+                        id="bookingSearch"
+                        class="search-input"
+                        placeholder="Zoeken op naam, e-mail of kind..."
+                        oninput="renderBookingList()">
+
+                <select
+                        id="paymentFilter"
+                        class="filter-select"
+                        onchange="renderBookingList()">
+
+                    <option value="all">
+                        Alle betaalstatussen
+                    </option>
+
+                    <option value="pending">
+                        ⏳ Nog te betalen
+                    </option>
+
+                    <option value="paid">
+                        ✅ Betaald
+                    </option>
+
+                    <option value="cancelled">
+                        ❌ Geannuleerd
+                    </option>
+
+                    <option value="failed">
+                        ❌ Mislukt
+                    </option>
+
+                    <option value="expired">
+                        ⌛ Verlopen
+                    </option>
+
+                </select>
+
+                <select
+                        id="bookingDateFilter"
+                        class="filter-select"
+                        onchange="renderBookingList()">
+
+                    <option value="all">
+                        Alle datums
+                    </option>
+
+                    <option value="upcoming">
+                        📅 Komend
+                    </option>
+
+                    <option value="past">
+                        🕘 Verleden
+                    </option>
+
+                    <option value="thisMonth">
+                        📆 Deze maand
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div
+                    id="bookingResultCount"
+                    class="result-count">
+                0 inschrijvingen
+            </div>
+
+            <div
+                    id="bookingList"
+                    class="booking-list">
             </div>
 
         </div>
 
     </section>
 
+
 </main>
 
 <!-- APPOINTMENT/THEME MODAL -->
+
 <div class="modal" id="editModal">
+
+
     <div class="modal-box">
 
-        <h3 id="modalTitle">✏️ Afspraak beheren</h3>
+        <h3 id="modalTitle">
+            ✏️ Afspraak beheren
+        </h3>
 
         <div id="appointmentEditor">
 
             <div class="form-grid">
 
                 <div class="form-field">
-                    <label for="editName">Naam ouder</label>
-                    <input id="editName" type="text">
+                    <label for="editName">
+                        Naam ouder
+                    </label>
+
+                    <input
+                            id="editName"
+                            type="text">
                 </div>
 
                 <div class="form-field">
-                    <label for="editEmail">E-mail</label>
-                    <input id="editEmail" type="email">
+                    <label for="editEmail">
+                        E-mail
+                    </label>
+
+                    <input
+                            id="editEmail"
+                            type="email">
                 </div>
 
                 <div class="form-field">
-                    <label for="editDate">Datum</label>
-                    <input id="editDate" type="date">
+                    <label for="editDate">
+                        Datum
+                    </label>
+
+                    <input
+                            id="editDate"
+                            type="date">
                 </div>
 
                 <div class="form-field">
-                    <label for="editChildrenCount">Aantal kinderen</label>
+                    <label for="editChildrenCount">
+                        Aantal kinderen
+                    </label>
+
                     <select id="editChildrenCount">
-                        <option value="1">1 kind</option>
-                        <option value="2">2 kinderen</option>
-                        <option value="3">3 kinderen</option>
-                        <option value="4">4 kinderen</option>
+                        <option value="1">
+                            1 kind
+                        </option>
+
+                        <option value="2">
+                            2 kinderen
+                        </option>
+
+                        <option value="3">
+                            3 kinderen
+                        </option>
+
+                        <option value="4">
+                            4 kinderen
+                        </option>
                     </select>
                 </div>
 
                 <div class="form-field">
-                    <label for="editAmount">Bedrag (€)</label>
-                    <input id="editAmount" type="number" min="0" step="0.01">
+                    <label for="editAmount">
+                        Bedrag (€)
+                    </label>
+
+                    <input
+                            id="editAmount"
+                            type="number"
+                            min="0"
+                            step="0.01">
                 </div>
 
                 <div class="form-field">
-                    <label for="editPaymentMethod">Betaalmethode</label>
+                    <label for="editPaymentMethod">
+                        Betaalmethode
+                    </label>
+
                     <select id="editPaymentMethod">
-                        <option value="onsite">Ter plaatse – cash/Payconiq</option>
-                        <option value="online">Online – Mollie</option>
+
+                        <option value="onsite">
+                            Ter plaatse – cash/Payconiq
+                        </option>
+
+                        <option value="online">
+                            Online – Mollie
+                        </option>
+
                     </select>
                 </div>
 
                 <div class="form-field">
-                    <label for="editPaymentStatus">Betaalstatus</label>
+                    <label for="editPaymentStatus">
+                        Betaalstatus
+                    </label>
+
                     <select id="editPaymentStatus">
-                        <option value="pending">Pending / open</option>
-                        <option value="paid">Paid / betaald</option>
-                        <option value="paidout">Paid out</option>
-                        <option value="cancelled">Cancelled</option>
-                        <option value="failed">Failed</option>
-                        <option value="expired">Expired</option>
+
+                        <option value="pending">
+                            Pending / open
+                        </option>
+
+                        <option value="paid">
+                            Paid / betaald
+                        </option>
+
+                        <option value="paidout">
+                            Paid out
+                        </option>
+
+                        <option value="cancelled">
+                            Cancelled
+                        </option>
+
+                        <option value="failed">
+                            Failed
+                        </option>
+
+                        <option value="expired">
+                            Expired
+                        </option>
+
                     </select>
                 </div>
 
             </div>
 
             <div class="children-box">
-                <h4>👶 Namen kinderen</h4>
+
+                <h4>
+                    👶 Namen kinderen
+                </h4>
 
                 <div class="children-grid">
+
                     <div class="form-field">
-                        <label for="editChild1">Kind 1</label>
-                        <input id="editChild1" type="text">
+                        <label for="editChild1">
+                            Kind 1
+                        </label>
+
+                        <input
+                                id="editChild1"
+                                type="text">
                     </div>
 
                     <div class="form-field">
-                        <label for="editChild2">Kind 2</label>
-                        <input id="editChild2" type="text">
+                        <label for="editChild2">
+                            Kind 2
+                        </label>
+
+                        <input
+                                id="editChild2"
+                                type="text">
                     </div>
 
                     <div class="form-field">
-                        <label for="editChild3">Kind 3</label>
-                        <input id="editChild3" type="text">
+                        <label for="editChild3">
+                            Kind 3
+                        </label>
+
+                        <input
+                                id="editChild3"
+                                type="text">
                     </div>
 
                     <div class="form-field">
-                        <label for="editChild4">Kind 4</label>
-                        <input id="editChild4" type="text">
+                        <label for="editChild4">
+                            Kind 4
+                        </label>
+
+                        <input
+                                id="editChild4"
+                                type="text">
                     </div>
+
                 </div>
+
             </div>
 
         </div>
 
         <div id="themeEditor" style="display:none;">
+
             <div class="form-grid">
+
                 <div class="form-field full">
-                    <label for="editThemeName">Thema</label>
-                    <input id="editThemeName" type="text">
+                    <label for="editThemeName">
+                        Thema
+                    </label>
+
+                    <input
+                            id="editThemeName"
+                            type="text">
                 </div>
 
                 <div class="form-field full">
-                    <label for="editThemeDate">Datum</label>
-                    <input id="editThemeDate" type="date">
+                    <label for="editThemeDate">
+                        Datum
+                    </label>
+
+                    <input
+                            id="editThemeDate"
+                            type="date">
                 </div>
+
             </div>
+
         </div>
 
         <div class="modal-actions">
@@ -797,6 +1476,7 @@
             </button>
 
             <div class="modal-actions-right">
+
                 <button
                         class="btn btn-gray"
                         onclick="closeEditModal()">
@@ -808,16 +1488,20 @@
                         onclick="saveCurrentItem()">
                     💾 Opslaan
                 </button>
+
             </div>
 
         </div>
 
     </div>
+
+
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+
     /* =========================================================
        CONFIGURATION
     ========================================================= */
@@ -828,10 +1512,6 @@
     const SUPABASE_ANON_KEY =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmFqdnl3aWtuZWxrZ3VmcGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTQ4ODcsImV4cCI6MjA5Nzc5MDg4N30.ZIrDry9i5slXuyZnSgd6L-baKI72ZtczX1nvoT3Azck";
 
-    /*
-     * De key hierboven wordt hieronder opnieuw exact opgebouwd om
-     * eventuele formattering/whitespace in de HTML te vermijden.
-     */
     const SUPABASE_ANON_KEY_CLEAN =
         SUPABASE_ANON_KEY.replace(/\s/g, "");
 
@@ -856,20 +1536,26 @@
     ========================================================= */
 
     function showToast(message, isError = false) {
-        const toast = document.getElementById("toast");
+
+        const toast =
+            document.getElementById("toast");
 
         toast.textContent = message;
+
         toast.className =
-            "toast show" + (isError ? " error" : "");
+            "toast show" +
+            (isError ? " error" : "");
 
         clearTimeout(showToast.timer);
 
-        showToast.timer = setTimeout(() => {
-            toast.classList.remove("show");
-        }, 3500);
+        showToast.timer =
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3500);
     }
 
     function escapeHtml(value) {
+
         return String(value ?? "")
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -879,20 +1565,27 @@
     }
 
     function formatEuro(value) {
-        const amount = Number(value || 0);
 
-        return amount.toLocaleString("nl-BE", {
-            style: "currency",
-            currency: "EUR"
-        });
+        const amount =
+            Number(value || 0);
+
+        return amount.toLocaleString(
+            "nl-BE",
+            {
+                style: "currency",
+                currency: "EUR"
+            }
+        );
     }
 
     function formatDate(dateString) {
+
         if (!dateString) {
             return "";
         }
 
-        const parts = String(dateString).split("-");
+        const parts =
+            String(dateString).split("-");
 
         if (parts.length !== 3) {
             return dateString;
@@ -902,16 +1595,22 @@
     }
 
     function calculateAmount(childrenCount) {
-        const count = Number(childrenCount || 1);
+
+        const count =
+            Number(childrenCount || 1);
 
         if (count <= 0) {
             return 0;
         }
 
-        return 18 + Math.max(0, count - 1) * 15;
+        return (
+            18 +
+            Math.max(0, count - 1) * 15
+        );
     }
 
     function getChildren(item) {
+
         return [
             item.child1,
             item.child2,
@@ -921,27 +1620,36 @@
     }
 
     function getAppointmentChildrenCount(item) {
-        const count = Number(item.children_count);
 
-        if (Number.isFinite(count) && count > 0) {
+        const count =
+            Number(item.children_count);
+
+        if (
+            Number.isFinite(count) &&
+            count > 0
+        ) {
             return count;
         }
 
-        return getChildren(item).length || 1;
+        return (
+            getChildren(item).length ||
+            1
+        );
     }
 
-    /*
-     * De index.html gebruikt:
-     * - pending voor onsite
-     * - paid/paidout/open voor effectieve online betalingen
-     *
-     * Geannuleerde/mislukte/expired Mollie records tellen niet mee
-     * voor de bezetting.
-     */
+    function getPaymentStatus(item) {
+
+        return String(
+            item.payment_status || ""
+        )
+            .trim()
+            .toLowerCase();
+    }
+
     function isActiveBooking(item) {
+
         const status =
-            String(item.payment_status || "")
-                .toLowerCase();
+            getPaymentStatus(item);
 
         return [
             "",
@@ -952,10 +1660,46 @@
         ].includes(status);
     }
 
-    function getStoredAmount(item) {
-        const amount = Number(item.amount);
+    function isPaidBooking(item) {
 
-        if (Number.isFinite(amount) && amount >= 0) {
+        const status =
+            getPaymentStatus(item);
+
+        return (
+            status === "paid" ||
+            status === "paidout"
+        );
+    }
+
+    function isOpenPayment(item) {
+
+        return (
+            isActiveBooking(item) &&
+            !isPaidBooking(item)
+        );
+    }
+
+    function isCancelledBooking(item) {
+
+        const status =
+            getPaymentStatus(item);
+
+        return [
+            "cancelled",
+            "failed",
+            "expired"
+        ].includes(status);
+    }
+
+    function getStoredAmount(item) {
+
+        const amount =
+            Number(item.amount);
+
+        if (
+            Number.isFinite(amount) &&
+            amount >= 0
+        ) {
             return amount;
         }
 
@@ -964,25 +1708,87 @@
         );
     }
 
+    function getAppointmentDate(item) {
+
+        if (!item?.appointment_date) {
+            return null;
+        }
+
+        return new Date(
+            item.appointment_date +
+            "T12:00:00"
+        );
+    }
+
+    function isThisMonth(item) {
+
+        const now = new Date();
+
+        const date =
+            getAppointmentDate(item);
+
+        if (!date) {
+            return false;
+        }
+
+        return (
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear()
+        );
+    }
+
+    function isUpcoming(item) {
+
+        const date =
+            getAppointmentDate(item);
+
+        if (!date) {
+            return false;
+        }
+
+        const today =
+            new Date();
+
+        today.setHours(
+            0, 0, 0, 0
+        );
+
+        return (
+            date >= today &&
+            isActiveBooking(item)
+        );
+    }
+
     /* =========================================================
        AUTH
     ========================================================= */
 
     async function requireLogin() {
+
         const {
             data,
             error
         } = await sb.auth.getSession();
 
         if (error) {
+
             console.error(error);
-            window.location.href = "index.html";
+
+            window.location.href =
+                "index.html";
+
             return false;
         }
 
         if (!data?.session) {
-            localStorage.removeItem("loggedIn");
-            window.location.href = "index.html";
+
+            localStorage.removeItem(
+                "loggedIn"
+            );
+
+            window.location.href =
+                "index.html";
+
             return false;
         }
 
@@ -990,11 +1796,15 @@
     }
 
     async function logout() {
+
         await sb.auth.signOut();
 
-        localStorage.removeItem("loggedIn");
+        localStorage.removeItem(
+            "loggedIn"
+        );
 
-        window.location.href = "index.html";
+        window.location.href =
+            "index.html";
     }
 
     /* =========================================================
@@ -1002,32 +1812,44 @@
     ========================================================= */
 
     async function loadData() {
+
         try {
+
             const [
                 appointmentsResult,
                 themesResult,
                 blockedResult
             ] = await Promise.all([
+
                 sb
                     .from("appointments")
                     .select("*")
-                    .order("appointment_date", {
-                        ascending: true
-                    }),
+                    .order(
+                        "appointment_date",
+                        {
+                            ascending: true
+                        }
+                    ),
 
                 sb
                     .from("themes")
                     .select("*")
-                    .order("date", {
-                        ascending: true
-                    }),
+                    .order(
+                        "date",
+                        {
+                            ascending: true
+                        }
+                    ),
 
                 sb
                     .from("blocked_dates")
                     .select("*")
-                    .order("date", {
-                        ascending: true
-                    })
+                    .order(
+                        "date",
+                        {
+                            ascending: true
+                        }
+                    )
             ]);
 
             if (appointmentsResult.error) {
@@ -1042,22 +1864,51 @@
                 throw blockedResult.error;
             }
 
-            allData = appointmentsResult.data || [];
-            themes = themesResult.data || [];
-            blockedDates = blockedResult.data || [];
+            allData =
+                appointmentsResult.data || [];
+
+            themes =
+                themesResult.data || [];
+
+            blockedDates =
+                blockedResult.data || [];
 
             updateDashboard();
+
             renderCalendar();
 
         } catch (error) {
-            console.error("Load error:", error);
+
+            console.error(
+                "Load error:",
+                error
+            );
 
             showToast(
                 "De gegevens konden niet worden geladen: " +
-                (error.message || "onbekende fout"),
+                (
+                    error.message ||
+                    "onbekende fout"
+                ),
                 true
             );
         }
+    }
+
+    async function refreshDashboard() {
+
+        showToast(
+            "🔄 Gegevens worden vernieuwd..."
+        );
+
+        await Promise.all([
+            loadBookingStatus(),
+            loadData()
+        ]);
+
+        showToast(
+            "✅ Dashboard vernieuwd."
+        );
     }
 
     /* =========================================================
@@ -1065,16 +1916,21 @@
     ========================================================= */
 
     async function loadBookingStatus() {
+
         const {
             data,
             error
         } = await sb
             .from("settings")
             .select("value")
-            .eq("key", "booking_enabled")
+            .eq(
+                "key",
+                "booking_enabled"
+            )
             .maybeSingle();
 
         if (error) {
+
             console.error(error);
 
             document.getElementById(
@@ -1089,22 +1945,35 @@
             data?.value === true;
 
         const toggle =
-            document.getElementById("bookingToggle");
+            document.getElementById(
+                "bookingToggle"
+            );
 
         const badge =
-            document.getElementById("bookingStatusBadge");
+            document.getElementById(
+                "bookingStatusBadge"
+            );
 
         const text =
-            document.getElementById("bookingStatusText");
+            document.getElementById(
+                "bookingStatusText"
+            );
 
-        toggle.checked = enabled;
+        toggle.checked =
+            enabled;
 
         badge.className =
             "status-badge " +
-            (enabled ? "on" : "off");
+            (
+                enabled
+                    ? "on"
+                    : "off"
+            );
 
         badge.textContent =
-            enabled ? "AAN" : "UIT";
+            enabled
+                ? "AAN"
+                : "UIT";
 
         text.textContent =
             enabled
@@ -1113,10 +1982,14 @@
     }
 
     async function updateBookingStatus() {
-        const toggle =
-            document.getElementById("bookingToggle");
 
-        const enabled = toggle.checked;
+        const toggle =
+            document.getElementById(
+                "bookingToggle"
+            );
+
+        const enabled =
+            toggle.checked;
 
         toggle.disabled = true;
 
@@ -1137,9 +2010,11 @@
         toggle.disabled = false;
 
         if (error) {
+
             console.error(error);
 
-            toggle.checked = !enabled;
+            toggle.checked =
+                !enabled;
 
             showToast(
                 "De inschrijvingsstatus kon niet worden aangepast.",
@@ -1163,8 +2038,11 @@
     ========================================================= */
 
     function renderCalendar() {
+
         const calendarEl =
-            document.getElementById("calendar");
+            document.getElementById(
+                "calendar"
+            );
 
         if (calendar) {
             calendar.destroy();
@@ -1175,117 +2053,202 @@
         /*
          * Thema's
          */
+
         themes.forEach(theme => {
-            if (!theme.date || !theme.theme) {
+
+            if (
+                !theme.date ||
+                !theme.theme
+            ) {
                 return;
             }
 
             events.push({
-                id: "theme-" + theme.date,
-                title: "🎨 " + theme.theme,
-                start: theme.date,
-                allDay: true,
 
-                backgroundColor: "#8b5cf6",
-                borderColor: "#8b5cf6",
-                textColor: "#ffffff",
+                id:
+                    "theme-" +
+                    theme.date,
+
+                title:
+                    "🎨 " +
+                    theme.theme,
+
+                start:
+                    theme.date,
+
+                allDay:
+                    true,
+
+                backgroundColor:
+                    "#8b5cf6",
+
+                borderColor:
+                    "#8b5cf6",
+
+                textColor:
+                    "#ffffff",
 
                 extendedProps: {
-                    type: "theme",
-                    themeId: theme.id ?? null,
-                    theme: theme.theme,
-                    date: theme.date
+
+                    type:
+                        "theme",
+
+                    themeId:
+                        theme.id ?? null,
+
+                    theme:
+                        theme.theme,
+
+                    date:
+                        theme.date
                 }
             });
         });
 
         /*
          * Inschrijvingen
-         *
-         * Eén kalender-event per reservatie.
-         * Zo zie je in de admin alle reservaties afzonderlijk.
          */
+
         allData.forEach(item => {
+
             const childrenCount =
-                getAppointmentChildrenCount(item);
+                getAppointmentChildrenCount(
+                    item
+                );
 
             const children =
                 getChildren(item);
 
             const childText =
                 children.length
-                    ? " – " + children.join(", ")
+                    ? " – " +
+                      children.join(", ")
                     : "";
 
             const status =
-                String(item.payment_status || "")
-                    .toLowerCase();
+                getPaymentStatus(item);
 
-            let backgroundColor = "#ff6f86";
+            let backgroundColor =
+                "#ff6f86";
 
             if (
                 status === "paid" ||
                 status === "paidout"
             ) {
-                backgroundColor = "#22a06b";
+
+                backgroundColor =
+                    "#22a06b";
+
+            } else if (
+                status === "pending" ||
+                status === "open" ||
+                status === ""
+            ) {
+
+                backgroundColor =
+                    "#f59e0b";
+
             } else if (
                 status === "cancelled" ||
                 status === "failed" ||
                 status === "expired"
             ) {
-                backgroundColor = "#9ca3af";
+
+                backgroundColor =
+                    "#9ca3af";
             }
 
             events.push({
-                id: String(item.id),
+
+                id:
+                    String(item.id),
+
                 title:
                     "👤 " +
-                    (item.name || "Onbekend") +
+                    (
+                        item.name ||
+                        "Onbekend"
+                    ) +
                     " (" +
                     childrenCount +
                     ")" +
                     childText,
 
-                start: item.appointment_date,
-                allDay: true,
+                start:
+                    item.appointment_date,
+
+                allDay:
+                    true,
 
                 backgroundColor,
-                borderColor: backgroundColor,
-                textColor: "#ffffff",
+                borderColor:
+                    backgroundColor,
+
+                textColor:
+                    "#ffffff",
 
                 extendedProps: {
-                    type: "appointment",
-                    appointment: item
+
+                    type:
+                        "appointment",
+
+                    appointment:
+                        item
                 }
             });
         });
 
         /*
-         * Geblokkeerde data als achtergrond.
+         * Geblokkeerde data
          */
+
         blockedDates.forEach(blocked => {
+
             if (!blocked.date) {
                 return;
             }
 
             events.push({
-                id: "blocked-" + blocked.date,
+
+                id:
+                    "blocked-" +
+                    blocked.date,
+
                 title:
                     "⛔ " +
-                    (blocked.reason || "Geblokkeerd"),
+                    (
+                        blocked.reason ||
+                        "Geblokkeerd"
+                    ),
 
-                start: blocked.date,
-                allDay: true,
+                start:
+                    blocked.date,
 
-                backgroundColor: "rgba(220,53,69,.18)",
-                borderColor: "#dc3545",
-                textColor: "#991b1b",
+                allDay:
+                    true,
+
+                backgroundColor:
+                    "rgba(220,53,69,.18)",
+
+                borderColor:
+                    "#dc3545",
+
+                textColor:
+                    "#991b1b",
 
                 extendedProps: {
-                    type: "blocked",
-                    blockedId: blocked.id ?? null,
-                    date: blocked.date,
-                    reason: blocked.reason || ""
+
+                    type:
+                        "blocked",
+
+                    blockedId:
+                        blocked.id ?? null,
+
+                    date:
+                        blocked.date,
+
+                    reason:
+                        blocked.reason || ""
                 }
             });
         });
@@ -1294,54 +2257,97 @@
             new FullCalendar.Calendar(
                 calendarEl,
                 {
-                    locale: "nl",
 
-                    initialView: "dayGridMonth",
+                    locale:
+                        "nl",
 
-                    height: "auto",
+                    initialView:
+                        "dayGridMonth",
 
-                    contentHeight: "auto",
+                    height:
+                        "auto",
 
-                    expandRows: true,
+                    contentHeight:
+                        "auto",
 
-                    fixedWeekCount: false,
+                    expandRows:
+                        true,
 
-                    firstDay: 1,
+                    fixedWeekCount:
+                        false,
+
+                    firstDay:
+                        1,
 
                     headerToolbar: {
-                        left: "prev,next today",
-                        center: "title",
+
+                        left:
+                            "prev,next today",
+
+                        center:
+                            "title",
+
                         right:
                             "dayGridMonth,timeGridWeek,timeGridDay"
                     },
 
                     buttonText: {
-                        today: "Vandaag",
-                        month: "Maand",
-                        week: "Week",
-                        day: "Dag"
+
+                        today:
+                            "Vandaag",
+
+                        month:
+                            "Maand",
+
+                        week:
+                            "Week",
+
+                        day:
+                            "Dag"
                     },
 
                     events,
 
-                    eventClick: function(info) {
-                        const type =
-                            info.event.extendedProps.type;
+                    eventClick:
+                        function(info) {
 
-                        if (type === "appointment") {
-                            openAppointmentEditor(
-                                info.event.extendedProps.appointment
-                            );
-                        } else if (type === "theme") {
-                            openThemeEditor(
-                                info.event.extendedProps
-                            );
-                        } else if (type === "blocked") {
-                            openBlockedEditor(
-                                info.event.extendedProps
-                            );
+                            const type =
+                                info.event
+                                    .extendedProps
+                                    .type;
+
+                            if (
+                                type ===
+                                "appointment"
+                            ) {
+
+                                openAppointmentEditor(
+                                    info.event
+                                        .extendedProps
+                                        .appointment
+                                );
+
+                            } else if (
+                                type ===
+                                "theme"
+                            ) {
+
+                                openThemeEditor(
+                                    info.event
+                                        .extendedProps
+                                );
+
+                            } else if (
+                                type ===
+                                "blocked"
+                            ) {
+
+                                openBlockedEditor(
+                                    info.event
+                                        .extendedProps
+                                );
+                            }
                         }
-                    }
                 }
             );
 
@@ -1353,17 +2359,24 @@
     ========================================================= */
 
     async function saveTheme() {
+
         const date =
-            document.getElementById("themeDate").value.trim();
+            document.getElementById(
+                "themeDate"
+            ).value.trim();
 
         const theme =
-            document.getElementById("themeName").value.trim();
+            document.getElementById(
+                "themeName"
+            ).value.trim();
 
         if (!date || !theme) {
+
             showToast(
                 "Vul zowel een datum als een thema in.",
                 true
             );
+
             return;
         }
 
@@ -1377,59 +2390,86 @@
                     theme
                 },
                 {
-                    onConflict: "date"
+                    onConflict:
+                        "date"
                 }
             );
 
         if (error) {
+
             console.error(error);
 
             showToast(
-                "Thema opslaan mislukt: " + error.message,
+                "Thema opslaan mislukt: " +
+                error.message,
                 true
             );
 
             return;
         }
 
-        document.getElementById("themeDate").value = "";
-        document.getElementById("themeName").value = "";
+        document.getElementById(
+            "themeDate"
+        ).value = "";
 
-        showToast("✅ Thema opgeslagen.");
+        document.getElementById(
+            "themeName"
+        ).value = "";
+
+        showToast(
+            "✅ Thema opgeslagen."
+        );
 
         await loadData();
     }
 
     function openThemeEditor(theme) {
-        editMode = "theme";
-        editId = theme.themeId;
 
-        document.getElementById("modalTitle").textContent =
+        editMode =
+            "theme";
+
+        editId =
+            theme.themeId;
+
+        document.getElementById(
+            "modalTitle"
+        ).textContent =
             "🎨 Thema beheren";
 
         document.getElementById(
             "appointmentEditor"
-        ).style.display = "none";
+        ).style.display =
+            "none";
 
         document.getElementById(
             "themeEditor"
-        ).style.display = "block";
+        ).style.display =
+            "block";
 
         document.getElementById(
             "editThemeName"
-        ).value = theme.theme || "";
+        ).value =
+            theme.theme || "";
 
         document.getElementById(
             "editThemeDate"
-        ).value = theme.date || "";
+        ).value =
+            theme.date || "";
+
+        document.getElementById(
+            "editThemeDate"
+        ).dataset.oldDate =
+            theme.date || "";
 
         document.getElementById(
             "deleteButton"
-        ).textContent = "🗑️ Thema verwijderen";
+        ).textContent =
+            "🗑️ Thema verwijderen";
 
         document.getElementById(
             "editModal"
-        ).style.display = "flex";
+        ).style.display =
+            "flex";
     }
 
     /* =========================================================
@@ -1437,17 +2477,24 @@
     ========================================================= */
 
     async function addBlockedDate() {
+
         const date =
-            document.getElementById("blockDate").value.trim();
+            document.getElementById(
+                "blockDate"
+            ).value.trim();
 
         const reason =
-            document.getElementById("blockReason").value.trim();
+            document.getElementById(
+                "blockReason"
+            ).value.trim();
 
         if (!date) {
+
             showToast(
                 "Selecteer eerst een datum.",
                 true
             );
+
             return;
         }
 
@@ -1458,62 +2505,92 @@
             .upsert(
                 {
                     date,
-                    reason: reason || "Geblokkeerd"
+                    reason:
+                        reason ||
+                        "Geblokkeerd"
                 },
                 {
-                    onConflict: "date"
+                    onConflict:
+                        "date"
                 }
             );
 
         if (error) {
+
             console.error(error);
 
             showToast(
-                "Datum blokkeren mislukt: " + error.message,
+                "Datum blokkeren mislukt: " +
+                error.message,
                 true
             );
 
             return;
         }
 
-        document.getElementById("blockDate").value = "";
-        document.getElementById("blockReason").value = "";
+        document.getElementById(
+            "blockDate"
+        ).value = "";
 
-        showToast("⛔ Datum geblokkeerd.");
+        document.getElementById(
+            "blockReason"
+        ).value = "";
+
+        showToast(
+            "⛔ Datum geblokkeerd."
+        );
 
         await loadData();
     }
 
     function openBlockedEditor(blocked) {
-        editMode = "blocked";
-        editId = blocked.blockedId;
 
-        document.getElementById("modalTitle").textContent =
+        editMode =
+            "blocked";
+
+        editId =
+            blocked.blockedId;
+
+        document.getElementById(
+            "modalTitle"
+        ).textContent =
             "⛔ Geblokkeerde datum";
 
         document.getElementById(
             "appointmentEditor"
-        ).style.display = "none";
+        ).style.display =
+            "none";
 
         document.getElementById(
             "themeEditor"
-        ).style.display = "block";
+        ).style.display =
+            "block";
 
         document.getElementById(
             "editThemeName"
-        ).value = blocked.reason || "Geblokkeerd";
+        ).value =
+            blocked.reason ||
+            "Geblokkeerd";
 
         document.getElementById(
             "editThemeDate"
-        ).value = blocked.date || "";
+        ).value =
+            blocked.date || "";
+
+        document.getElementById(
+            "editThemeDate"
+        ).dataset.oldDate =
+            blocked.date || "";
 
         document.getElementById(
             "deleteButton"
-        ).textContent = "🗑️ Blokkering verwijderen";
+        ).textContent =
+            "🗑️ Blokkering verwijderen";
 
         document.getElementById(
             "editModal"
-        ).style.display = "flex";
+        ).style.display =
+            "flex";
     }
 
     /* =========================================================
@@ -1521,78 +2598,120 @@
     ========================================================= */
 
     function openAppointmentEditor(item) {
-        editMode = "appointment";
-        editId = item.id;
 
-        document.getElementById("modalTitle").textContent =
+        editMode =
+            "appointment";
+
+        editId =
+            item.id;
+
+        document.getElementById(
+            "modalTitle"
+        ).textContent =
             "✏️ Inschrijving beheren";
 
         document.getElementById(
             "appointmentEditor"
-        ).style.display = "block";
+        ).style.display =
+            "block";
 
         document.getElementById(
             "themeEditor"
-        ).style.display = "none";
+        ).style.display =
+            "none";
 
-        document.getElementById("editName").value =
+        document.getElementById(
+            "editName"
+        ).value =
             item.name || "";
 
-        document.getElementById("editEmail").value =
+        document.getElementById(
+            "editEmail"
+        ).value =
             item.email || "";
 
-        document.getElementById("editDate").value =
+        document.getElementById(
+            "editDate"
+        ).value =
             item.appointment_date || "";
 
         const childrenCount =
-            getAppointmentChildrenCount(item);
+            getAppointmentChildrenCount(
+                item
+            );
 
         document.getElementById(
             "editChildrenCount"
-        ).value = String(
-            Math.min(4, Math.max(1, childrenCount))
-        );
+        ).value =
+            String(
+                Math.min(
+                    4,
+                    Math.max(
+                        1,
+                        childrenCount
+                    )
+                )
+            );
 
-        document.getElementById("editAmount").value =
-            getStoredAmount(item).toFixed(2);
+        document.getElementById(
+            "editAmount"
+        ).value =
+            getStoredAmount(
+                item
+            ).toFixed(2);
 
         document.getElementById(
             "editPaymentMethod"
         ).value =
-            item.payment_method || "onsite";
+            item.payment_method ||
+            "onsite";
 
         document.getElementById(
             "editPaymentStatus"
         ).value =
-            item.payment_status || "pending";
+            item.payment_status ||
+            "pending";
 
-        document.getElementById("editChild1").value =
+        document.getElementById(
+            "editChild1"
+        ).value =
             item.child1 || "";
 
-        document.getElementById("editChild2").value =
+        document.getElementById(
+            "editChild2"
+        ).value =
             item.child2 || "";
 
-        document.getElementById("editChild3").value =
+        document.getElementById(
+            "editChild3"
+        ).value =
             item.child3 || "";
 
-        document.getElementById("editChild4").value =
+        document.getElementById(
+            "editChild4"
+        ).value =
             item.child4 || "";
 
         document.getElementById(
             "deleteButton"
-        ).textContent = "🗑️ Inschrijving verwijderen";
+        ).textContent =
+            "🗑️ Inschrijving verwijderen";
 
         document.getElementById(
             "editModal"
-        ).style.display = "flex";
+        ).style.display =
+            "flex";
     }
 
     function closeEditModal() {
+
         document.getElementById(
             "editModal"
-        ).style.display = "none";
+        ).style.display =
+            "none";
 
-        editId = null;
+        editId =
+            null;
     }
 
     /* =========================================================
@@ -1600,34 +2719,54 @@
     ========================================================= */
 
     async function saveCurrentItem() {
-        if (editMode === "appointment") {
+
+        if (
+            editMode ===
+            "appointment"
+        ) {
+
             await saveAppointment();
+
             return;
         }
 
-        if (editMode === "theme") {
+        if (
+            editMode ===
+            "theme"
+        ) {
+
             await saveThemeEdit();
+
             return;
         }
 
-        if (editMode === "blocked") {
+        if (
+            editMode ===
+            "blocked"
+        ) {
+
             await saveBlockedEdit();
+
             return;
         }
     }
 
     async function saveAppointment() {
+
         const name =
-            document.getElementById("editName")
-                .value.trim();
+            document.getElementById(
+                "editName"
+            ).value.trim();
 
         const email =
-            document.getElementById("editEmail")
-                .value.trim();
+            document.getElementById(
+                "editEmail"
+            ).value.trim();
 
         const date =
-            document.getElementById("editDate")
-                .value;
+            document.getElementById(
+                "editDate"
+            ).value;
 
         const childrenCount =
             Number(
@@ -1653,59 +2792,92 @@
                 "editPaymentStatus"
             ).value;
 
-        if (!name || !email || !date) {
+        if (
+            !name ||
+            !email ||
+            !date
+        ) {
+
             showToast(
                 "Naam, e-mail en datum zijn verplicht.",
                 true
             );
+
             return;
         }
 
         if (
-            !Number.isFinite(childrenCount) ||
+            !Number.isFinite(
+                childrenCount
+            ) ||
             childrenCount < 1 ||
             childrenCount > 4
         ) {
+
             showToast(
                 "Het aantal kinderen moet tussen 1 en 4 liggen.",
                 true
             );
+
             return;
         }
 
-        if (!Number.isFinite(amount) || amount < 0) {
+        if (
+            !Number.isFinite(amount) ||
+            amount < 0
+        ) {
+
             showToast(
                 "Het bedrag is ongeldig.",
                 true
             );
+
             return;
         }
 
         const payload = {
+
             name,
+
             email,
-            appointment_date: date,
-            children_count: childrenCount,
+
+            appointment_date:
+                date,
+
+            children_count:
+                childrenCount,
 
             child1:
-                document.getElementById("editChild1")
-                    .value.trim() || null,
+                document.getElementById(
+                    "editChild1"
+                ).value.trim() ||
+                null,
 
             child2:
-                document.getElementById("editChild2")
-                    .value.trim() || null,
+                document.getElementById(
+                    "editChild2"
+                ).value.trim() ||
+                null,
 
             child3:
-                document.getElementById("editChild3")
-                    .value.trim() || null,
+                document.getElementById(
+                    "editChild3"
+                ).value.trim() ||
+                null,
 
             child4:
-                document.getElementById("editChild4")
-                    .value.trim() || null,
+                document.getElementById(
+                    "editChild4"
+                ).value.trim() ||
+                null,
 
             amount,
-            payment_method: paymentMethod,
-            payment_status: paymentStatus
+
+            payment_method:
+                paymentMethod,
+
+            payment_status:
+                paymentStatus
         };
 
         const {
@@ -1713,9 +2885,13 @@
         } = await sb
             .from("appointments")
             .update(payload)
-            .eq("id", editId);
+            .eq(
+                "id",
+                editId
+            );
 
         if (error) {
+
             console.error(error);
 
             showToast(
@@ -1729,12 +2905,15 @@
 
         closeEditModal();
 
-        showToast("✅ Inschrijving opgeslagen.");
+        showToast(
+            "✅ Inschrijving opgeslagen."
+        );
 
         await loadData();
     }
 
     async function saveThemeEdit() {
+
         const name =
             document.getElementById(
                 "editThemeName"
@@ -1746,46 +2925,53 @@
             ).value;
 
         if (!name || !date) {
+
             showToast(
                 "Vul datum en thema in.",
                 true
             );
+
             return;
         }
 
-        /*
-         * Thema's hebben normaal geen aparte ID nodig:
-         * date is de unieke sleutel volgens index.html.
-         */
         const oldDate =
+            document.getElementById(
+                "editThemeDate"
+            ).dataset.oldDate ||
             themes.find(theme =>
-                String(theme.id) === String(editId)
+                String(theme.id) ===
+                String(editId)
             )?.date;
 
         let query;
 
         if (oldDate) {
-            query = sb
-                .from("themes")
-                .update({
-                    date,
-                    theme: name
-                })
-                .eq("date", oldDate);
+
+            query =
+                sb
+                    .from("themes")
+                    .update({
+                        date,
+                        theme: name
+                    })
+                    .eq(
+                        "date",
+                        oldDate
+                    );
+
         } else {
-            /*
-             * Fallback voor bestaande theme-events waarbij
-             * geen id beschikbaar is.
-             */
-            query = sb
-                .from("themes")
-                .update({
-                    date,
-                    theme: name
-                })
-                .eq("date", document.getElementById(
-                    "editThemeDate"
-                ).dataset.oldDate || date);
+
+            query =
+                sb
+                    .from("themes")
+                    .update({
+                        date,
+                        theme: name
+                    })
+                    .eq(
+                        "date",
+                        date
+                    );
         }
 
         const {
@@ -1793,6 +2979,7 @@
         } = await query;
 
         if (error) {
+
             console.error(error);
 
             showToast(
@@ -1806,12 +2993,15 @@
 
         closeEditModal();
 
-        showToast("✅ Thema aangepast.");
+        showToast(
+            "✅ Thema aangepast."
+        );
 
         await loadData();
     }
 
     async function saveBlockedEdit() {
+
         const date =
             document.getElementById(
                 "editThemeDate"
@@ -1823,16 +3013,22 @@
             ).value.trim();
 
         if (!date) {
+
             showToast(
                 "Selecteer een datum.",
                 true
             );
+
             return;
         }
 
         const oldDate =
+            document.getElementById(
+                "editThemeDate"
+            ).dataset.oldDate ||
             blockedDates.find(item =>
-                String(item.id) === String(editId)
+                String(item.id) ===
+                String(editId)
             )?.date;
 
         const {
@@ -1841,7 +3037,9 @@
             .from("blocked_dates")
             .update({
                 date,
-                reason: reason || "Geblokkeerd"
+                reason:
+                    reason ||
+                    "Geblokkeerd"
             })
             .eq(
                 "date",
@@ -1849,6 +3047,7 @@
             );
 
         if (error) {
+
             console.error(error);
 
             showToast(
@@ -1862,7 +3061,9 @@
 
         closeEditModal();
 
-        showToast("✅ Geblokkeerde datum aangepast.");
+        showToast(
+            "✅ Geblokkeerde datum aangepast."
+        );
 
         await loadData();
     }
@@ -1872,26 +3073,45 @@
     ========================================================= */
 
     async function deleteCurrentItem() {
-        if (editMode === "appointment") {
+
+        if (
+            editMode ===
+            "appointment"
+        ) {
+
             await deleteAppointment();
+
             return;
         }
 
-        if (editMode === "theme") {
+        if (
+            editMode ===
+            "theme"
+        ) {
+
             await deleteTheme();
+
             return;
         }
 
-        if (editMode === "blocked") {
+        if (
+            editMode ===
+            "blocked"
+        ) {
+
             await deleteBlockedDate();
+
             return;
         }
     }
 
     async function deleteAppointment() {
-        if (!confirm(
-            "Deze inschrijving definitief verwijderen?"
-        )) {
+
+        if (
+            !confirm(
+                "Deze inschrijving definitief verwijderen?"
+            )
+        ) {
             return;
         }
 
@@ -1900,13 +3120,18 @@
         } = await sb
             .from("appointments")
             .delete()
-            .eq("id", editId);
+            .eq(
+                "id",
+                editId
+            );
 
         if (error) {
+
             console.error(error);
 
             showToast(
-                "Verwijderen mislukt: " + error.message,
+                "Verwijderen mislukt: " +
+                error.message,
                 true
             );
 
@@ -1915,28 +3140,36 @@
 
         closeEditModal();
 
-        showToast("🗑️ Inschrijving verwijderd.");
+        showToast(
+            "🗑️ Inschrijving verwijderd."
+        );
 
         await loadData();
     }
 
     async function deleteTheme() {
-        if (!confirm(
-            "Dit thema definitief verwijderen?"
-        )) {
+
+        if (
+            !confirm(
+                "Dit thema definitief verwijderen?"
+            )
+        ) {
             return;
         }
 
         const theme =
             themes.find(item =>
-                String(item.id) === String(editId)
+                String(item.id) ===
+                String(editId)
             );
 
         if (!theme?.date) {
+
             showToast(
                 "Het thema kon niet worden gevonden.",
                 true
             );
+
             return;
         }
 
@@ -1945,9 +3178,13 @@
         } = await sb
             .from("themes")
             .delete()
-            .eq("date", theme.date);
+            .eq(
+                "date",
+                theme.date
+            );
 
         if (error) {
+
             console.error(error);
 
             showToast(
@@ -1961,28 +3198,36 @@
 
         closeEditModal();
 
-        showToast("🗑️ Thema verwijderd.");
+        showToast(
+            "🗑️ Thema verwijderd."
+        );
 
         await loadData();
     }
 
     async function deleteBlockedDate() {
-        if (!confirm(
-            "Deze blokkering verwijderen?"
-        )) {
+
+        if (
+            !confirm(
+                "Deze blokkering verwijderen?"
+            )
+        ) {
             return;
         }
 
         const blocked =
             blockedDates.find(item =>
-                String(item.id) === String(editId)
+                String(item.id) ===
+                String(editId)
             );
 
         if (!blocked?.date) {
+
             showToast(
                 "De blokkering kon niet worden gevonden.",
                 true
             );
+
             return;
         }
 
@@ -1991,9 +3236,13 @@
         } = await sb
             .from("blocked_dates")
             .delete()
-            .eq("date", blocked.date);
+            .eq(
+                "date",
+                blocked.date
+            );
 
         if (error) {
+
             console.error(error);
 
             showToast(
@@ -2007,31 +3256,34 @@
 
         closeEditModal();
 
-        showToast("🗑️ Blokkering verwijderd.");
+        showToast(
+            "🗑️ Blokkering verwijderd."
+        );
 
         await loadData();
     }
 
     /* =========================================================
        DASHBOARD
-    ========================================================= */
+       ========================================================= */
 
     function updateDashboard() {
-        const now = new Date();
+
+        const now =
+            new Date();
+
+        /*
+         * Deze maand
+         */
 
         const thisMonth =
-            allData.filter(item => {
-                const d =
-                    new Date(
-                        item.appointment_date +
-                        "T12:00:00"
-                    );
+            allData.filter(item =>
+                isThisMonth(item)
+            );
 
-                return (
-                    d.getMonth() === now.getMonth() &&
-                    d.getFullYear() === now.getFullYear()
-                );
-            });
+        /*
+         * Vorige maand
+         */
 
         const previousMonthDate =
             new Date(
@@ -2042,19 +3294,27 @@
 
         const previousMonth =
             allData.filter(item => {
+
                 const d =
-                    new Date(
-                        item.appointment_date +
-                        "T12:00:00"
+                    getAppointmentDate(
+                        item
                     );
+
+                if (!d) {
+                    return false;
+                }
 
                 return (
                     d.getMonth() ===
-                        previousMonthDate.getMonth() &&
+                    previousMonthDate.getMonth() &&
                     d.getFullYear() ===
-                        previousMonthDate.getFullYear()
+                    previousMonthDate.getFullYear()
                 );
             });
+
+        /*
+         * Groei
+         */
 
         const growth =
             previousMonth.length > 0
@@ -2069,38 +3329,173 @@
                 )
                 : 0;
 
+        /*
+         * Unieke personen
+         */
+
         const uniqueEmails =
             new Set(
                 allData
                     .map(item =>
-                        String(item.email || "")
+                        String(
+                            item.email || ""
+                        )
                             .trim()
                             .toLowerCase()
                     )
                     .filter(Boolean)
             );
 
+        /*
+         * Alleen actieve inschrijvingen
+         */
+
+        const activeBookings =
+            allData.filter(
+                item =>
+                    isActiveBooking(item)
+            );
+
+        /*
+         * Kinderen
+         */
+
         const totalChildren =
-            allData.reduce(
+            activeBookings.reduce(
                 (total, item) =>
                     total +
-                    getAppointmentChildrenCount(item),
+                    getAppointmentChildrenCount(
+                        item
+                    ),
                 0
             );
 
-        const totalRevenue =
-            allData.reduce(
+        /*
+         * Verwachte omzet
+         *
+         * Alle actieve reservaties tellen mee.
+         * Dus pending + paid + paidout.
+         */
+
+        const totalExpectedRevenue =
+            activeBookings.reduce(
                 (total, item) =>
-                    total + getStoredAmount(item),
+                    total +
+                    getStoredAmount(item),
                 0
             );
 
-        const monthRevenue =
-            thisMonth.reduce(
+        /*
+         * Effectief betaald
+         *
+         * Alleen paid en paidout.
+         */
+
+        const totalPaidRevenue =
+            allData
+                .filter(item =>
+                    isPaidBooking(item)
+                )
+                .reduce(
+                    (total, item) =>
+                        total +
+                        getStoredAmount(item),
+                    0
+                );
+
+        /*
+         * Nog te ontvangen
+         */
+
+        const totalOutstandingRevenue =
+            activeBookings
+                .filter(item =>
+                    isOpenPayment(item)
+                )
+                .reduce(
+                    (total, item) =>
+                        total +
+                        getStoredAmount(item),
+                    0
+                );
+
+        /*
+         * Aantallen betalingen
+         */
+
+        const paidAppointments =
+            allData.filter(
+                item =>
+                    isPaidBooking(item)
+            ).length;
+
+        const pendingAppointments =
+            allData.filter(
+                item =>
+                    isOpenPayment(item)
+            ).length;
+
+        const cancelledAppointments =
+            allData.filter(
+                item =>
+                    isCancelledBooking(item)
+            ).length;
+
+        /*
+         * Deze maand financieel
+         */
+
+        const monthActiveBookings =
+            thisMonth.filter(
+                item =>
+                    isActiveBooking(item)
+            );
+
+        const monthExpectedRevenue =
+            monthActiveBookings.reduce(
                 (total, item) =>
-                    total + getStoredAmount(item),
+                    total +
+                    getStoredAmount(item),
                 0
             );
+
+        const monthPaidRevenue =
+            thisMonth
+                .filter(item =>
+                    isPaidBooking(item)
+                )
+                .reduce(
+                    (total, item) =>
+                        total +
+                        getStoredAmount(item),
+                    0
+                );
+
+        const monthOutstandingRevenue =
+            monthActiveBookings
+                .filter(item =>
+                    isOpenPayment(item)
+                )
+                .reduce(
+                    (total, item) =>
+                        total +
+                        getStoredAmount(item),
+                    0
+                );
+
+        /*
+         * Komende afspraken
+         */
+
+        const upcomingAppointments =
+            allData.filter(
+                item =>
+                    isUpcoming(item)
+            ).length;
+
+        /*
+         * UI
+         */
 
         document.getElementById(
             "totalAppointments"
@@ -2115,7 +3510,13 @@
         document.getElementById(
             "growthPercentage"
         ).textContent =
-            growth + "%";
+            (
+                growth > 0
+                    ? "+"
+                    : ""
+            ) +
+            growth +
+            "%";
 
         document.getElementById(
             "uniquePeople"
@@ -2128,28 +3529,114 @@
             totalChildren;
 
         document.getElementById(
-            "totalRevenue"
+            "upcomingAppointments"
         ).textContent =
-            formatEuro(totalRevenue);
+            upcomingAppointments;
 
         document.getElementById(
-            "monthRevenue"
+            "totalExpectedRevenue"
         ).textContent =
-            formatEuro(monthRevenue);
+            formatEuro(
+                totalExpectedRevenue
+            );
+
+        document.getElementById(
+            "totalPaidRevenue"
+        ).textContent =
+            formatEuro(
+                totalPaidRevenue
+            );
+
+        document.getElementById(
+            "totalOutstandingRevenue"
+        ).textContent =
+            formatEuro(
+                totalOutstandingRevenue
+            );
+
+        document.getElementById(
+            "paidAppointments"
+        ).textContent =
+            paidAppointments;
+
+        document.getElementById(
+            "pendingAppointments"
+        ).textContent =
+            pendingAppointments;
+
+        document.getElementById(
+            "cancelledAppointments"
+        ).textContent =
+            cancelledAppointments;
+
+        document.getElementById(
+            "outstandingCountSub"
+        ).textContent =
+            pendingAppointments +
+            (
+                pendingAppointments === 1
+                    ? " openstaande betaling"
+                    : " openstaande betalingen"
+            );
+
+        document.getElementById(
+            "monthExpectedRevenue"
+        ).textContent =
+            formatEuro(
+                monthExpectedRevenue
+            );
+
+        document.getElementById(
+            "monthPaidRevenue"
+        ).textContent =
+            formatEuro(
+                monthPaidRevenue
+            );
+
+        document.getElementById(
+            "monthOutstandingRevenue"
+        ).textContent =
+            formatEuro(
+                monthOutstandingRevenue
+            );
+
+        document.getElementById(
+            "monthAppointmentsSub"
+        ).textContent =
+            thisMonth.length +
+            (
+                thisMonth.length === 1
+                    ? " reservatie"
+                    : " reservaties"
+            );
 
         renderMonthlyChart();
+
         renderTopUsers();
+
+        renderUpcoming();
+
+        renderBookingList();
     }
 
+    /* =========================================================
+       MONTHLY CHART
+    ========================================================= */
+
     function renderMonthlyChart() {
+
         const months = {};
 
         allData.forEach(item => {
+
             const d =
-                new Date(
-                    item.appointment_date +
-                    "T12:00:00"
+                getAppointmentDate(
+                    item
                 );
+
+            if (!d) {
+                return;
+            }
 
             const key =
                 d.getFullYear() +
@@ -2158,17 +3645,83 @@
                     d.getMonth() + 1
                 ).padStart(2, "0");
 
-            months[key] =
-                (months[key] || 0) + 1;
+            if (!months[key]) {
+
+                months[key] = {
+
+                    bookings:
+                        0,
+
+                    paid:
+                        0
+                };
+            }
+
+            months[key].bookings++;
+
+            if (
+                isPaidBooking(item)
+            ) {
+
+                months[key].paid +=
+                    getStoredAmount(
+                        item
+                    );
+            }
         });
 
         const labels =
-            Object.keys(months).sort();
+            Object.keys(
+                months
+            ).sort();
 
-        const values =
-            labels.map(label =>
-                months[label]
+        const bookingValues =
+            labels.map(
+                label =>
+                    months[label]
+                        .bookings
             );
+
+        const paidValues =
+            labels.map(
+                label =>
+                    months[label]
+                        .paid
+            );
+
+        const formattedLabels =
+            labels.map(label => {
+
+                const parts =
+                    label.split("-");
+
+                const year =
+                    parts[0];
+
+                const month =
+                    Number(parts[1]);
+
+                const names = [
+                    "jan",
+                    "feb",
+                    "mrt",
+                    "apr",
+                    "mei",
+                    "jun",
+                    "jul",
+                    "aug",
+                    "sep",
+                    "okt",
+                    "nov",
+                    "dec"
+                ];
+
+                return (
+                    names[month - 1] +
+                    " " +
+                    year
+                );
+            });
 
         if (monthlyChart) {
             monthlyChart.destroy();
@@ -2180,38 +3733,156 @@
                     "monthlyChart"
                 ),
                 {
-                    type: "line",
+
+                    type:
+                        "bar",
 
                     data: {
-                        labels,
 
-                        datasets: [{
-                            label:
-                                "Inschrijvingen",
+                        labels:
+                            formattedLabels,
 
-                            data: values,
+                        datasets: [
 
-                            tension: .35,
+                            {
+                                type:
+                                    "line",
 
-                            fill: false
-                        }]
+                                label:
+                                    "Inschrijvingen",
+
+                                data:
+                                    bookingValues,
+
+                                tension:
+                                    .35,
+
+                                yAxisID:
+                                    "y"
+                            },
+
+                            {
+                                type:
+                                    "bar",
+
+                                label:
+                                    "Effectief betaald",
+
+                                data:
+                                    paidValues,
+
+                                yAxisID:
+                                    "yRevenue"
+                            }
+
+                        ]
                     },
 
                     options: {
-                        responsive: true,
+
+                        responsive:
+                            true,
+
+                        interaction: {
+
+                            mode:
+                                "index",
+
+                            intersect:
+                                false
+                        },
 
                         plugins: {
-                            legend: {
-                                display: true
+
+                            tooltip: {
+
+                                callbacks: {
+
+                                    label:
+                                        function(
+                                            context
+                                        ) {
+
+                                            if (
+                                                context.dataset
+                                                    .label ===
+                                                "Effectief betaald"
+                                            ) {
+
+                                                return (
+                                                    "Effectief betaald: " +
+                                                    formatEuro(
+                                                        context.parsed.y
+                                                    )
+                                                );
+                                            }
+
+                                            return (
+                                                "Inschrijvingen: " +
+                                                context.parsed.y
+                                            );
+                                        }
+                                }
                             }
                         },
 
                         scales: {
+
                             y: {
-                                beginAtZero: true,
+
+                                beginAtZero:
+                                    true,
 
                                 ticks: {
-                                    precision: 0
+
+                                    precision:
+                                        0
+                                },
+
+                                title: {
+
+                                    display:
+                                        true,
+
+                                    text:
+                                        "Inschrijvingen"
+                                }
+                            },
+
+                            yRevenue: {
+
+                                beginAtZero:
+                                    true,
+
+                                position:
+                                    "right",
+
+                                grid: {
+
+                                    drawOnChartArea:
+                                        false
+                                },
+
+                                ticks: {
+
+                                    callback:
+                                        function(
+                                            value
+                                        ) {
+
+                                            return formatEuro(
+                                                value
+                                            );
+                                        }
+                                },
+
+                                title: {
+
+                                    display:
+                                        true,
+
+                                    text:
+                                        "Omzet"
                                 }
                             }
                         }
@@ -2220,46 +3891,66 @@
             );
     }
 
+    /* =========================================================
+       TOP USERS
+    ========================================================= */
+
     function renderTopUsers() {
+
         const counts = {};
 
-        allData.forEach(item => {
-            const key =
-                String(
-                    item.email ||
-                    item.name ||
-                    "Onbekend"
-                )
-                    .trim()
-                    .toLowerCase();
+        allData
+            .filter(item =>
+                isActiveBooking(item)
+            )
+            .forEach(item => {
 
-            if (!counts[key]) {
-                counts[key] = {
-                    name:
+                const key =
+                    String(
+                        item.email ||
                         item.name ||
-                        "Onbekend",
+                        "Onbekend"
+                    )
+                        .trim()
+                        .toLowerCase();
 
-                    count: 0
-                };
-            }
+                if (!counts[key]) {
 
-            counts[key].count++;
-        });
+                    counts[key] = {
+
+                        name:
+                            item.name ||
+                            "Onbekend",
+
+                        count:
+                            0
+                    };
+                }
+
+                counts[key].count++;
+            });
 
         const top =
-            Object.values(counts)
+            Object.values(
+                counts
+            )
                 .sort(
-                    (a, b) =>
-                        b.count - a.count
+                    (a,b) =>
+                        b.count -
+                        a.count
                 )
-                .slice(0, 10);
+                .slice(0,10);
 
         const container =
-            document.getElementById("topUsers");
+            document.getElementById(
+                "topUsers"
+            );
 
         if (!top.length) {
+
             container.innerHTML =
                 "<p style='color:#6b7280'>Nog geen inschrijvingen.</p>";
+
             return;
         }
 
@@ -2267,8 +3958,11 @@
             top.map(user => `
                 <div>
                     <span>
-                        ${escapeHtml(user.name)}
+                        ${escapeHtml(
+                            user.name
+                        )}
                     </span>
+
                     <strong>
                         ${user.count}
                     </strong>
@@ -2277,10 +3971,677 @@
     }
 
     /* =========================================================
+       UPCOMING
+       ========================================================= */
+
+    function renderUpcoming() {
+
+        const container =
+            document.getElementById(
+                "upcomingList"
+            );
+
+        const upcoming =
+            allData
+                .filter(item =>
+                    isUpcoming(item)
+                )
+                .sort(
+                    (a,b) =>
+                        getAppointmentDate(a) -
+                        getAppointmentDate(b)
+                )
+                .slice(0,8);
+
+        if (!upcoming.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    🎉 Geen komende inschrijvingen.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML =
+            upcoming.map(
+                item =>
+                    createBookingHtml(item)
+            ).join("");
+    }
+
+    function showAllUpcoming() {
+
+        const search =
+            document.getElementById(
+                "bookingSearch"
+            );
+
+        const dateFilter =
+            document.getElementById(
+                "bookingDateFilter"
+            );
+
+        if (search) {
+            search.value = "";
+        }
+
+        if (dateFilter) {
+            dateFilter.value =
+                "upcoming";
+        }
+
+        renderBookingList();
+
+        document.getElementById(
+            "bookingList"
+        ).scrollIntoView({
+            behavior:
+                "smooth"
+        });
+    }
+
+    /* =========================================================
+       BOOKING SEARCH
+       ========================================================= */
+
+    function renderBookingList() {
+
+        const container =
+            document.getElementById(
+                "bookingList"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        const search =
+            String(
+                document.getElementById(
+                    "bookingSearch"
+                )?.value || ""
+            )
+                .trim()
+                .toLowerCase();
+
+        const paymentFilter =
+            document.getElementById(
+                "paymentFilter"
+            )?.value ||
+            "all";
+
+        const dateFilter =
+            document.getElementById(
+                "bookingDateFilter"
+            )?.value ||
+            "all";
+
+        let filtered =
+            [...allData];
+
+        if (search) {
+
+            filtered =
+                filtered.filter(item => {
+
+                    const children =
+                        getChildren(
+                            item
+                        ).join(" ");
+
+                    const haystack =
+                        [
+                            item.name,
+                            item.email,
+                            children,
+                            item.appointment_date
+                        ]
+                            .join(" ")
+                            .toLowerCase();
+
+                    return haystack.includes(
+                        search
+                    );
+                });
+        }
+
+        if (
+            paymentFilter !==
+            "all"
+        ) {
+
+            if (
+                paymentFilter ===
+                "paid"
+            ) {
+
+                filtered =
+                    filtered.filter(
+                        item =>
+                            isPaidBooking(
+                                item
+                            )
+                    );
+
+            } else if (
+                paymentFilter ===
+                "pending"
+            ) {
+
+                filtered =
+                    filtered.filter(
+                        item =>
+                            isOpenPayment(
+                                item
+                            )
+                    );
+
+            } else {
+
+                filtered =
+                    filtered.filter(
+                        item =>
+                            getPaymentStatus(
+                                item
+                            ) ===
+                            paymentFilter
+                    );
+            }
+        }
+
+        if (
+            dateFilter !==
+            "all"
+        ) {
+
+            filtered =
+                filtered.filter(
+                    item => {
+
+                        const date =
+                            getAppointmentDate(
+                                item
+                            );
+
+                        if (!date) {
+                            return false;
+                        }
+
+                        const today =
+                            new Date();
+
+                        today.setHours(
+                            0,
+                            0,
+                            0,
+                            0
+                        );
+
+                        if (
+                            dateFilter ===
+                            "upcoming"
+                        ) {
+
+                            return (
+                                date >=
+                                today
+                            );
+                        }
+
+                        if (
+                            dateFilter ===
+                            "past"
+                        ) {
+
+                            return (
+                                date <
+                                today
+                            );
+                        }
+
+                        if (
+                            dateFilter ===
+                            "thisMonth"
+                        ) {
+
+                            return (
+                                date.getMonth() ===
+                                    today.getMonth() &&
+                                date.getFullYear() ===
+                                    today.getFullYear()
+                            );
+                        }
+
+                        return true;
+                    }
+                );
+        }
+
+        filtered.sort(
+            (a,b) => {
+
+                const da =
+                    getAppointmentDate(a);
+
+                const db =
+                    getAppointmentDate(b);
+
+                return (
+                    (db || 0) -
+                    (da || 0)
+                );
+            }
+        );
+
+        document.getElementById(
+            "bookingResultCount"
+        ).textContent =
+            filtered.length +
+            (
+                filtered.length === 1
+                    ? " inschrijving"
+                    : " inschrijvingen"
+            );
+
+        if (!filtered.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    Geen inschrijvingen gevonden.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML =
+            filtered.map(
+                item =>
+                    createBookingHtml(
+                        item,
+                        true
+                    )
+            ).join("");
+    }
+
+    function createBookingHtml(
+        item,
+        clickable = true
+    ) {
+
+        const children =
+            getChildren(item);
+
+        const count =
+            getAppointmentChildrenCount(
+                item
+            );
+
+        const status =
+            getPaymentStatus(item);
+
+        const amount =
+            getStoredAmount(item);
+
+        const date =
+            formatDate(
+                item.appointment_date
+            );
+
+        let statusText =
+            "Onbekend";
+
+        let pillClass =
+            "other";
+
+        if (
+            status ===
+            "paid" ||
+            status ===
+            "paidout"
+        ) {
+
+            statusText =
+                "✅ Betaald";
+
+            pillClass =
+                "paid";
+
+        } else if (
+            status ===
+            "pending" ||
+            status ===
+            "open" ||
+            status ===
+            ""
+        ) {
+
+            statusText =
+                "⏳ Nog te betalen";
+
+            pillClass =
+                "pending";
+
+        } else if (
+            status ===
+            "cancelled"
+        ) {
+
+            statusText =
+                "❌ Geannuleerd";
+
+            pillClass =
+                "cancelled";
+
+        } else if (
+            status ===
+            "failed"
+        ) {
+
+            statusText =
+                "❌ Mislukt";
+
+            pillClass =
+                "failed";
+
+        } else if (
+            status ===
+            "expired"
+        ) {
+
+            statusText =
+                "⌛ Verlopen";
+
+            pillClass =
+                "expired";
+        }
+
+        const childrenText =
+            children.length
+                ? children.join(", ")
+                : "Geen kindernamen";
+
+        const safeId =
+            String(
+                item.id
+            ).replace(
+                /'/g,
+                "\\'"
+            );
+
+        return `
+            <div
+                class="booking-item"
+                ${
+                    clickable
+                        ? `onclick="openBookingFromList('${safeId}')"`
+                        : ""
+                }
+                style="${
+                    clickable
+                        ? "cursor:pointer;"
+                        : ""
+                }">
+
+                <div class="booking-main">
+
+                    <div class="booking-name">
+                        👤
+                        ${escapeHtml(
+                            item.name ||
+                            "Onbekend"
+                        )}
+                    </div>
+
+                    <div class="booking-meta">
+
+                        📅 ${escapeHtml(date)}
+                        ·
+                        👶 ${count}
+                        ${
+                            count === 1
+                                ? "kind"
+                                : "kinderen"
+                        }
+
+                        <br>
+
+                        🧒
+                        ${escapeHtml(
+                            childrenText
+                        )}
+
+                        <br>
+
+                        ✉️
+                        ${escapeHtml(
+                            item.email ||
+                            ""
+                        )}
+
+                    </div>
+
+                </div>
+
+                <div class="booking-side">
+
+                    <div class="booking-amount">
+                        ${formatEuro(amount)}
+                    </div>
+
+                    <span
+                        class="payment-pill ${pillClass}">
+                        ${statusText}
+                    </span>
+
+                </div>
+
+            </div>
+        `;
+    }
+
+    function openBookingFromList(id) {
+
+        const item =
+            allData.find(
+                appointment =>
+                    String(
+                        appointment.id
+                    ) ===
+                    String(id)
+            );
+
+        if (!item) {
+
+            showToast(
+                "Inschrijving niet gevonden.",
+                true
+            );
+
+            return;
+        }
+
+        openAppointmentEditor(
+            item
+        );
+    }
+
+    /* =========================================================
+       CSV EXPORT
+       ========================================================= */
+
+    function csvEscape(value) {
+
+        const stringValue =
+            String(
+                value ?? ""
+            );
+
+        return '"' +
+            stringValue
+                .replace(
+                    /"/g,
+                    '""'
+                ) +
+            '"';
+    }
+
+    function exportCSV() {
+
+        if (!allData.length) {
+
+            showToast(
+                "Er zijn geen inschrijvingen om te exporteren.",
+                true
+            );
+
+            return;
+        }
+
+        const headers = [
+
+            "Datum",
+
+            "Naam ouder",
+
+            "E-mail",
+
+            "Aantal kinderen",
+
+            "Kind 1",
+
+            "Kind 2",
+
+            "Kind 3",
+
+            "Kind 4",
+
+            "Bedrag",
+
+            "Betaalmethode",
+
+            "Betaalstatus"
+        ];
+
+        const rows =
+            allData
+                .slice()
+                .sort(
+                    (a,b) =>
+                        (
+                            getAppointmentDate(a) ||
+                            0
+                        ) -
+                        (
+                            getAppointmentDate(b) ||
+                            0
+                        )
+                )
+                .map(item => [
+
+                    item.appointment_date,
+
+                    item.name,
+
+                    item.email,
+
+                    getAppointmentChildrenCount(
+                        item
+                    ),
+
+                    item.child1,
+
+                    item.child2,
+
+                    item.child3,
+
+                    item.child4,
+
+                    getStoredAmount(
+                        item
+                    ).toFixed(2),
+
+                    item.payment_method,
+
+                    item.payment_status
+
+                ]);
+
+        const csv = [
+
+            headers,
+
+            ...rows
+
+        ]
+            .map(row =>
+                row
+                    .map(csvEscape)
+                    .join(";")
+            )
+            .join("\r\n");
+
+        const blob =
+            new Blob(
+                [
+                    "\uFEFF" +
+                    csv
+                ],
+                {
+                    type:
+                        "text/csv;charset=utf-8;"
+                }
+            );
+
+        const url =
+            URL.createObjectURL(
+                blob
+            );
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        const today =
+            new Date()
+                .toISOString()
+                .slice(0,10);
+
+        link.href =
+            url;
+
+        link.download =
+            "kleine-wonderwereld-inschrijvingen-" +
+            today +
+            ".csv";
+
+        document.body.appendChild(
+            link
+        );
+
+        link.click();
+
+        document.body.removeChild(
+            link
+        );
+
+        URL.revokeObjectURL(
+            url
+        );
+
+        showToast(
+            "📥 CSV-export aangemaakt."
+        );
+    }
+
+    /* =========================================================
        REALTIME
     ========================================================= */
 
-    sb.channel("admin-live")
+    sb.channel(
+        "admin-live"
+    )
         .on(
             "postgres_changes",
             {
@@ -2336,7 +4697,11 @@
     ).addEventListener(
         "click",
         function(event) {
-            if (event.target === this) {
+
+            if (
+                event.target ===
+                this
+            ) {
                 closeEditModal();
             }
         }
@@ -2345,22 +4710,26 @@
     document.addEventListener(
         "keydown",
         function(event) {
-            if (event.key === "Escape") {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
                 closeEditModal();
             }
         }
     );
 
-    /*
-     * Bedrag automatisch aanpassen bij wijziging van
-     * aantal kinderen. De beheerder kan het bedrag daarna
-     * nog steeds handmatig aanpassen.
-     */
+    /* =========================================================
+       AUTOMATIC AMOUNT
+       ========================================================= */
+
     document.getElementById(
         "editChildrenCount"
     ).addEventListener(
         "change",
         function() {
+
             const current =
                 Number(
                     document.getElementById(
@@ -2369,17 +4738,23 @@
                 );
 
             const calculated =
-                calculateAmount(this.value);
+                calculateAmount(
+                    this.value
+                );
 
-            /*
-             * Alleen automatisch aanpassen als het huidige
-             * bedrag leeg is of overeenkomt met de standaardprijs.
-             */
             if (
-                !Number.isFinite(current) ||
+                !Number.isFinite(
+                    current
+                ) ||
                 current === 0 ||
-                [18,33,48,63].includes(current)
+                [
+                    18,
+                    33,
+                    48,
+                    63
+                ].includes(current)
             ) {
+
                 document.getElementById(
                     "editAmount"
                 ).value =
@@ -2409,6 +4784,7 @@
             ]);
         }
     );
+
 </script>
 
 </body>

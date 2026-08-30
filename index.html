@@ -1433,15 +1433,15 @@ margin-left:0;
 
                 <span class="payment-method-text">
 
-        <span class="payment-method-title">
-            💳 Online betalen
-        </span>
+            <span class="payment-method-title">
+                💳 Online betalen
+            </span>
 
-        <span class="payment-method-description">
-            Momenteel niet beschikbaar
-        </span>
+            <span class="payment-method-description">
+                Tijdelijk niet beschikbaar
+            </span>
 
-    </span>
+        </span>
 
             </label>
 
@@ -2159,15 +2159,12 @@ async function sendBookingEmails({
     const formattedDate =
         formatDateForEmail(date);
 
+
     const paymentText =
         paymentMethod === "onsite"
             ? "Ter plaatse betalen (cash of Payconiq)"
             : "Online betaling via Mollie";
 
-
-    /* =====================================================
-       KINDERNAMEN OPMAKEN
-    ===================================================== */
 
     const childNamesText =
         childNames
@@ -2178,32 +2175,23 @@ async function sendBookingEmails({
             .join("\n");
 
 
-    /* =====================================================
-       EMAILJS PARAMETERS
-    ===================================================== */
-
     const templateParams = {
 
-        /* Ouder */
         name:
             name,
 
         email:
             email,
 
-        /* Datum */
         date:
             formattedDate,
 
-        /* Aantal */
         children_count:
             childrenCount,
 
-        /* Alle namen samen */
         child_names:
             childNamesText,
 
-        /* Namen afzonderlijk */
         child1:
             childNames[0] || "",
 
@@ -2216,69 +2204,58 @@ async function sendBookingEmails({
         child4:
             childNames[3] || "",
 
-        /* Bedrag */
         amount:
-            amount
+            Number(amount || 0)
                 .toFixed(2)
                 .replace(".", ","),
 
-        /* Betaling */
         payment_method:
             paymentText
 
     };
 
 
-    /* =====================================================
-       BEVESTIGINGSMAIL NAAR OUDER
-    ===================================================== */
+    /*
+     * KLANT
+     */
 
-    try {
-
-        await emailjs.send(
-            EMAILJS_SERVICE,
-            EMAILJS_CONFIRMATION_TEMPLATE,
-            templateParams
-        );
-
-        console.log(
-            "Klantbevestiging verzonden."
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Klantmail kon niet worden verzonden:",
-            error
-        );
-
-    }
+    console.log(
+        "📧 Bevestigingsmail naar:",
+        email
+    );
 
 
-    /* =====================================================
-       INTERNE MAIL NAAR JEZELF
-    ===================================================== */
+    await emailjs.send(
+        EMAILJS_SERVICE,
+        EMAILJS_CONFIRMATION_TEMPLATE,
+        templateParams
+    );
 
-    try {
 
-        await emailjs.send(
-            EMAILJS_SERVICE,
-            EMAILJS_ADMIN_TEMPLATE,
-            templateParams
-        );
+    console.log(
+        "✅ Klantbevestiging verzonden."
+    );
 
-        console.log(
-            "Adminmelding verzonden."
-        );
 
-    } catch (error) {
+    /*
+     * ADMIN
+     */
 
-        console.error(
-            "Adminmail kon niet worden verzonden:",
-            error
-        );
+    console.log(
+        "📧 Interne mail verzenden..."
+    );
 
-    }
+
+    await emailjs.send(
+        EMAILJS_SERVICE,
+        EMAILJS_ADMIN_TEMPLATE,
+        templateParams
+    );
+
+
+    console.log(
+        "✅ Adminmelding verzonden."
+    );
 
 }
 
@@ -2855,47 +2832,48 @@ async function sendBookingEmails({
                ONLINE MOLLIE BETALING
             ================================================= */
 
-            const {
-                data,
-                error
-            } =
-                await sb.functions.invoke(
-                    "create-mollie-payment",
-                    {
-                        body: {
+           const {
+    data,
+    error
+} =
+    await sb.functions.invoke(
+        "create-mollie-payment",
+        {
+            body: {
 
-                            appointment_date:
-                                selectedDate,
+                appointment_date:
+                    selectedDate,
 
-                            name:
-                                name,
+                name:
+                    name,
 
-                            email:
-                                email,
+                email:
+                    email,
 
-                            children_count:
-                                childrenCount,
+                children_count:
+                    childrenCount,
 
-                            /*
-                             * Nieuwe structuur:
-                             * afzonderlijke kindnamen.
-                             */
+                child1:
+                    child1,
 
-                            child1:
-                                child1,
+                child2:
+                    child2,
 
-                            child2:
-                                child2,
+                child3:
+                    child3,
 
-                            child3:
-                                child3,
+                child4:
+                    child4,
 
-                            child4:
-                                child4
+                amount:
+                    amount,
 
-                        }
-                    }
-                );
+                payment_method:
+                    paymentMethod
+
+            }
+        }
+    );
 
 
             if (error) {
@@ -4035,32 +4013,199 @@ async function sendBookingEmails({
     );
 
 
-    /* =========================================================
-       MOLLIE RETURN
-    ========================================================= */
+/* =========================================================
+   MOLLIE RETURN
+========================================================= */
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        function() {
+async function handleMollieReturn() {
 
-            const params =
-                new URLSearchParams(
-                    window.location.search
-                );
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
+    if (
+        params.get("payment") !== "return"
+    ) {
+        return;
+    }
+
+    console.log(
+        "💳 Teruggekeerd van Mollie."
+    );
+
+
+    /*
+     * Booking ID werd opgeslagen
+     * voordat we naar Mollie gingen.
+     */
+
+    const bookingId =
+        localStorage.getItem(
+            "pendingBookingId"
+        );
+
+
+    if (!bookingId) {
+
+        console.error(
+            "Geen pendingBookingId gevonden."
+        );
+
+        alert(
+            "💛 Bedankt voor je betaling. " +
+            "We konden je reservatie niet automatisch terugvinden. " +
+            "Neem indien nodig even contact met ons op."
+        );
+
+        history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
+
+        return;
+    }
+
+
+    /*
+     * Voorkomen dat dezelfde reservatie
+     * meerdere keren een mail krijgt.
+     */
+
+    const mailAlreadySent =
+        localStorage.getItem(
+            "bookingMailSent_" + bookingId
+        );
+
+
+    if (mailAlreadySent === "true") {
+
+        console.log(
+            "Mails waren al verzonden voor booking:",
+            bookingId
+        );
+
+        history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
+
+        return;
+    }
+
+
+    /*
+     * Mollie webhook kan enkele seconden
+     * nodig hebben om payment_status
+     * naar 'paid' te veranderen.
+     *
+     * Daarom controleren we meerdere keren.
+     */
+
+    let booking = null;
+
+    const maxAttempts = 12;
+
+    const waitTime = 2500;
+
+
+    for (
+        let attempt = 1;
+        attempt <= maxAttempts;
+        attempt++
+    ) {
+
+        console.log(
+            `Betaling controleren (${attempt}/${maxAttempts})...`
+        );
+
+
+        const {
+            data,
+            error
+        } =
+            await sb
+                .from("appointments")
+                .select(`
+                    id,
+                    appointment_date,
+                    name,
+                    email,
+                    children_count,
+                    child1,
+                    child2,
+                    child3,
+                    child4,
+                    amount,
+                    payment_method,
+                    payment_status
+                `)
+                .eq(
+                    "id",
+                    bookingId
+                )
+                .maybeSingle();
+
+
+        if (error) {
+
+            console.error(
+                "Booking ophalen mislukt:",
+                error
+            );
+
+        } else if (data) {
+
+            booking = data;
+
+            console.log(
+                "Booking gevonden:",
+                booking
+            );
+
+
+            const status =
+                String(
+                    booking.payment_status || ""
+                ).toLowerCase();
+
+
+            /*
+             * Betaling geslaagd
+             */
 
             if (
-                params.get(
-                    "payment"
-                ) === "return"
+                status === "paid" ||
+                status === "paidout"
             ) {
 
-                alert(
-                    "💛 Bedankt! We controleren je betaling. " +
-                    "Je inschrijving wordt bevestigd zodra " +
-                    "Mollie de betaling als geslaagd heeft gemeld."
+                break;
+
+            }
+
+
+            /*
+             * Betaling geweigerd/geannuleerd.
+             */
+
+            if (
+                status === "failed" ||
+                status === "canceled" ||
+                status === "cancelled" ||
+                status === "expired"
+            ) {
+
+                console.warn(
+                    "Mollie betaling niet geslaagd:",
+                    status
                 );
 
+                alert(
+                    "❌ De betaling is niet geslaagd. " +
+                    "Je inschrijving werd daarom niet bevestigd."
+                );
 
                 history.replaceState(
                     {},
@@ -4068,10 +4213,269 @@ async function sendBookingEmails({
                     window.location.pathname
                 );
 
+                return;
+
             }
 
         }
+
+
+        /*
+         * Nog niet betaald:
+         * even wachten op de webhook.
+         */
+
+        if (
+            attempt < maxAttempts
+        ) {
+
+            await new Promise(
+                resolve =>
+                    setTimeout(
+                        resolve,
+                        waitTime
+                    )
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Geen booking gevonden.
+     */
+
+    if (!booking) {
+
+        console.error(
+            "Reservatie kon niet worden opgehaald."
+        );
+
+        alert(
+            "💛 Bedankt voor je betaling. " +
+            "We zijn je reservatie nog aan het verwerken. " +
+            "Neem contact met ons op als je geen bevestiging ontvangt."
+        );
+
+        history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
+
+        return;
+    }
+
+
+    /*
+     * Betalingsstatus controleren.
+     */
+
+    const finalStatus =
+        String(
+            booking.payment_status || ""
+        ).toLowerCase();
+
+
+    if (
+        finalStatus !== "paid" &&
+        finalStatus !== "paidout"
+    ) {
+
+        console.warn(
+            "Betaling nog niet als betaald geregistreerd:",
+            finalStatus
+        );
+
+        alert(
+            "💛 Bedankt! Je betaling wordt nog verwerkt. " +
+            "Zodra de betaling bevestigd is, ontvang je automatisch een e-mail."
+        );
+
+        history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
+
+        return;
+    }
+
+
+    /*
+     * KINDERNAMEN OPBOUWEN
+     */
+
+    const childNames = [
+        booking.child1,
+        booking.child2,
+        booking.child3,
+        booking.child4
+    ]
+        .filter(
+            name =>
+                name &&
+                String(name).trim() !== ""
+        )
+        .map(
+            name =>
+                String(name).trim()
+        );
+
+
+    /*
+     * KINDERNAMEN CONTROLEREN
+     */
+
+    const childrenCount =
+        Number(
+            booking.children_count || 1
+        );
+
+
+    /*
+     * Bedrag uit database gebruiken.
+     * Zo komt exact hetzelfde bedrag
+     * in de bevestigingsmail als in de betaling.
+     */
+
+    const amount =
+        Number(
+            booking.amount || 0
+        );
+
+
+    /*
+     * MAILS VERZENDEN
+     */
+
+    try {
+
+        await sendBookingEmails({
+
+            name:
+                booking.name,
+
+            email:
+                booking.email,
+
+            date:
+                booking.appointment_date,
+
+            childrenCount:
+                childrenCount,
+
+            childNames:
+                childNames,
+
+            amount:
+                amount,
+
+            paymentMethod:
+                "online"
+
+        });
+
+
+        /*
+         * Markeren als verzonden.
+         *
+         * Hierdoor worden bij een refresh
+         * geen dubbele mails verstuurd.
+         */
+
+        localStorage.setItem(
+            "bookingMailSent_" + bookingId,
+            "true"
+        );
+
+
+        /*
+         * Oude tijdelijke gegevens opruimen.
+         */
+
+        localStorage.removeItem(
+            "pendingPaymentId"
+        );
+
+        localStorage.removeItem(
+            "pendingBookingId"
+        );
+
+
+        /*
+         * Kalender vernieuwen.
+         */
+
+        await loadPublicCalendar();
+
+
+        /*
+         * Succesmelding
+         */
+
+        alert(
+            "💛 Bedankt voor je inschrijving!\n\n" +
+            "Je betaling is goed ontvangen.\n" +
+            "Een bevestigingsmail werd naar " +
+            booking.email +
+            " verzonden."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Fout bij verwerken Mollie-return:",
+            error
+        );
+
+        alert(
+            "💛 Je betaling is geslaagd en je reservatie is geregistreerd.\n\n" +
+            "De bevestigingsmail kon momenteel niet worden verzonden. " +
+            "Je reservatie blijft wel geldig."
+        );
+
+    }
+
+
+    /*
+     * URL proper maken.
+     */
+
+    history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
     );
+
+}
+
+
+/* =========================================================
+   START MOLLIE RETURN CHECK
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function() {
+
+        try {
+
+            await handleMollieReturn();
+
+        } catch (error) {
+
+            console.error(
+                "Mollie return verwerking mislukt:",
+                error
+            );
+
+        }
+
+    }
+);
 
 </script>
 
