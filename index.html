@@ -1422,14 +1422,13 @@ margin-left:0;
 
         <div class="payment-method-container">
 
-            <label class="payment-method-option disabled"
+            <label class="payment-method-option"
                    id="paymentOnlineOption"
-                   style="opacity:0.45; cursor:not-allowed;">
+                   style="cursor:pointer;">
 
                 <input type="radio"
                        name="paymentMethod"
-                       value="online"
-                       disabled>
+                       value="online">
 
                 <span class="payment-method-text">
 
@@ -1438,7 +1437,7 @@ margin-left:0;
             </span>
 
             <span class="payment-method-description">
-                Tijdelijk niet beschikbaar
+                Veilig online betalen
             </span>
 
         </span>
@@ -4040,11 +4039,34 @@ async function handleMollieReturn() {
      * voordat we naar Mollie gingen.
      */
 
-    const bookingId =
-        localStorage.getItem(
-            "pendingBookingId"
-        );
+    // Mollie kan het booking-ID als queryparameter teruggeven.
+    // Gebruik die waarde eerst en val terug op localStorage.
+    // Zo werkt de return ook wanneer localStorage niet behouden is.
+ const bookingIdFromUrl =
+    params.get("booking");
 
+const bookingIdFromStorage =
+    localStorage.getItem("pendingBookingId");
+
+const bookingId =
+    bookingIdFromUrl ||
+    bookingIdFromStorage;
+
+console.log("========== MOLLIE RETURN DEBUG ==========");
+console.log("Volledige URL:", window.location.href);
+console.log("Querystring:", window.location.search);
+console.log("payment:", params.get("payment"));
+console.log("booking uit URL:", bookingIdFromUrl);
+console.log("booking uit localStorage:", bookingIdFromStorage);
+console.log("uiteindelijk bookingId:", bookingId);
+console.log("==========================================");
+
+    if (bookingIdFromUrl) {
+        localStorage.setItem(
+            "pendingBookingId",
+            bookingIdFromUrl
+        );
+    }
 
     if (!bookingId) {
 
@@ -4481,4 +4503,3 @@ document.addEventListener(
 
 </body>
 </html>
-
