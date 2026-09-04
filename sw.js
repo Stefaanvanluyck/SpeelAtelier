@@ -1,16 +1,16 @@
-const CACHE_NAME = "kleine-wonderwereld-v1";
+const CACHE_NAME = "kleine-wonderwereld-v2";
 const ASSETS = [
     "./",
     "./index.html",
     "./favicon.png",
-    "./logosite.jpeg",
-    "./Valerie.jpeg",
-    "./gekleurderijst.jpeg",
-    "./speelatteliervoorbeeld1.jpeg",
-    "./speelatteliervoorbeeld2.jpeg",
-    "./waterenspel.jpeg",
-    "./beurtenkaart5.jpeg",
-    "./beurtenkaart10.jpeg",
+    "./logosite.webp",
+    "./Valerie.webp",
+    "./gekleurderijst.webp",
+    "./speelatteliervoorbeeld1.webp",
+    "./speelatteliervoorbeeld2.webp",
+    "./waterenspel.webp",
+    "./beurtenkaart5.webp",
+    "./beurtenkaart10.webp",
     "./manifest.webmanifest"
 ];
 

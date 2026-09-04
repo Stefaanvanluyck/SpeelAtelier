@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+    <url>
+        <loc>https://jufvalerie.be/</loc>
+        <lastmod>2026-09-04</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://jufvalerie.be/logosite.webp</image:loc>
+            <image:title>Kleine Wonderwereld — sensorisch speelatelier</image:title>
+        </image:image>
+        <image:image>
+            <image:loc>https://jufvalerie.be/Valerie.webp</image:loc>
+            <image:title>Valerie De Beuckelaer — juf van Kleine Wonderwereld</image:title>
+        </image:image>
+    </url>
+
+</urlset>

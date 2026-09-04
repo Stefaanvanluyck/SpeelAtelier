@@ -1257,37 +1257,6 @@
 
     </section>
 
-    <!-- WACHTLIJST -->
-    <section class="admin-card">
-
-        <div class="dashboard-card-header">
-
-            <div>
-                <h3 style="margin-bottom:3px;">
-                    ⏳ Wachtlijst
-                </h3>
-
-                <div
-                        style="color:#6b7280;font-size:.78rem;">
-                    Gezinnen die een volzet thema willen volgen
-                </div>
-            </div>
-
-        </div>
-
-        <div
-                id="waitlistResultCount"
-                class="result-count">
-            0 wachtlijstaanvragen
-        </div>
-
-        <div
-                id="waitlistList"
-                class="booking-list">
-        </div>
-
-    </section>
-
 
 </main>
 
@@ -1567,13 +1536,11 @@
     let allData = [];
     let themes = [];
     let blockedDates = [];
-    let waitlist = [];
     let calendar = null;
     let monthlyChart = null;
 
     let editMode = "appointment";
     let editId = null;
-    let editWaitlistId = null;
 
     /* =========================================================
        HELPERS
@@ -1636,40 +1603,6 @@
         }
 
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-
-    function formatTimestamp(isoString) {
-
-        if (!isoString) {
-            return "";
-        }
-
-        const date =
-            new Date(isoString);
-
-        if (isNaN(date.getTime())) {
-            return "";
-        }
-
-        return date.toLocaleString(
-            "nl-BE",
-            {
-                dateStyle: "short",
-                timeStyle: "short"
-            }
-        );
-    }
-
-    function getThemeForDate(dateString) {
-
-        if (!dateString) {
-            return "";
-        }
-
-        return themes.find(theme =>
-            String(theme.date) ===
-            String(dateString)
-        )?.theme || "";
     }
 
     function calculateAmount(childrenCount) {
@@ -1927,8 +1860,7 @@
             const [
                 appointmentsResult,
                 themesResult,
-                blockedResult,
-                waitlistResult
+                blockedResult
             ] = await Promise.all([
 
                 sb
@@ -1959,16 +1891,6 @@
                         {
                             ascending: true
                         }
-                    ),
-
-                sb
-                    .from("waitlist")
-                    .select("*")
-                    .order(
-                        "created_at",
-                        {
-                            ascending: false
-                        }
                     )
             ]);
 
@@ -1984,10 +1906,6 @@
                 throw blockedResult.error;
             }
 
-            if (waitlistResult.error) {
-                throw waitlistResult.error;
-            }
-
             allData =
                 appointmentsResult.data || [];
 
@@ -1997,14 +1915,9 @@
             blockedDates =
                 blockedResult.data || [];
 
-            waitlist =
-                waitlistResult.data || [];
-
             updateDashboard();
 
             renderCalendar();
-
-            renderWaitlist();
 
         } catch (error) {
 
@@ -2861,16 +2774,6 @@
 
         if (
             editMode ===
-            "waitlist"
-        ) {
-
-            await saveWaitlist();
-
-            return;
-        }
-
-        if (
-            editMode ===
             "theme"
         ) {
 
@@ -3219,18 +3122,6 @@
         ) {
 
             await deleteAppointment();
-
-            return;
-        }
-
-        if (
-            editMode ===
-            "waitlist"
-        ) {
-
-            await deleteWaitlistEntry(
-                editWaitlistId
-            );
 
             return;
         }
@@ -4615,522 +4506,6 @@
         openAppointmentEditor(
             item
         );
-    }
-
-    /* =========================================================
-       WAITLIST
-    ========================================================= */
-
-    function renderWaitlist() {
-
-        const container =
-            document.getElementById(
-                "waitlistList"
-            );
-
-        if (!container) {
-            return;
-        }
-
-        document.getElementById(
-            "waitlistResultCount"
-        ).textContent =
-            waitlist.length +
-            (
-                waitlist.length === 1
-                    ? " wachtlijstaanvraag"
-                    : " wachtlijstaanvragen"
-            );
-
-        if (!waitlist.length) {
-
-            container.innerHTML =
-                `<div class="empty-state">
-                    Geen wachtlijstaanvragen.
-                </div>`;
-
-            return;
-        }
-
-        container.innerHTML =
-            waitlist
-                .map(item => {
-
-                    const safeId =
-                        String(item.id).replace(
-                            /'/g,
-                            "\\'"
-                        );
-
-                    return `
-                        <div class="booking-item">
-
-                            <div class="booking-main">
-
-                                <div class="booking-name">
-                                    👤
-                                    ${escapeHtml(
-                                        item.parent_name ||
-                                        "Onbekend"
-                                    )}
-                                </div>
-
-                                <div class="booking-meta">
-
-                                    📅
-                                    ${escapeHtml(
-                                        formatDate(
-                                            item.appointment_date
-                                        )
-                                    )}
-                                    ·
-                                    🎨
-                                    ${escapeHtml(
-                                        getThemeForDate(
-                                            item.appointment_date
-                                        ) ||
-                                        "Thema onbekend"
-                                    )}
-
-                                    <br>
-
-                                    👶
-                                    ${Number(
-                                        item.children_count ||
-                                        1
-                                    )}
-
-                                    ${
-                                        Number(
-                                            item.children_count ||
-                                            1
-                                        ) === 1
-                                            ? "kind"
-                                            : "kinderen"
-                                    }
-
-                                    <br>
-
-                                    🧒
-                                    ${escapeHtml(
-                                        item.child_names ||
-                                        "Geen kindernamen"
-                                    )}
-
-                                    <br>
-
-                                    ✉️
-                                    ${escapeHtml(
-                                        item.email ||
-                                        ""
-                                    )}
-
-                                    <br>
-
-                                    🕐 Aangevraagd op
-                                    ${escapeHtml(
-                                        formatTimestamp(
-                                            item.created_at
-                                        )
-                                    )}
-
-                                </div>
-
-                            </div>
-
-                            <div class="booking-side">
-
-                                <span
-                                    class="payment-pill pending">
-                                    ⏳ Wachtlijst
-                                </span>
-
-                                <div
-                                    class="waitlist-actions"
-                                    style="
-                                        display:flex;
-                                        gap:6px;
-                                        flex-wrap:wrap;
-                                        justify-content:flex-end;
-                                        margin-top:8px;">
-
-                                    <button
-                                        class="btn"
-                                        onclick="openWaitlistEditor('${safeId}')">
-                                        ➡️ Naar inschrijving
-                                    </button>
-
-                                    <button
-                                        class="btn btn-gray"
-                                        onclick="deleteWaitlistEntry('${safeId}')"
-                                        title="Wachtlijstaanvraag verwijderen">
-                                        🗑️
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-                    `;
-
-                })
-                .join("");
-    }
-
-    function openWaitlistEditor(id) {
-
-        const item =
-            waitlist.find(entry =>
-                String(entry.id) ===
-                String(id)
-            );
-
-        if (!item) {
-
-            showToast(
-                "Wachtlijstaanvraag niet gevonden.",
-                true
-            );
-
-            return;
-        }
-
-        editMode =
-            "waitlist";
-
-        editId =
-            null;
-
-        editWaitlistId =
-            String(item.id);
-
-        document.getElementById(
-            "modalTitle"
-        ).textContent =
-            "📥 Naar inschrijving";
-
-        document.getElementById(
-            "appointmentEditor"
-        ).style.display =
-            "block";
-
-        document.getElementById(
-            "themeEditor"
-        ).style.display =
-            "none";
-
-        document.getElementById(
-            "editName"
-        ).value =
-            item.parent_name || "";
-
-        document.getElementById(
-            "editEmail"
-        ).value =
-            item.email || "";
-
-        document.getElementById(
-            "editDate"
-        ).value =
-            item.appointment_date || "";
-
-        const childrenCount =
-            Number(
-                item.children_count ||
-                1
-            );
-
-        document.getElementById(
-            "editChildrenCount"
-        ).value =
-            String(
-                Math.min(
-                    4,
-                    Math.max(
-                        1,
-                        childrenCount
-                    )
-                )
-            );
-
-        const childrenNames =
-            String(
-                item.child_names ||
-                ""
-            )
-                .split(",")
-                .map(name => name.trim())
-                .filter(Boolean);
-
-        document.getElementById(
-            "editChild1"
-        ).value =
-            childrenNames[0] ||
-            "";
-
-        document.getElementById(
-            "editChild2"
-        ).value =
-            childrenNames[1] ||
-            "";
-
-        document.getElementById(
-            "editChild3"
-        ).value =
-            childrenNames[2] ||
-            "";
-
-        document.getElementById(
-            "editChild4"
-        ).value =
-            childrenNames[3] ||
-            "";
-
-        document.getElementById(
-            "editAmount"
-        ).value =
-            calculateAmount(
-                childrenCount
-            ).toFixed(2);
-
-        document.getElementById(
-            "editPaymentMethod"
-        ).value =
-            "onsite";
-
-        document.getElementById(
-            "editPaymentStatus"
-        ).value =
-            "pending";
-
-        document.getElementById(
-            "deleteButton"
-        ).textContent =
-            "🗑️ Wachtlijst verwijderen";
-
-        document.getElementById(
-            "editModal"
-        ).style.display =
-            "flex";
-    }
-
-    async function saveWaitlist() {
-
-        const name =
-            document.getElementById(
-                "editName"
-            ).value.trim();
-
-        const email =
-            document.getElementById(
-                "editEmail"
-            ).value.trim();
-
-        const date =
-            document.getElementById(
-                "editDate"
-            ).value;
-
-        const childrenCount =
-            Number(
-                document.getElementById(
-                    "editChildrenCount"
-                ).value
-            );
-
-        const amount =
-            Number(
-                document.getElementById(
-                    "editAmount"
-                ).value
-            );
-
-        const paymentMethod =
-            document.getElementById(
-                "editPaymentMethod"
-            ).value;
-
-        const paymentStatus =
-            document.getElementById(
-                "editPaymentStatus"
-            ).value;
-
-        if (
-            !name ||
-            !email ||
-            !date
-        ) {
-
-            showToast(
-                "Naam, e-mail en datum zijn verplicht.",
-                true
-            );
-
-            return;
-        }
-
-        if (
-            !Number.isFinite(
-                childrenCount
-            ) ||
-            childrenCount < 1 ||
-            childrenCount > 4
-        ) {
-
-            showToast(
-                "Het aantal kinderen moet tussen 1 en 4 liggen.",
-                true
-            );
-
-            return;
-        }
-
-        if (
-            !Number.isFinite(amount) ||
-            amount < 0
-        ) {
-
-            showToast(
-                "Het bedrag is ongeldig.",
-                true
-            );
-
-            return;
-        }
-
-        const payload = {
-
-            name,
-
-            email,
-
-            appointment_date:
-                date,
-
-            children_count:
-                childrenCount,
-
-            child1:
-                document.getElementById(
-                    "editChild1"
-                ).value.trim() ||
-                null,
-
-            child2:
-                document.getElementById(
-                    "editChild2"
-                ).value.trim() ||
-                null,
-
-            child3:
-                document.getElementById(
-                    "editChild3"
-                ).value.trim() ||
-                null,
-
-            child4:
-                document.getElementById(
-                    "editChild4"
-                ).value.trim() ||
-                null,
-
-            amount,
-
-            payment_method:
-
-                paymentMethod,
-
-            payment_status:
-                paymentStatus
-        };
-
-        const {
-            error
-        } = await sb
-            .from("appointments")
-            .insert(payload);
-
-        if (error) {
-
-            console.error(error);
-
-            showToast(
-                "Verplaatsen naar inschrijving mislukt: " +
-                error.message,
-                true
-            );
-
-            return;
-        }
-
-        const {
-            error: deleteError
-        } = await sb
-            .from("waitlist")
-            .delete()
-            .eq(
-                "id",
-                editWaitlistId
-            );
-
-        if (deleteError) {
-
-            console.error(
-                "Waitlist delete error:",
-                deleteError
-            );
-        }
-
-        closeEditModal();
-
-        showToast(
-            "✅ Verplaatst naar inschrijving."
-        );
-
-        await loadData();
-    }
-
-    async function deleteWaitlistEntry(id) {
-
-        if (
-            !confirm(
-                "Deze wachtlijstaanvraag definitief verwijderen?"
-            )
-        ) {
-            return;
-        }
-
-        const {
-            error
-        } = await sb
-            .from("waitlist")
-            .delete()
-            .eq(
-                "id",
-                id
-            );
-
-        if (error) {
-
-            console.error(error);
-
-            showToast(
-                "Wachtlijstaanvraag verwijderen mislukt: " +
-                error.message,
-                true
-            );
-
-            return;
-        }
-
-        closeEditModal();
-
-        showToast(
-            "🗑️ Wachtlijstaanvraag verwijderd."
-        );
-
-        await loadData();
     }
 
     /* =========================================================
