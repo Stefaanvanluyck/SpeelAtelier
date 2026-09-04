@@ -10,59 +10,13 @@
 
     <title>Kleine Wonderwereld</title>
 
-<meta name="description"
-          content="Kleine Wonderwereld: sensorisch speelatelier voor kinderen van 2 tot 6 jaar in Kalmthout. Op zaterdagvoormiddag ouder en kind samen spelen, voelen en ontdekken.">
+    <meta name="description"
+          content="Kleine Wonderwereld – sensorisch speelatelier voor kinderen van 2 tot 6 jaar in Kalmthout.">
 
-    <link rel="canonical" href="https://jufvalerie.be/">
-
-    <meta name="theme-color" content="#ff6f86">
-
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="nl_BE">
-    <meta property="og:url" content="https://jufvalerie.be/">
-    <meta property="og:site_name" content="Kleine Wonderwereld">
-    <meta property="og:title" content="Kleine Wonderwereld | Sensorisch speelatelier">
+    <meta property="og:title" content="Kleine Wonderwereld">
     <meta property="og:description"
-          content="Sensorisch speelatelier voor kleine ontdekkers van 2 tot 6 jaar in Kalmthout.">
-    <meta property="og:image" content="https://jufvalerie.be/logosite.jpeg">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Kleine Wonderwereld | Sensorisch speelatelier">
-    <meta name="twitter:description"
-          content="Sensorisch speelatelier voor kleine ontdekkers van 2 tot 6 jaar in Kalmthout.">
-    <meta name="twitter:image" content="https://jufvalerie.be/logosite.jpeg">
-
-    <link rel="manifest" href="manifest.webmanifest">
-
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "ChildCare",
-            "name": "Kleine Wonderwereld",
-            "description": "Sensorisch speelatelier voor kinderen van 2 tot 6 jaar. Ouder en kind samen spelen, voelen en ontdekken.",
-            "url": "https://jufvalerie.be/",
-            "image": "https://jufvalerie.be/logosite.jpeg",
-            "telephone": "+32471390682",
-            "email": "kleinewonderwereld2920@gmail.com",
-            "address": {
-                "@type": "PostalAddress",
-                "streetAddress": "Canadezenlaan 7",
-                "postalCode": "2920",
-                "addressLocality": "Kalmthout",
-                "addressCountry": "BE"
-            },
-            "openingHoursSpecification": {
-                "@type": "OpeningHoursSpecification",
-                "dayOfWeek": "Saturday",
-                "opens": "10:00",
-                "closes": "11:00"
-            },
-            "priceRange": "€15 - €18",
-            "sameAs": [
-                "https://www.instagram.com/juf__valerie"
-            ]
-        }
-    </script>
+          content="Sensorisch speelatelier voor kleine ontdekkers van 2 tot 6 jaar.">
+    <meta property="og:image" content="logosite.jpeg">
 
     <meta http-equiv="Content-Security-Policy"
           content="
@@ -850,303 +804,6 @@
         }
 
         /* =========================================================
-           COUNTDOWN
-        ========================================================= */
-
-        .countdown {
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-
-            margin-top: 26px;
-
-            flex-wrap: wrap;
-        }
-
-        .countdown-box {
-            background: rgba(255,255,255,0.16);
-            backdrop-filter: blur(8px);
-
-            border: 1px solid rgba(255,255,255,0.25);
-
-            border-radius: 18px;
-
-            padding: 12px 16px;
-
-            min-width: 78px;
-
-            text-align: center;
-        }
-
-        .countdown-value {
-            display: block;
-
-            font-size: 1.9rem;
-            font-weight: 700;
-
-            line-height: 1.1;
-        }
-
-        .countdown-label {
-            display: block;
-
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-
-            opacity: 0.85;
-        }
-
-        .countdown-meta {
-            margin-top: 12px;
-
-            font-size: 0.95rem;
-            font-style: italic;
-
-            opacity: 0.92;
-        }
-
-        /* =========================================================
-           SOCIAL SHARE
-        ========================================================= */
-
-        .social-share {
-            display: flex;
-            justify-content: center;
-
-            gap: 12px;
-
-            margin-top: 20px;
-
-            flex-wrap: wrap;
-        }
-
-        .social-share a {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-
-            padding: 10px 18px;
-
-            border-radius: 999px;
-
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(8px);
-
-            border: 1px solid rgba(255,255,255,0.3);
-
-            color: white;
-
-            text-decoration: none;
-
-            font-weight: 600;
-
-            font-size: 0.9rem;
-
-            transition: 0.25s;
-        }
-
-        .social-share a:hover {
-            background: rgba(255,255,255,0.32);
-            transform: translateY(-3px);
-        }
-
-        /* =========================================================
-           LIGHTBOX
-        ========================================================= */
-
-        .lightbox {
-            display: none;
-
-            position: fixed;
-            inset: 0;
-
-            z-index: 3000;
-
-            background: rgba(0,0,0,0.88);
-
-            justify-content: center;
-            align-items: center;
-        }
-
-        .lightbox.open {
-            display: flex;
-        }
-
-        .lightbox img {
-            max-width: 90vw;
-            max-height: 82vh;
-
-            border-radius: 16px;
-
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-
-        .lightbox-caption {
-            position: absolute;
-
-            bottom: 28px;
-            left: 0;
-            right: 0;
-
-            text-align: center;
-
-            color: white;
-
-            font-size: 1rem;
-
-            padding: 0 20px;
-        }
-
-        .lightbox-btn {
-            position: absolute;
-
-            top: 50%;
-
-            transform: translateY(-50%);
-
-            width: 52px;
-            height: 52px;
-
-            border: none;
-            border-radius: 50%;
-
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(6px);
-
-            color: white;
-
-            font-size: 1.4rem;
-
-            cursor: pointer;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            transition: 0.2s;
-        }
-
-        .lightbox-btn:hover {
-            background: rgba(255,255,255,0.35);
-        }
-
-        .lightbox-prev {
-            left: 20px;
-        }
-
-        .lightbox-next {
-            right: 20px;
-        }
-
-        .lightbox-close {
-            top: 20px;
-            transform: none;
-
-            right: 20px;
-        }
-
-        .gallery img {
-            cursor: zoom-in;
-        }
-
-        /* =========================================================
-           TESTIMONIALS
-        ========================================================= */
-
-        .testimonials {
-            display: grid;
-            grid-template-columns:
-                repeat(auto-fit,minmax(280px,1fr));
-            gap: 25px;
-        }
-
-        .testimonial {
-            background: var(--card);
-            backdrop-filter: blur(16px);
-
-            border-radius: 26px;
-
-            padding: 30px;
-
-            box-shadow: var(--shadow);
-
-            transition: 0.3s;
-        }
-
-        .testimonial:hover {
-            transform: translateY(-8px);
-        }
-
-        .testimonial-stars {
-            color: #ffb400;
-            font-size: 1.1rem;
-
-            margin-bottom: 12px;
-        }
-
-        .testimonial-text {
-            font-style: italic;
-
-            line-height: 1.6;
-        }
-
-        .testimonial-author {
-            margin-top: 16px;
-
-            font-weight: 600;
-
-            color: var(--accent);
-        }
-
-        /* =========================================================
-           COOKIE BANNER
-        ========================================================= */
-
-        .cookie-banner {
-            position: fixed;
-
-            left: 16px;
-            right: 16px;
-            bottom: 16px;
-
-            z-index: 2500;
-
-            max-width: 480px;
-
-            margin: 0 auto;
-
-            background: rgba(31,42,31,0.95);
-            backdrop-filter: blur(10px);
-
-            color: white;
-
-            border-radius: 18px;
-
-            padding: 20px 24px;
-
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-
-            display: none;
-        }
-
-        .cookie-banner.show {
-            display: block;
-        }
-
-        .cookie-banner p {
-            font-size: 0.9rem;
-
-            margin-bottom: 14px;
-
-            line-height: 1.5;
-        }
-
-        .cookie-banner .btn {
-            margin-top: 0;
-        }
-
-        /* =========================================================
            MOBILE
         ========================================================= */
 
@@ -1231,45 +888,6 @@
             .fc-btn {
                 padding: 11px 14px;
             }
-
-            .countdown-box {
-                min-width: 64px;
-                padding: 10px 12px;
-            }
-
-            .countdown-value {
-                font-size: 1.5rem;
-            }
-
-            .lightbox-btn {
-                width: 44px;
-                height: 44px;
-                font-size: 1.1rem;
-            }
-
-            .lightbox-prev {
-                left: 8px;
-            }
-
-            .lightbox-next {
-                right: 8px;
-            }
-
-            .lightbox-close {
-                right: 10px;
-                top: 10px;
-            }
-
-            .cookie-banner {
-                left: 10px;
-                right: 10px;
-                bottom: 10px;
-            }
-
-            .social-share a {
-                padding: 9px 14px;
-                font-size: 0.85rem;
-            }
         }
 
     </style>
@@ -1350,41 +968,6 @@ margin-left:0;
 
         </p>
 
-        <div class="countdown"
-             id="nextSessionCountdown"
-             style="display:none;">
-
-            <div class="countdown-box">
-                <span class="countdown-value"
-                      id="cdDays">0</span>
-                <span class="countdown-label">dagen</span>
-            </div>
-
-            <div class="countdown-box">
-                <span class="countdown-value"
-                      id="cdHours">0</span>
-                <span class="countdown-label">uren</span>
-            </div>
-
-            <div class="countdown-box">
-                <span class="countdown-value"
-                      id="cdMinutes">0</span>
-                <span class="countdown-label">minuten</span>
-            </div>
-
-            <div class="countdown-box">
-                <span class="countdown-value"
-                      id="cdSeconds">0</span>
-                <span class="countdown-label">seconden</span>
-            </div>
-
-        </div>
-
-        <p class="countdown-meta"
-           id="countdownMeta"
-           style="display:none;">
-        </p>
-
         <button class="btn secondary"
                 onclick="
     document
@@ -1395,26 +978,6 @@ margin-left:0;
             Bekijk planning
 
         </button>
-
-        <div class="social-share">
-
-            <a href="https://api.whatsapp.com/send?text=Kleine%20Wonderwereld%20%E2%80%94%20sensorisch%20speelatelier%20voor%20kleine%20ontdekkers%20van%202%20tot%206%20jaar!%20https%3A%2F%2Fjufvalerie.be"
-               target="_blank"
-               rel="noopener">
-
-                <i class="fab fa-whatsapp"></i> Deel
-
-            </a>
-
-            <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjufvalerie.be"
-               target="_blank"
-               rel="noopener">
-
-                <i class="fab fa-facebook-f"></i> Deel
-
-            </a>
-
-        </div>
 
     </div>
 
@@ -1671,51 +1234,10 @@ margin-left:0;
     <div class="gallery">
 
         <img src="speelatteliervoorbeeld1.jpeg"
-             alt="Kinderen ontdekken het sensorisch speelatelier">
+             alt="Voorbeeld sensorisch speelatelier">
 
         <img src="speelatteliervoorbeeld2.jpeg"
-             alt="Sensorisch spelen met fantasie en verwondering">
-
-        <img src="waterenspel.jpeg"
-             alt="Water spelen met de zintuigen">
-
-        <img src="gekleurderijst.jpeg"
-             alt="Gekleurde rijst om te kneden en gieten">
-
-        <img src="logosite.jpeg"
-             alt="Logo van Kleine Wonderwereld">
-
-    </div>
-
-    <div class="lightbox"
-         id="lightbox"
-         role="dialog"
-         aria-modal="true"
-         aria-label="Foto viewer">
-
-        <button class="lightbox-btn lightbox-close"
-                id="lightboxClose"
-                aria-label="Sluiten">
-            <i class="fas fa-times"></i>
-        </button>
-
-        <button class="lightbox-btn lightbox-prev"
-                id="lightboxPrev"
-                aria-label="Vorige foto">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-
-        <button class="lightbox-btn lightbox-next"
-                id="lightboxNext"
-                aria-label="Volgende foto">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-
-        <img id="lightboxImg"
-             alt="">
-
-        <div class="lightbox-caption"
-             id="lightboxCaption"></div>
+             alt="Voorbeeld sensorisch speelatelier">
 
     </div>
 
@@ -2070,29 +1592,6 @@ margin-left:0;
 
 
 </footer>
-
-<!-- =========================================================
-     COOKIE BANNER
-========================================================= -->
-
-<div class="cookie-banner"
-     id="cookieBanner">
-
-    <p>
-        🍪 Deze website gebruikt geen trackingcookies.
-        Graag of niet, je kan gewoon blijven surfen.
-        Wij gebruiken enkel een kleine instelling
-        om te onthouden dat je deze boodschap al gezien hebt.
-    </p>
-
-    <button class="btn"
-            onclick="acceptCookies()">
-
-        Ok, duidelijk!
-
-    </button>
-
-</div>
 
 <!-- =========================================================
      FLOATING CONTACT
@@ -3170,7 +2669,9 @@ margin-left:0;
                             payment_status:
                                 "pending"
 
-                        }]);
+                        }])
+                        .select()
+                        .single();
 
 
                 if (bookingError) {
@@ -3302,15 +2803,6 @@ margin-left:0;
 
                 submitBtn.innerHTML =
                     "✓ Inschrijving bevestigd";
-
-
-                /*
-                 * Agenda koppeling (ICS download)
-                 */
-
-                showICSButton(
-                    selectedDate
-                );
 
 
                 /*
@@ -3804,25 +3296,16 @@ margin-left:0;
 
 
             /* =================================================
-               DYNAMISCHE PLANNING
+               SEPTEMBER 2026
             ================================================= */
 
             const events = [];
 
 
-            /*
-             * Start: de 1ste van de lopende maand,
-             * zodat ook volzette/bestaande sessies
-             * van deze maand zichtbaar blijven.
-             */
-
-            const now =
-                new Date();
-
             const start =
                 new Date(
-                    now.getFullYear(),
-                    now.getMonth(),
+                    2026,
+                    8,
                     1,
                     12,
                     0,
@@ -3830,14 +3313,10 @@ margin-left:0;
                 );
 
 
-            /*
-             * Eind: 4 maanden later (vooruit kijken).
-             */
-
             const end =
                 new Date(
-                    start.getFullYear(),
-                    start.getMonth() + 4,
+                    2026,
+                    9,
                     1,
                     12,
                     0,
@@ -4147,9 +3626,7 @@ margin-left:0;
                             "dayGridMonth",
 
                         initialDate:
-                            `${now.getFullYear()}-${String(
-                                now.getMonth() + 1
-                            ).padStart(2, "0")}-01`,
+                            "2026-09-01",
 
                         height:
                             "auto",
@@ -4623,34 +4100,6 @@ margin-left:0;
 
             await loadPublicCalendar();
 
-
-            /*
-             * Countdown
-             */
-
-            initCountdown();
-
-
-            /*
-             * Lichtbox
-             */
-
-            initLightbox();
-
-
-            /*
-             * Cookie banner
-             */
-
-            initCookieBanner();
-
-
-            /*
-             * Service worker (PWA)
-             */
-
-            initServiceWorker();
-
         }
     );
 
@@ -4817,7 +4266,13 @@ margin-left:0;
                     .select(`
                         id,
                         appointment_date,
+                        name,
+                        email,
                         children_count,
+                        child1,
+                        child2,
+                        child3,
+                        child4,
                         amount,
                         payment_method,
                         payment_status
@@ -5049,638 +4504,6 @@ margin-left:0;
             document.title,
             window.location.pathname
         );
-
-    }
-
-
-    /* =========================================================
-       COUNTDOWN NAAR VOLGENDE SESSIE
-    ========================================================= */
-
-    function pad2(number) {
-        return String(number).padStart(2, "0");
-    }
-
-    function getNextSaturday() {
-
-        const now = new Date();
-
-        const candidate =
-            new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                now.getDate(),
-                10,
-                0,
-                0
-            );
-
-        /*
-         * Zaterdag = 6.
-         * Indien vandaag zaterdag en nog vóór 11u,
-         * is de sessie vandaag.
-         */
-
-        while (
-            candidate.getDay() !== 6 ||
-            candidate <= now
-        ) {
-
-            candidate.setDate(
-                candidate.getDate() + 1
-            );
-
-        }
-
-        return candidate;
-
-    }
-
-    function updateCountdown() {
-
-        const target =
-            getNextSaturday();
-
-        const now =
-            new Date();
-
-        const diff =
-            target.getTime() -
-            now.getTime();
-
-        const days =
-            Math.max(0, Math.floor(diff / 86400000));
-
-        const hours =
-            Math.max(0, Math.floor((diff % 86400000) / 3600000));
-
-        const minutes =
-            Math.max(0, Math.floor((diff % 3600000) / 60000));
-
-        const seconds =
-            Math.max(0, Math.floor((diff % 60000) / 1000));
-
-        const dayEl =
-            document.getElementById("cdDays");
-
-        const hourEl =
-            document.getElementById("cdHours");
-
-        const minuteEl =
-            document.getElementById("cdMinutes");
-
-        const secondEl =
-            document.getElementById("cdSeconds");
-
-        if (dayEl) {
-            dayEl.textContent =
-                days;
-        }
-
-        if (hourEl) {
-            hourEl.textContent =
-                pad2(hours);
-        }
-
-        if (minuteEl) {
-            minuteEl.textContent =
-                pad2(minutes);
-        }
-
-        if (secondEl) {
-            secondEl.textContent =
-                pad2(seconds);
-        }
-
-        const metaEl =
-            document.getElementById("countdownMeta");
-
-        if (metaEl) {
-
-            const formatted =
-                target.toLocaleDateString(
-                    "nl-BE",
-                    {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric"
-                    }
-                );
-
-            metaEl.textContent =
-                "🤍 Volgende sessie: " +
-                formatted +
-                " (10 – 11 uur)";
-
-        }
-
-    }
-
-    function initCountdown() {
-
-        const countdownEl =
-            document.getElementById(
-                "nextSessionCountdown"
-            );
-
-        const metaEl =
-            document.getElementById(
-                "countdownMeta"
-            );
-
-        if (
-            !countdownEl ||
-            countdownEl.style.display === "none"
-        ) {
-
-            /*
-             * Alleen tonen als er een hero is.
-             */
-
-            if (countdownEl) {
-                countdownEl.style.display = "flex";
-            }
-
-        }
-
-        if (metaEl) {
-            metaEl.style.display = "block";
-        }
-
-        updateCountdown();
-
-        setInterval(
-            updateCountdown,
-            1000
-        );
-
-    }
-
-
-    /* =========================================================
-       LICHTBOX
-    ========================================================= */
-
-    const lightboxState = {
-        images: [],
-        current: 0
-    };
-
-    function openLightbox(index) {
-
-        const lightbox =
-            document.getElementById(
-                "lightbox"
-            );
-
-        const img =
-            document.getElementById(
-                "lightboxImg"
-            );
-
-        const caption =
-            document.getElementById(
-                "lightboxCaption"
-            );
-
-        if (!lightbox || !img) {
-            return;
-        }
-
-        lightboxState.current =
-            index;
-
-        const entry =
-            lightboxState.images[
-                index
-            ];
-
-        img.src =
-            entry.full;
-
-        img.alt =
-            entry.alt;
-
-        if (caption) {
-            caption.textContent =
-                `${index + 1} / ${lightboxState.images.length}`;
-        }
-
-        lightbox.classList.add(
-            "open"
-        );
-
-        document.body.style.overflow =
-            "hidden";
-
-    }
-
-    function closeLightbox() {
-
-        const lightbox =
-            document.getElementById(
-                "lightbox"
-            );
-
-        if (!lightbox) {
-            return;
-        }
-
-        lightbox.classList.remove(
-            "open"
-        );
-
-        document.body.style.overflow =
-            "";
-
-    }
-
-    function moveLightbox(step) {
-
-        if (
-            lightboxState.images.length === 0
-        ) {
-            return;
-        }
-
-        const nextIndex =
-            (
-                lightboxState.current +
-                step +
-                lightboxState.images.length
-            ) %
-            lightboxState.images.length;
-
-        openLightbox(
-            nextIndex
-        );
-
-    }
-
-    function initLightbox() {
-
-        const galleryImages =
-            Array.from(
-                document.querySelectorAll(
-                    ".gallery img"
-                )
-            );
-
-        lightboxState.images =
-            galleryImages.map(
-                img => ({
-                    full: img.src,
-                    alt: img.alt || "Foto"
-                })
-            );
-
-        galleryImages.forEach(
-            (img, index) => {
-
-                img.addEventListener(
-                    "click",
-                    () =>
-                        openLightbox(
-                            index
-                        )
-                );
-
-                img.classList.add(
-                    "lightbox-trigger"
-                );
-
-            }
-        );
-
-        const closeBtn =
-            document.getElementById(
-                "lightboxClose"
-            );
-
-        const prevBtn =
-            document.getElementById(
-                "lightboxPrev"
-            );
-
-        const nextBtn =
-            document.getElementById(
-                "lightboxNext"
-            );
-
-        if (closeBtn) {
-            closeBtn.addEventListener(
-                "click",
-                closeLightbox
-            );
-        }
-
-        if (prevBtn) {
-            prevBtn.addEventListener(
-                "click",
-                () =>
-                    moveLightbox(-1)
-            );
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener(
-                "click",
-                () =>
-                    moveLightbox(1)
-            );
-        }
-
-        const lightbox =
-            document.getElementById(
-                "lightbox"
-            );
-
-        if (lightbox) {
-
-            lightbox.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target === lightbox
-                    ) {
-                        closeLightbox();
-                    }
-
-                }
-            );
-
-        }
-
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    !lightbox ||
-                    !lightbox.classList.contains(
-                        "open"
-                    )
-                ) {
-                    return;
-                }
-
-                if (
-                    event.key === "Escape"
-                ) {
-                    closeLightbox();
-                } else if (
-                    event.key === "ArrowLeft"
-                ) {
-                    moveLightbox(-1);
-                } else if (
-                    event.key === "ArrowRight"
-                ) {
-                    moveLightbox(1);
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =========================================================
-       COOKIE BANNER
-    ========================================================= */
-
-    function acceptCookies() {
-
-        localStorage.setItem(
-            "kleineWondercookies",
-            "accepted"
-        );
-
-        const banner =
-            document.getElementById(
-                "cookieBanner"
-            );
-
-        if (banner) {
-            banner.classList.remove(
-                "show"
-            );
-        }
-
-    }
-
-    function initCookieBanner() {
-
-        const banner =
-            document.getElementById(
-                "cookieBanner"
-            );
-
-        if (!banner) {
-            return;
-        }
-
-        const choice =
-            localStorage.getItem(
-                "kleineWondercookies"
-            );
-
-        if (
-            !choice &&
-            new URLSearchParams(
-                window.location.search
-            ).get("inschrijven") !== "gedaan"
-        ) {
-
-            setTimeout(
-                () =>
-                    banner.classList.add(
-                        "show"
-                    ),
-                1500
-            );
-
-        }
-
-    }
-
-
-    /* =========================================================
-       ICS DOWNLOAD
-    ========================================================= */
-
-    function downloadICS(dateStr, label) {
-
-        const date =
-            new Date(
-                dateStr + "T10:00:00"
-            );
-
-        const startLocal =
-            new Date(
-                date.getTime() -
-                date.getTimezoneOffset() * 60000
-            );
-
-        const endLocal =
-            new Date(
-                startLocal.getTime() +
-                60 * 60000
-            );
-
-        const formatICS =
-            d =>
-                d.toISOString()
-                    .replace(
-                        /[-:]/g,
-                        ""
-                    )
-                    .replace(
-                        /\.\d{3}/,
-                        ""
-                    );
-
-        const content = [
-            "BEGIN:VCALENDAR",
-            "VERSION:2.0",
-            "PRODID:-//KleineWonderwereld//SpeelAtelier//NL",
-            "BEGIN:VEVENT",
-            "UID:" +
-                dateStr +
-                "@jufvalerie.be",
-            "DTSTAMP:" +
-                formatICS(
-                    new Date()
-                ),
-            "DTSTART:" +
-                formatICS(
-                    startLocal
-                ),
-            "DTEND:" +
-                formatICS(
-                    endLocal
-                ),
-            "SUMMARY:Kleine Wonderwereld – " +
-                (label || "Speelatelier"),
-            "DESCRIPTION:Sensorisch speelatelier voor kinderen van 2 tot 6 jaar. Adres: GO! Basisschool 3D, Canadezenlaan 7, 2920 Kalmthout.",
-            "LOCATION:GO! Basisschool 3D, Canadezenlaan 7, 2920 Kalmthout",
-            "END:VEVENT",
-            "END:VCALENDAR"
-        ].join("\r\n");
-
-        const blob =
-            new Blob(
-                [content],
-                {
-                    type:
-                        "text/calendar;charset=utf-8"
-                }
-            );
-
-        const url =
-            URL.createObjectURL(
-                blob
-            );
-
-        const link =
-            document.createElement(
-                "a"
-            );
-
-        link.href =
-            url;
-
-        link.download =
-            `KleineWonderwereld-${dateStr}.ics`;
-
-        document.body.appendChild(
-            link
-        );
-
-        link.click();
-
-        document.body.removeChild(
-            link
-        );
-
-        URL.revokeObjectURL(
-            url
-        );
-
-    }
-
-    function showICSButton(dateStr) {
-
-        const message =
-            document.getElementById(
-                "confirm"
-            );
-
-        if (!message) {
-            return;
-        }
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-        button.className =
-            "btn";
-
-        button.style.marginTop =
-            "12px";
-
-        button.innerHTML =
-            "📅 Voeg toe aan agenda";
-
-        button.addEventListener(
-            "click",
-            () =>
-                downloadICS(
-                    dateStr,
-                    "Speelatelier"
-                )
-        );
-
-        message.appendChild(
-            button
-        );
-
-    }
-
-
-    /* =========================================================
-       SERVICE WORKER (PWA)
-    ========================================================= */
-
-    function initServiceWorker() {
-
-        if (
-            "serviceWorker" in navigator
-        ) {
-
-            window.addEventListener(
-                "load",
-                () => {
-
-                    navigator.serviceWorker
-                        .register(
-                            "sw.js"
-                        )
-                        .catch(
-                            error =>
-                                console.warn(
-                                    "Service worker registratie mislukt:",
-                                    error
-                                )
-                        );
-
-                }
-            );
-
-        }
 
     }
 
