@@ -1782,6 +1782,10 @@
 
         if (!data?.session) {
 
+            localStorage.removeItem(
+                "loggedIn"
+            );
+
             window.location.href =
                 "index.html";
 
@@ -1794,6 +1798,10 @@
     async function logout() {
 
         await sb.auth.signOut();
+
+        localStorage.removeItem(
+            "loggedIn"
+        );
 
         window.location.href =
             "index.html";

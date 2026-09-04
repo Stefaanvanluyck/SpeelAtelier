@@ -18,21 +18,6 @@
           content="Sensorisch speelatelier voor kleine ontdekkers van 2 tot 6 jaar.">
     <meta property="og:image" content="logosite.jpeg">
 
-    <meta http-equiv="Content-Security-Policy"
-          content="
-              default-src 'self';
-              script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://widgets.sociablekit.com;
-              style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://widgets.sociablekit.com https://maxcdn.bootstrapcdn.com;
-              font-src 'self' data: https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;
-              img-src 'self' data: blob: https:;
-              connect-src 'self' https://nafajvywiknelkgufpac.supabase.co https://*.supabase.co https://api.emailjs.com https://*.emailjs.com https://*.accentapi.com https://*.sociablekit.com;
-              frame-src https://widgets.sociablekit.com https://payment.mollie.com https://www.mollie.com;
-              media-src 'self';
-              object-src 'none';
-              base-uri 'self';
-              form-action 'self';
-          ">
-
     <link rel="icon" sizes="32x32" href="favicon.png">
     <link rel="icon" sizes="192x192" href="favicon.png">
 
@@ -1362,12 +1347,10 @@ margin-left:0;
         <!-- OUDER / CONTACTPERSOON -->
         <input type="text"
                id="parentName"
-               maxlength="100"
                placeholder="Naam ouder / contactpersoon">
 
         <input type="email"
                id="email"
-               maxlength="254"
                placeholder="Email">
 
         <!-- AANTAL KINDEREN -->
@@ -1682,21 +1665,6 @@ margin-left:0;
 
 
     /* =========================================================
-       HELPERS
-    ========================================================= */
-
-    function escapeHtml(value) {
-
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-
-    /* =========================================================
        CREATE CHILD NAME FIELDS
     ========================================================= */
 
@@ -1810,9 +1778,6 @@ margin-left:0;
 
             input.className =
                 "child-name";
-
-            input.maxLength =
-                50;
 
             input.placeholder =
                 `Naam kind ${i}`;
@@ -2742,7 +2707,7 @@ margin-left:0;
                                 `<strong>
                                     Kind ${index + 1}:
                                  </strong>
-                                 ${escapeHtml(childName)}`
+                                 ${childName}`
                         )
                         .join("<br>");
 
@@ -2794,7 +2759,7 @@ margin-left:0;
                         <br><br>
 
                         Een bevestigingsmail werd
-                        naar <strong>${escapeHtml(email)}</strong>
+                        naar <strong>${email}</strong>
                         verzonden.
 
                     </div>
@@ -3006,35 +2971,10 @@ margin-left:0;
 
             /*
              * Naar Mollie
-             *
-             * Alleen https-links naar Mollie
-             * of naar het eigen domein toelaten.
              */
 
-            const checkoutUrl =
-                String(data.checkoutUrl || "");
-
-            const isAllowed =
-                checkoutUrl.startsWith(
-                    "https://www.mollie.com/"
-                ) ||
-                checkoutUrl.startsWith(
-                    "https://payment.mollie.com/"
-                ) ||
-                checkoutUrl.startsWith(
-                    window.location.origin
-                );
-
-            if (!isAllowed) {
-
-                throw new Error(
-                    "Ongeldige betalingslink ontvangen. Probeer opnieuw."
-                );
-
-            }
-
             window.location.href =
-                checkoutUrl;
+                data.checkoutUrl;
 
 
         } catch (err) {
@@ -3848,8 +3788,11 @@ margin-left:0;
             }
 
 
-            /* Admin-pagina controleert de
-               sessie zelf via Supabase Auth. */
+            localStorage.setItem(
+                "loggedIn",
+                "true"
+            );
+
 
             window.location.href =
                 "admin.html";
