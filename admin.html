@@ -11,7 +11,7 @@
                    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
                    font-src 'self' data:;
                    img-src 'self' data: blob: https:;
-                   connect-src 'self' https://nafajvywiknelkgufpac.supabase.co https://*.supabase.co;
+                   connect-src 'self' https://nafajvywiknelkgufpac.supabase.co https://*.supabase.co https://api.emailjs.com https://*.emailjs.com;
                    object-src 'none';
                    base-uri 'self';
                    form-action 'self';
@@ -23,6 +23,7 @@
     <link rel="icon" sizes="192x192" href="favicon.png">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
     <link
             href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
@@ -1561,6 +1562,19 @@
         SUPABASE_URL,
         SUPABASE_ANON_KEY_CLEAN
     );
+
+    const EMAILJS_PUBLIC_KEY =
+        "ryf0HAbDqTzY368PW";
+
+    const EMAILJS_SERVICE =
+        "service_9u8ex4o";
+
+    const EMAILJS_CONFIRMATION_TEMPLATE =
+        "template_m20bheg";
+
+    emailjs.init({
+        publicKey: EMAILJS_PUBLIC_KEY
+    });
 
     const MAX_CHILDREN = 10;
 
@@ -4915,6 +4929,96 @@
             "flex";
     }
 
+    async function sendBookingConfirmation({
+        name,
+        email,
+        date,
+        childrenCount,
+        children,
+        amount,
+        paymentMethod
+    }) {
+
+        const parts =
+            String(date).split("-");
+
+        const formattedDate =
+            parts.length === 3
+                ? `${parts[2]}/${parts[1]}/${parts[0]}`
+                : date;
+
+        const paymentText =
+            paymentMethod === "onsite"
+                ? "Ter plaatse betalen (cash of Payconiq)"
+                : "Online betaling via Mollie";
+
+        const childNamesText =
+            children
+                .map(
+                    (childName, index) =>
+                        `Kind ${index + 1}: ${childName}`
+                )
+                .join("\n");
+
+        const templateParams = {
+
+            name,
+
+            email,
+
+            date:
+                formattedDate,
+
+            children_count:
+                childrenCount,
+
+            child_names:
+                childNamesText,
+
+            child1:
+                children[0] || "",
+
+            child2:
+                children[1] || "",
+
+            child3:
+                children[2] || "",
+
+            child4:
+                children[3] || "",
+
+            amount:
+                Number(amount || 0)
+                    .toFixed(2)
+                    .replace(".", ","),
+
+            payment_method:
+                paymentText
+        };
+
+        try {
+
+            await emailjs.send(
+                EMAILJS_SERVICE,
+                EMAILJS_CONFIRMATION_TEMPLATE,
+                templateParams
+            );
+
+            console.log(
+                "✅ Klantbevestiging verzonden naar:",
+                email
+            );
+
+        } catch (mailError) {
+
+            console.error(
+                "EmailJS versturen mislukt:",
+                mailError
+            );
+
+        }
+    }
+
     async function saveWaitlist() {
 
         const name =
@@ -5081,6 +5185,32 @@
                 deleteError
             );
         }
+
+        await sendBookingConfirmation({
+            name,
+            email,
+            date,
+            childrenCount,
+            children: [
+                document.getElementById(
+                    "editChild1"
+                ).value.trim(),
+
+                document.getElementById(
+                    "editChild2"
+                ).value.trim(),
+
+                document.getElementById(
+                    "editChild3"
+                ).value.trim(),
+
+                document.getElementById(
+                    "editChild4"
+                ).value.trim()
+            ],
+            amount,
+            paymentMethod
+        });
 
         closeEditModal();
 
