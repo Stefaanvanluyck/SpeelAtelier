@@ -1572,6 +1572,9 @@
     const EMAILJS_CONFIRMATION_TEMPLATE =
         "template_m20bheg";
 
+    const EMAILJS_ADMIN_TEMPLATE =
+        "template_nndh15x";
+
     emailjs.init({
         publicKey: EMAILJS_PUBLIC_KEY
     });
@@ -5007,6 +5010,16 @@
             console.log(
                 "✅ Klantbevestiging verzonden naar:",
                 email
+            );
+
+            await emailjs.send(
+                EMAILJS_SERVICE,
+                EMAILJS_ADMIN_TEMPLATE,
+                templateParams
+            );
+
+            console.log(
+                "✅ Adminmelding verzonden."
             );
 
         } catch (mailError) {
