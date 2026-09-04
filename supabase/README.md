@@ -8,6 +8,7 @@ die niet vanuit de client-code geregeld kunnen worden:
 | 2 | `sql/amount_validation_trigger.sql` | DB-trigger die het bedrag altijd server-side herberekent, aantallen (1-4), datums (zaterdag, niet verleden) en capaciteit (10 kindjes) valideert, en nieuwe inschrijvingen op `pending` zet |
 | 3 | `functions/create-mollie-payment/index.ts` | Edge Function die de online inschrijving en Mollie-betaallink server-side aanmaakt. Het bedrag wordt herberekend; de clientwaarde wordt genegeerd. |
 | + | `functions/mollie-webhook/index.ts` | Webhook die Mollie-status **opnieuw verifieert bij Mollie** (tegen vervalste webhooks), de inschrijving bijwerkt en bij succes de mails verstuurt |
+| 4 | `sql/rls_hardening.sql` | RLS-beveiliging: anon mag alleen minimale kolommen lezen (geen naam/e-mail/kinderen), alleen inschrijvingen aanmaken, en NOOIT iets muteren; volledige toegang vereist een admin-rij in `admin_users` |
 
 ---
 
@@ -65,6 +66,41 @@ Dit werkt vanzelf zodra de functie is gedeployed (geen extra config nodig).
 
 ---
 
+## Stap 4 — RLS-hardening (optie 4)
+
+1. Open `sql/rls_hardening.sql`.
+2. Vervang op de eerste regel van het `DO`-blok
+   `'JOUW_EMAIL@voorbeeld.be'` door het e-mailadres **waarmee je zelf op
+   `admin.html` inlogt** (dit wordt de eerste beheerder).
+3. In [Supabase Dashboard](https://supabase.com/dashboard) → **SQL Editor**
+   → de inhoud plakken → **Run**.
+
+Wat het script doet:
+
+| Tabel / rol | Nog toegelaten |
+|---|---|
+| `appointments` (anon) | alleen **INSERT** (inschrijving aanmaken) + **SELECT** van `id, appointment_date, children_count, payment_status, amount, payment_method` voor kalender/return |
+| `appointments` (anon) | **GEEN** `name`, `email`, `child1-4`, ... meer leesbaar; **geen** UPDATE/DELETE |
+| `themes` / `blocked_dates` (anon) | alleen SELECT (datum/themavelden) |
+| alle beheertabellen (authenticated) | alleen als de e-mail een rij heeft in `admin_users`; een zelf aangemaakt account is dus geen beheerder |
+| Edge functions | `service_role` bypasset RLS → webhook & betaalflow werken gewoon |
+
+Daarna — handmatige toggles in het dashboard:
+
+1. **Supabase → Authentication → Providers → Email**:
+   zet **"Allow new users to sign up"** op **uit**. (Jouw bestaande admin-account
+   blijft gewoon inloggen; er kunnen geen vreemde accounts meer aangemaakt worden.)
+2. **EmailJS → Account → Security**: vink **"Allow EmailJS API for
+   non-browser applications"** aan als de webhook mails via de server verstuurt.
+
+Nadien deze bestanden opnieuw deployen (bevatten de code die met het nieuwe
+RLS-schema compatibel is):
+
+- `index.html` (plant publiceren/kopieren naar de hosting)
+- `admin.html`
+
+---
+
 ## Controle na implementatie
 
 - [ ] `su -c`-achtige test: probeer via de browser een inschrijving met
@@ -74,6 +110,16 @@ Dit werkt vanzelf zodra de functie is gedeployed (geen extra config nodig).
 - [ ] Probeer een inschrijving op een geblokkeerde datum of doordeweeks
       → foutmelding.
 - [ ] Online betalen met een Mollie **testmodus**-key eerst uitproberen.
+- [ ] Anoniem (niet ingelogd, netwerktab) de kalender openen → werkt
+      (alleen `date/theme/children_count/status` zichtbaar).
+- [ ] Anoniem via het netwerktab de API aanspreken met
+      `PATCH /rest/v1/appointments?id=<pak een id>` → **HTTP 403/401**,
+      geen wijziging.
+- [ ] Anoniem `SELECT */name` via de API → kolommen `name/email/child1-4`
+      ontbreken in het antwoord.
+- [ ] Inloggen op `admin.html` met jouw admin-e-mail → dashboard laadt.
+- [ ] Een tweede (wegwerp)-account aanmaken → kan `admin.html` **niet**
+      openen en wordt automatisch uitgelogd.
 
 ## Belangrijk
 
