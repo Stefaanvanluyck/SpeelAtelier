@@ -252,7 +252,11 @@ Deno.serve(async (req: Request) => {
 
     const mollieData = await mollieResponse.json().catch(() => ({}));
 
-    if (!mollieResponse.ok || !mollieData.id) {
+    // Mollie geeft de betaal-URL terug in `_links.checkout.href`,
+    // niet als top-level `checkoutUrl`-veld.
+    const checkoutHref = String(mollieData._links?.checkout?.href ?? "");
+
+    if (!mollieResponse.ok || !mollieData.id || !checkoutHref) {
         console.error("Mollie error:", mollieData);
 
         // Vrijgekomen plaats terugvrijgeven
@@ -280,7 +284,7 @@ Deno.serve(async (req: Request) => {
     // 9. Antwoord aan index.html
     // ------------------------------------------------------------------
     return json({
-        checkoutUrl: mollieData.checkoutUrl,
+        checkoutUrl: checkoutHref,
         paymentId: mollieData.id,
         bookingId,
         amount,

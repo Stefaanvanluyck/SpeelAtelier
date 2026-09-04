@@ -3014,15 +3014,45 @@ margin-left:0;
             const checkoutUrl =
                 String(data.checkoutUrl || "");
 
+            /*
+             * Alleen https-links naar Mollie/PPRO-eindpagina's
+             * of naar het eigen domein toelaten.
+             */
+
+            let parsedCheckoutUrl =
+                null;
+
+            try {
+
+                parsedCheckoutUrl =
+                    new URL(checkoutUrl);
+
+            } catch {
+
+                parsedCheckoutUrl =
+                    null;
+
+            }
+
+            const checkoutHost =
+                parsedCheckoutUrl
+                    ? parsedCheckoutUrl.hostname.toLowerCase()
+                    : "";
+
             const isAllowed =
-                checkoutUrl.startsWith(
-                    "https://www.mollie.com/"
-                ) ||
-                checkoutUrl.startsWith(
-                    "https://payment.mollie.com/"
-                ) ||
-                checkoutUrl.startsWith(
-                    window.location.origin
+                parsedCheckoutUrl !== null &&
+                parsedCheckoutUrl.protocol === "https:" &&
+                (
+                    checkoutHost === "mollie.com" ||
+                    checkoutHost.endsWith(
+                        ".mollie.com"
+                    ) ||
+                    checkoutHost === "ppro.com" ||
+                    checkoutHost.endsWith(
+                        ".ppro.com"
+                    ) ||
+                    checkoutHost ===
+                        window.location.hostname
                 );
 
             if (!isAllowed) {
