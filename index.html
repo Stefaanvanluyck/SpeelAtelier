@@ -1858,6 +1858,157 @@
             }
         }
 
+    /* =========================================================
+           QUIZ: WELK THEMA PAST BIJ JOU?
+        ========================================================= */
+
+        .quiz-section,
+        .kleurplaat-wrap {
+            background: rgba(255,255,255,.55);
+            backdrop-filter: blur(16px);
+            border-radius: 30px;
+            padding: 45px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .quiz-stage {
+            max-width: 620px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .quiz-step-tag {
+            display: inline-block;
+            font-size: .85rem;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 14px;
+        }
+
+        .quiz-stage h3 {
+            font-size: 1.7rem;
+            margin-bottom: 10px;
+        }
+
+        .quiz-stage .lead {
+            color: #666;
+            margin-bottom: 26px;
+        }
+
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin: 12px 0;
+            padding: 16px 22px;
+            border: 2px solid rgba(31,42,31,.12);
+            border-radius: 18px;
+            background: rgba(255,255,255,.9);
+            color: var(--text);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(255,111,134,.18);
+        }
+
+        .quiz-result-emoji {
+            font-size: 3.4rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .quiz-meta {
+            margin-top: 26px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* =========================================================
+           KLEURPLAAT
+        ========================================================= */
+
+        .kleurplaat-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kleurplaat-info {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .kleurplaat-copy {
+            max-width: 520px;
+        }
+
+        .kleurplaat-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn.ghost {
+            margin-top: 22px;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            box-shadow: none;
+        }
+
+        .btn.ghost:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        #kleurplaatSvg {
+            width: 100%;
+            max-width: 520px;
+            height: auto;
+            display: block;
+            border-radius: 18px;
+            background: #fff;
+        }
+
+        @media print {
+
+            body * {
+                visibility: hidden;
+            }
+
+            .kleurplaat-print,
+            .kleurplaat-print * {
+                visibility: visible;
+            }
+
+            .kleurplaat-print {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #fff !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+
+            .kleurplaats-hidden-print {
+                display: none !important;
+            }
+
+        }
+
     </style>
 
 
@@ -2183,6 +2334,22 @@ margin-left:0;
 </section>
 
 <!-- =========================================================
+     QUIZ: WELK THEMA PAST BIJ JOU?
+========================================================= -->
+
+<section id="quiz">
+
+    <h2>🎨 Welk thema past bij jou?</h2>
+
+    <div class="quiz-section" aria-live="polite">
+
+        <div id="quizStage" class="quiz-stage"></div>
+
+    </div>
+
+</section>
+
+<!-- =========================================================
      PRIJZEN
 ========================================================= -->
 
@@ -2378,6 +2545,172 @@ margin-left:0;
 
     </div>
 
+
+</section>
+
+<!-- =========================================================
+     KLEURPLAAT
+========================================================= -->
+
+<section id="kleurplaats" class="kleurplaat-wrap kleurplaat-print">
+
+    <h2>🖍️ Kleurplaat</h2>
+
+    <div class="kleurplaat-flex">
+
+        <div class="kleurplaat-info kleurplaats-hidden-print">
+
+            <p class="lead">
+                Lekker kleuren tijdens het wachten of thuis?
+                Print onze Kleine Wonderwereld-kleurplaat of
+                download hem als plaatje. Veel kleurplezier!
+            </p>
+
+            <div class="kleurplaat-buttons">
+
+                <button class="btn"
+                        onclick="printKleurplaat()">
+                    🖨️ Print / PDF
+                </button>
+
+                <button class="btn ghost"
+                        onclick="downloadKleurplaat()">
+                    ⬇️ Download SVG
+                </button>
+
+            </div>
+
+        </div>
+
+        <svg id="kleurplaatSvg"
+             viewBox="0 0 600 800"
+             xmlns="http://www.w3.org/2000/svg"
+             role="img"
+             aria-label="Kleurplaat van Kleine Wonderwereld">
+
+            <g fill="none"
+               stroke="#1f2a1f"
+               stroke-width="4"
+               stroke-linecap="round"
+               stroke-linejoin="round">
+
+                <text x="300"
+                      y="64"
+                      text-anchor="middle"
+                      font-size="36"
+                      font-family="Poppins, Arial, sans-serif"
+                      font-weight="700">
+                    Kleine Wonderwereld
+                </text>
+
+                <text x="300"
+                      y="96"
+                      text-anchor="middle"
+                      font-size="20"
+                      font-family="Poppins, Arial, sans-serif"
+                      opacity=".6">
+                    speelatelier
+                </text>
+
+                <circle cx="92"
+                        cy="168"
+                        r="42"></circle>
+
+                <line x1="92"
+                      y1="112"
+                      x2="92"
+                      y2="86"></line>
+
+                <line x1="136"
+                      y1="132"
+                      x2="154"
+                      y2="112"></line>
+
+                <line x1="148"
+                      y1="168"
+                      x2="174"
+                      y2="168"></line>
+
+                <line x1="136"
+                      y1="204"
+                      x2="154"
+                      y2="224"></line>
+
+                <line x1="48"
+                      y1="132"
+                      x2="30"
+                      y2="112"></line>
+
+                <line x1="36"
+                      y1="168"
+                      x2="10"
+                      y2="168"></line>
+
+                <line x1="48"
+                      y1="204"
+                      x2="30"
+                      y2="224"></line>
+
+                <path d="M180 150 q15 -16 30 0 q15 -16 30 0 q15 -16 30 0 q15 -16 30 0 q15 -16 30 0 q15 -16 30 0 q15 -16 30 0 q8 -10 20 -6 l-2 12 q-6 2 -12 8 q0 10 -14 12 q-6 4 -12 14 q-14 6 -28 0 q-14 8 -28 0 q-14 8 -28 0 q-12 -6 -24 -14 l-8 6 q-10 4 -18 -2 q-6 -10 -18 -10 q-10 0 -16 -6 q-8 -10 -18 -12 0 -18 -6 -24 z"></path>
+
+                <path d="M70 430 q30 -36 70 0 q30 -36 70 0 q30 -36 70 0 q30 -36 70 0 q30 -36 70 0 q30 -36 70 0 l14 46 q-8 6 -18 2 q-10 6 -20 -4 q-8 8 -22 0 q-10 8 -24 -2 q-16 10 -32 0 q-14 6 -28 -2 q-14 8 -30 -4 q-18 10 -36 -4 q-14 8 -30 -6 q-16 12 -36 -2 q-14 6 -26 -10 q-16 6 -30 -6 q-12 4 -24 -12 z"></path>
+
+                <path d="M512 470 q-8 -40 22 -70 q-30 -60 6 -108 q34 56 0 108 q32 30 20 70 z"></path>
+
+                <path d="M540 410 l-18 -8"></path>
+
+                <path d="M552 400 q6 -26 26 -40"></path>
+
+                <path d="M530 402 q-8 -24 -30 -34"></path>
+
+                <circle cx="418"
+                        cy="232"
+                        r="26"></circle>
+
+                <circle cx="444"
+                        cy="244"
+                        r="16"></circle>
+
+                <circle cx="398"
+                        cy="246"
+                        r="16"></circle>
+
+                <path d="M414 262 q-10 40 -2 70"></path>
+
+                <path d="M430 268 q4 34 14 58"></path>
+
+                <path d="M392 292 q-22 6 -30 26"></path>
+
+                <path d="M446 296 q22 8 26 26"></path>
+
+                <ellipse cx="300"
+                         cy="560"
+                         rx="150"
+                         ry="86"></ellipse>
+
+                <path d="M185 460 q18 40 20 84"></path>
+
+                <path d="M415 456 q-16 44 -14 92"></path>
+
+                <circle cx="218"
+                        cy="470"
+                        r="52"
+                        opacity=".35"></circle>
+
+                <path d="M300 700 q-38 30 -80 0 q-38 30 -78 -2"></path>
+
+                <path d="M300 700 q38 30 80 0 q38 30 78 -2"></path>
+
+                <line x1="150"
+                      y1="752"
+                      x2="450"
+                      y2="752"></line>
+
+            </g>
+
+        </svg>
+
+    </div>
 
 </section>
 
@@ -7631,6 +7964,591 @@ margin-left:0;
 
             }
         );
+
+    }
+
+
+    /* =========================================================
+       QUIZ: WELK THEMA PAST BIJ JOU?
+    ========================================================= */
+
+    const QUIZ_THEMES = {
+
+        onderwater: {
+
+            emoji: "🐠",
+
+            name: "Onderwaterwereld",
+
+            description:
+                "Jij hoort thuis in de Onderwaterwereld! " +
+                "Duik mee langs kwallen, vliegende vissen " +
+                "en fonkelende schelpen."
+
+        },
+
+        ruimte: {
+
+            emoji: "🚀",
+
+            name: "Ruimte",
+
+            description:
+                "Jij bent een echte ruimteheld! " +
+                "Zet je rakethelm op voor een reis langs " +
+                "sterren en planeten."
+
+        },
+
+        kunst: {
+
+            emoji: "🎨",
+
+            name: "Kunst & Klieder",
+
+            description:
+                "Jij bent een echte kliederkunstenaar! " +
+                "Verf, klei en vingerverf: alles mag " +
+                "door elkaar."
+
+        },
+
+        dino: {
+
+            emoji: "🦖",
+
+            name: "Dino",
+
+            description:
+                "Jij bent een echte dino-fan! " +
+                "Kom brullen en speuren naar sporen " +
+                "uit de oertijd."
+
+        },
+
+        sprookje: {
+
+            emoji: "🦄",
+
+            name: "Feeën & Ridders",
+
+            description:
+                "Jij leeft in een sprookjeswereld! " +
+                "Bouw kastelen, red de prinses of " +
+                "tover met sterrenstof."
+
+        }
+
+    };
+
+    const QUIZ_QUESTIONS = [
+
+        {
+
+            question:
+                "Waar speel jij het liefst?",
+
+            options: [
+
+                {
+                    theme: "onderwater",
+                    label:
+                        "In bad met schepjes en zeepbellen 🫧"
+                },
+
+                {
+                    theme: "ruimte",
+                    label:
+                        "'s Avonds naar de sterren kijken 🌠"
+                },
+
+                {
+                    theme: "kunst",
+                    label:
+                        "Tekenen, knutselen en kliederen 🌈"
+                },
+
+                {
+                    theme: "dino",
+                    label:
+                        "Als een dino rondstampen en brullen 🦖"
+                },
+
+                {
+                    theme: "sprookje",
+                    label:
+                        "Een kasteel bouwen en verkleden 👑"
+                }
+
+            ]
+
+        },
+
+        {
+
+            question:
+                "Welke kleur vind jij het mooist?",
+
+            options: [
+
+                {
+                    theme: "onderwater",
+                    label:
+                        "Blauw, zoals de zee 🌊"
+                },
+
+                {
+                    theme: "ruimte",
+                    label:
+                        "Donkerpaars, zoals de ruimte 🪐"
+                },
+
+                {
+                    theme: "kunst",
+                    label:
+                        "Alle kleuren tegelijk 🎨"
+                },
+
+                {
+                    theme: "dino",
+                    label:
+                        "Groen, zoals een oerwoud 🌿"
+                },
+
+                {
+                    theme: "sprookje",
+                    label:
+                        "Roze of goud, zoals een kroon ✨"
+                }
+
+            ]
+
+        },
+
+        {
+
+            question:
+                "Wat wil jij het liefst ontdekken?",
+
+            options: [
+
+                {
+                    theme: "onderwater",
+                    label:
+                        "Wat er allemaal onder de zee leeft 🐙"
+                },
+
+                {
+                    theme: "ruimte",
+                    label:
+                        "Hoe ver de maan wel is 🌕"
+                },
+
+                {
+                    theme: "kunst",
+                    label:
+                        "Welke kleur je krijgt als je kleuren mixt 🎨"
+                },
+
+                {
+                    theme: "dino",
+                    label:
+                        "Of dino's hier echt rondliepen 🦕"
+                },
+
+                {
+                    theme: "sprookje",
+                    label:
+                        "Waar een draak zijn schat verstopt 🐉"
+                }
+
+            ]
+
+        },
+
+        {
+
+            question:
+                "Welk dier neem je mee op avontuur?",
+
+            options: [
+
+                {
+                    theme: "onderwater",
+                    label:
+                        "Een vriendelijke dolfijn 🐬"
+                },
+
+                {
+                    theme: "ruimte",
+                    label:
+                        "Een ruimte-aapje 🐒"
+                },
+
+                {
+                    theme: "kunst",
+                    label:
+                        "Een regenboogvogel 🦜"
+                },
+
+                {
+                    theme: "dino",
+                    label:
+                        "Een kleine T-rex 🦖"
+                },
+
+                {
+                    theme: "sprookje",
+                    label:
+                        "Een eenhoorn 🦄"
+                }
+
+            ]
+
+        },
+
+        {
+
+            question:
+                "Wat zou jij vies en leuk vinden?",
+
+            options: [
+
+                {
+                    theme: "onderwater",
+                    label:
+                        "Schelpen rapen en natte handen 💦"
+                },
+
+                {
+                    theme: "ruimte",
+                    label:
+                        "Raketjes maken van dozen 🚀"
+                },
+
+                {
+                    theme: "kunst",
+                    label:
+                        "Vingerverven, tot je knieën toe 🖐️"
+                },
+
+                {
+                    theme: "dino",
+                    label:
+                        "Graven in een modderput 🦴"
+                },
+
+                {
+                    theme: "sprookje",
+                    label:
+                        "Toverjurkjes en glitterstof 🪄"
+                }
+
+            ]
+
+        }
+
+    ];
+
+    let quizStep = 0;
+
+    let quizScores = {
+
+        onderwater: 0,
+
+        ruimte: 0,
+
+        kunst: 0,
+
+        dino: 0,
+
+        sprookje: 0
+
+    };
+
+    function startQuiz() {
+
+        quizStep = 0;
+
+        quizScores = {
+
+            onderwater: 0,
+
+            ruimte: 0,
+
+            kunst: 0,
+
+            dino: 0,
+
+            sprookje: 0
+
+        };
+
+        renderQuizStep();
+
+    }
+
+    function renderQuizStep() {
+
+        const stage =
+            document.getElementById(
+                "quizStage"
+            );
+
+        if (!stage) {
+
+            return;
+
+        }
+
+        stage.innerHTML = "";
+
+        if (
+            quizStep <
+            QUIZ_QUESTIONS.length
+        ) {
+
+            const q =
+                QUIZ_QUESTIONS[quizStep];
+
+            const tag =
+                document.createElement(
+                    "p"
+                );
+
+            tag.className =
+                "quiz-step-tag";
+
+            tag.textContent =
+                `Vraag ${quizStep + 1} ` +
+                `van ${QUIZ_QUESTIONS.length}`;
+
+            const title =
+                document.createElement(
+                    "h3"
+                );
+
+            title.textContent =
+                q.question;
+
+            stage.appendChild(tag);
+
+            stage.appendChild(title);
+
+            q.options.forEach(
+                option => {
+
+                    const btn =
+                        document.createElement(
+                            "button"
+                        );
+
+                    btn.className =
+                        "quiz-option";
+
+                    btn.textContent =
+                        option.label;
+
+                    btn.addEventListener(
+                        "click",
+                        function() {
+
+                            quizScores[
+                                option.theme
+                            ] =
+                                (quizScores[
+                                    option.theme
+                                ] || 0) + 1;
+
+                            quizStep++;
+
+                            renderQuizStep();
+
+                        }
+                    );
+
+                    stage.appendChild(btn);
+
+                }
+            );
+
+            return;
+
+        }
+
+        const best =
+            Object.keys(quizScores)
+                .reduce(
+                    (a, b) =>
+                        quizScores[b] >
+                        quizScores[a]
+                            ? b
+                            : a,
+                    Object.keys(
+                        quizScores
+                    )[0]
+                );
+
+        const theme =
+            QUIZ_THEMES[best];
+
+        const emoji =
+            document.createElement(
+                "span"
+            );
+
+        emoji.className =
+            "quiz-result-emoji";
+
+        emoji.textContent =
+            theme.emoji;
+
+        const title =
+            document.createElement(
+                "h3"
+            );
+
+        title.textContent =
+            theme.name;
+
+        const desc =
+            document.createElement(
+                "p"
+            );
+
+        desc.className =
+            "lead";
+
+        desc.textContent =
+            theme.description;
+
+        const meta =
+            document.createElement(
+                "div"
+            );
+
+        meta.className =
+            "quiz-meta";
+
+        const planBtn =
+            document.createElement(
+                "button"
+            );
+
+        planBtn.className =
+            "btn";
+
+        planBtn.textContent =
+            "📅 Bekijk planning";
+
+        planBtn.addEventListener(
+            "click",
+            function() {
+
+                document
+                    .getElementById(
+                        "planning"
+                    )
+                    ?.scrollIntoView({
+                        behavior:
+                            "smooth"
+                    });
+
+            }
+        );
+
+        const againBtn =
+            document.createElement(
+                "button"
+            );
+
+        againBtn.className =
+            "btn ghost";
+
+        againBtn.textContent =
+            "🔁 Doe opnieuw";
+
+        againBtn.addEventListener(
+            "click",
+            startQuiz
+        );
+
+        meta.appendChild(planBtn);
+
+        meta.appendChild(againBtn);
+
+        stage.appendChild(emoji);
+
+        stage.appendChild(title);
+
+        stage.appendChild(desc);
+
+        stage.appendChild(meta);
+
+    }
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        startQuiz
+    );
+
+
+    /* =========================================================
+       KLEURPLAAT
+    ========================================================= */
+
+    function printKleurplaat() {
+
+        window.print();
+
+    }
+
+    function downloadKleurplaat() {
+
+        const svg =
+            document.getElementById(
+                "kleurplaatSvg"
+            );
+
+        if (!svg) {
+
+            return;
+
+        }
+
+        const xml =
+            new XMLSerializer()
+                .serializeToString(svg);
+
+        const blob =
+            new Blob(
+                [xml],
+                {
+                    type:
+                        "image/svg+xml;charset=utf-8"
+                }
+            );
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        link.href = url;
+
+        link.download =
+            "kleurplaat-kleine-wonderwereld.svg";
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.remove();
+
+        URL.revokeObjectURL(url);
 
     }
 
