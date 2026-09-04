@@ -61,47 +61,6 @@
             "sameAs": [
                 "https://www.instagram.com/juf__valerie"
             ]
-}
-    </script>
-
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                {
-                    "@type": "Question",
-                    "name": "Voor welke leeftijd is het speelatelier?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Het sensorisch speelatelier is er voor kinderen van 2 tot 6 jaar."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Wanneer vinden de speelateliers plaats?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Elke zaterdagvoormiddag tussen 10 en 11 uur. De exacte data vind je in de planner op de website."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Welke kledij moeten mijn kind en ik dragen?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Draag praktische kledij. Al het materiaal is normaal uitwasbaar, maar voor de zekerheid trek je best niet je beste kledij aan."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Waar is het speelatelier gevestigd?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Het speelatelier gaat door in GO! Basisschool 3D, Canadezenlaan 7, 2920 Kalmthout."
-                    }
-                }
-            ]
         }
     </script>
 
@@ -113,7 +72,7 @@
               font-src 'self' data: https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;
               img-src 'self' data: blob: https:;
               connect-src 'self' https://nafajvywiknelkgufpac.supabase.co https://*.supabase.co https://api.emailjs.com https://*.emailjs.com https://*.accentapi.com https://*.sociablekit.com;
-              frame-src https://widgets.sociablekit.com https://payment.mollie.com https://www.mollie.com https://www.google.com;
+              frame-src https://widgets.sociablekit.com https://payment.mollie.com https://www.mollie.com;
               media-src 'self';
               object-src 'none';
               base-uri 'self';
@@ -210,49 +169,6 @@
 
         nav a:hover {
             color: var(--accent);
-        }
-
-        .nav-burger {
-            display: none;
-
-            border: none;
-
-            background: none;
-
-            font-size: 1.5rem;
-
-            color: var(--text);
-
-            cursor: pointer;
-
-            padding: 4px 8px;
-
-            border-radius: 12px;
-
-            transition: 0.2s;
-        }
-
-        .nav-burger:hover {
-            color: var(--accent);
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
-            margin-left: 18px;
-        }
-
-        .nav-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 14px;
-            width: auto;
         }
 
         /* =========================================================
@@ -513,21 +429,6 @@
             display: block;
         }
 
-        .map-wrapper {
-            margin-top: 16px;
-
-            border-radius: 14px;
-
-            overflow: hidden;
-
-            box-shadow:
-                0 8px 25px rgba(0,0,0,0.12);
-        }
-
-        .map-wrapper iframe {
-            display: block;
-        }
-
         /* =========================================================
            MODAL
         ========================================================= */
@@ -778,7 +679,6 @@
 
             #publicCalendar {
                 padding: 8px;
-                border-radius: 14px;
             }
 
             .fc-event {
@@ -788,63 +688,6 @@
             .fc-event-title {
                 font-size: 0.7rem !important;
                 line-height: 1.15 !important;
-            }
-
-            .fc-toolbar {
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-
-            .fc-toolbar-title {
-                font-size: 1.05rem !important;
-            }
-
-            .fc-toolbar-chunk {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-
-                gap: 6px;
-            }
-
-            .fc .fc-button {
-                padding: 5px 10px;
-
-                font-size: 0.8rem;
-            }
-
-            .fc-daygrid-day {
-                min-height: 0 !important;
-            }
-
-            .fc-daygrid-day-number {
-                font-size: 0.8rem;
-
-                padding: 2px 4px;
-            }
-
-            .fc-daygrid-day-frame {
-                min-height: 44px;
-            }
-
-            .fc-daygrid-event {
-                font-size: 0.65rem !important;
-
-                margin: 1px 0 !important;
-            }
-
-            .fc-daygrid-day-top {
-                flex-direction: row;
-            }
-
-            .fc-scrollgrid {
-                border-radius: 10px;
-
-                overflow: hidden;
-            }
-
-            .fc-col-header-cell {
-                font-size: 0.75rem;
             }
 
         }
@@ -1061,47 +904,6 @@
             font-style: italic;
 
             opacity: 0.92;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-
-            align-items: center;
-            gap: 8px;
-
-            padding: 8px 18px;
-
-            margin-bottom: 20px;
-
-            border-radius: 999px;
-
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(8px);
-
-            border: 1px solid rgba(255,255,255,0.35);
-
-            color: white;
-
-            font-weight: 600;
-
-            font-size: 0.9rem;
-
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .hero-badge.closed {
-            background: rgba(0,0,0,0.35);
-        }
-
-        .next-theme {
-            margin-top: 10px;
-
-            font-size: 1.1rem;
-            font-weight: 700;
-
-            color: var(--accent2);
-
-            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
         /* =========================================================
@@ -1345,144 +1147,6 @@
         }
 
         /* =========================================================
-           UPCOMING SESSIONS
-        ========================================================= */
-
-        .upcoming-title {
-            text-align: center;
-
-            margin-top: 40px;
-        }
-
-        .upcoming-title h3 {
-            font-size: 1.6rem;
-
-            color: var(--text);
-        }
-
-        .upcoming-sessions {
-            margin-top: 22px;
-
-            display: grid;
-            gap: 14px;
-        }
-
-        .session-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 16px;
-
-            flex-wrap: wrap;
-
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(16px);
-
-            padding: 18px 22px;
-
-            border-radius: 18px;
-
-            box-shadow: var(--shadow);
-
-            transition: 0.3s;
-        }
-
-        .session-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .session-main {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .session-date {
-            font-size: 0.85rem;
-            font-weight: 600;
-
-            text-transform: capitalize;
-
-            color: #777;
-        }
-
-        .session-theme {
-            font-size: 1.15rem;
-            font-weight: 700;
-        }
-
-        .session-status {
-            font-weight: 600;
-            font-size: 0.9rem;
-
-            color: #2ecc71;
-        }
-
-        .session-status.full {
-            color: #ef4444;
-        }
-
-        .session-btn {
-            margin-top: 0;
-            padding: 11px 22px;
-        }
-
-        /* =========================================================
-           BACK TO TOP
-        ========================================================= */
-
-        .back-to-top {
-            position: fixed;
-
-            bottom: 20px;
-            left: 20px;
-
-            z-index: 9980;
-
-            width: 48px;
-            height: 48px;
-
-            border: none;
-            border-radius: 50%;
-
-            background: linear-gradient(
-                135deg,
-                var(--accent),
-                #ffb199
-            );
-
-            color: white;
-
-            font-size: 1.1rem;
-
-            cursor: pointer;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-
-            opacity: 0;
-            visibility: hidden;
-
-            transform: translateY(10px);
-
-            transition: 0.3s;
-        }
-
-        .back-to-top.visible {
-            opacity: 1;
-            visibility: visible;
-
-            transform: translateY(0);
-        }
-
-        .back-to-top:hover {
-            transform: translateY(-3px);
-        }
-
-        /* =========================================================
            MOBILE
         ========================================================= */
 
@@ -1498,41 +1162,11 @@
                 border-radius: 24px;
 
                 justify-content: center;
-
-                padding: 14px 18px;
             }
 
-            .nav-top {
-                width: 100%;
-            }
-
-            .nav-burger {
-                display: inline-flex;
-            }
-
-            .nav-links {
-                display: none;
-
-                width: 100%;
-
-                flex-direction: column;
-
-                align-items: flex-start;
-
-                gap: 2px;
-
-                padding-top: 8px;
-            }
-
-            .nav-links.open {
-                display: flex;
-            }
-
-            .nav-links a {
-                margin-left: 4px;
-                margin-right: 4px;
-
-                padding: 6px 0;
+            nav a {
+                margin-left: 8px;
+                margin-right: 8px;
             }
 
             .hero {
@@ -1651,32 +1285,19 @@
 
 <nav>
 
-    <div class="nav-top">
 
-        <a href="#"
-           style="
+    <a href="#"
+       style="
 text-decoration:none;
 color:var(--text);
 font-weight:700;
 font-size:1.1rem;
 margin-left:0;
 ">
-            🌿 Kleine Wonderwereld </a>
+        🌿 Kleine Wonderwereld </a>
 
 
-        <button class="nav-burger"
-                id="navBurger"
-                aria-label="Menu openen"
-                aria-expanded="false">
-
-            <i class="fas fa-bars"></i>
-
-        </button>
-
-    </div>
-
-    <div class="nav-links"
-         id="navLinks">
+    <div>
 
         <a href="#over">Over</a>
 
@@ -1715,10 +1336,6 @@ margin-left:0;
 
 
     <div class="hero-content">
-
-        <div class="hero-badge"
-             id="heroBadge">
-        </div>
 
         <h1>Kleine Wonderwereld</h1>
 
@@ -1765,11 +1382,6 @@ margin-left:0;
 
         <p class="countdown-meta"
            id="countdownMeta"
-           style="display:none;">
-        </p>
-
-        <p class="next-theme"
-           id="nextTheme"
            style="display:none;">
         </p>
 
@@ -1820,8 +1432,6 @@ margin-left:0;
     <h2>🌿 Over</h2>
 
     <img src="logosite.jpeg"
-         loading="lazy"
-         decoding="async"
          alt="Logo van het sensorisch speelatelier">
 
     <div class="over-text">
@@ -1869,9 +1479,7 @@ margin-left:0;
     <div class="teacher">
 
         <img src="Valerie.jpeg"
-         loading="lazy"
-         decoding="async"
-         alt="Valerie De Beuckelaer">
+             alt="Valerie De Beuckelaer">
 
         <div>
 
@@ -1940,21 +1548,6 @@ margin-left:0;
 
     </div>
 
-    <div class="upcoming-title">
-
-        <h3>✨ Wat komt eraan?</h3>
-
-    </div>
-
-    <div id="upcomingSessions"
-         class="upcoming-sessions">
-
-        <p style="text-align:center;color:#777;">
-            ⌛ Sessies laden...
-        </p>
-
-    </div>
-
 
 </section>
 
@@ -2008,8 +1601,6 @@ margin-left:0;
                 </ul>
 
                 <img src="beurtenkaart5.jpeg"
-                     loading="lazy"
-                     decoding="async"
                      alt="5-beurtenkaart Kleine Wonderwereld">
 
             </div>
@@ -2025,8 +1616,6 @@ margin-left:0;
                 </ul>
 
                 <img src="beurtenkaart10.jpeg"
-                     loading="lazy"
-                     decoding="async"
                      alt="10-beurtenkaart Kleine Wonderwereld">
 
             </div>
@@ -2082,28 +1671,18 @@ margin-left:0;
     <div class="gallery">
 
         <img src="speelatteliervoorbeeld1.jpeg"
-             loading="lazy"
-             decoding="async"
              alt="Kinderen ontdekken het sensorisch speelatelier">
 
         <img src="speelatteliervoorbeeld2.jpeg"
-             loading="lazy"
-             decoding="async"
              alt="Sensorisch spelen met fantasie en verwondering">
 
         <img src="waterenspel.jpeg"
-             loading="lazy"
-             decoding="async"
              alt="Water spelen met de zintuigen">
 
         <img src="gekleurderijst.jpeg"
-             loading="lazy"
-             decoding="async"
              alt="Gekleurde rijst om te kneden en gieten">
 
         <img src="logosite.jpeg"
-             loading="lazy"
-             decoding="async"
              alt="Logo van Kleine Wonderwereld">
 
     </div>
@@ -2229,20 +1808,6 @@ margin-left:0;
                 Canadezenlaan 7, 2920 Kalmthout
 
             </a>
-
-            <div class="map-wrapper">
-
-                <iframe src="https://www.google.com/maps?q=Canadezenlaan%207%2C%202920%20Kalmthout&output=embed"
-                        width="100%"
-                        height="280"
-                        style="border:0;"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        allowfullscreen
-                        title="Kaart: Canadezenlaan 7, 2920 Kalmthout">
-                </iframe>
-
-            </div>
 
         </div>
 
@@ -2558,19 +2123,6 @@ margin-left:0;
 
 
 </div>
-
-<!-- =========================================================
-     BACK TO TOP
-========================================================= -->
-
-<button class="back-to-top"
-        id="backToTop"
-        onclick="window.scrollTo({top:0,behavior:'smooth'})"
-        aria-label="Terug naar boven">
-
-    <i class="fas fa-chevron-up"></i>
-
-</button>
 
 <script>
 
@@ -3762,13 +3314,6 @@ margin-left:0;
 
 
                 /*
-                 * Feestje!
-                 */
-
-                launchConfetti();
-
-
-                /*
                  * Kalender opnieuw laden
                  */
 
@@ -4757,17 +4302,6 @@ margin-left:0;
             publicCalendar.render();
 
 
-            /*
-             * "Wat komt eraan?"-lijst
-             */
-
-            buildUpcomingSessions(
-                themesMap,
-                counts,
-                blockedSet
-            );
-
-
         } catch (err) {
 
             console.error(
@@ -5095,27 +4629,6 @@ margin-left:0;
              */
 
             initCountdown();
-
-
-            /*
-             * Nav toggle (hamburger)
-             */
-
-            initNavToggle();
-
-
-            /*
-             * Hero badge + volgend thema
-             */
-
-            await loadNextTheme();
-
-
-            /*
-             * Back to top
-             */
-
-            initBackToTop();
 
 
             /*
@@ -5528,13 +5041,6 @@ margin-left:0;
 
 
         /*
-         * Feestje!
-         */
-
-        launchConfetti();
-
-
-        /*
          * URL proper maken.
          */
 
@@ -5708,478 +5214,6 @@ margin-left:0;
             updateCountdown,
             1000
         );
-
-    }
-
-
-    /* =========================================================
-       HERO BADGE + VOLGENDE THEMA
-    ========================================================= */
-
-    function formatLongDate(date) {
-
-        return date.toLocaleDateString(
-            "nl-BE",
-            {
-                weekday: "long",
-                day: "numeric",
-                month: "long"
-            }
-        );
-
-    }
-
-    async function loadNextTheme() {
-
-        try {
-
-            const badgeEl =
-                document.getElementById(
-                    "heroBadge"
-                );
-
-            if (badgeEl) {
-
-                const enabled =
-                    await isBookingEnabled();
-
-                badgeEl.innerHTML =
-                    enabled
-                        ? "🎟️ Inschrijvingen geopend"
-                        : "🕐 Inschrijvingen volgen binnenkort";
-
-                badgeEl.classList.toggle(
-                    "closed",
-                    !enabled
-                );
-
-            }
-
-
-            /*
-             * Ontdek het thema van de eerstvolgende
-             * zaterdag met een sessie.
-             */
-
-            const {
-                data: themeRows,
-                error: themeError
-            } =
-                await sb
-                    .from("themes")
-                    .select("date,theme")
-                    .gte(
-                        "date",
-                        new Date()
-                            .toISOString()
-                            .slice(0, 10)
-                    )
-                    .order(
-                        "date",
-                        { ascending: true }
-                    )
-                    .limit(12);
-
-            if (themeError) {
-                console.warn(
-                    "Thema ophalen mislukt:",
-                    themeError
-                );
-                return;
-            }
-
-            const {
-                data: blockedRows,
-                error: blockedError
-            } =
-                await sb
-                    .from("blocked_dates")
-                    .select("date");
-
-            if (blockedError) {
-                console.warn(
-                    "Blokkades ophalen mislukt:",
-                    blockedError
-                );
-            }
-
-            const blockedSet =
-                new Set(
-                    (blockedRows || [])
-                        .map(
-                            item =>
-                                item.date
-                        )
-                );
-
-            const today =
-                new Date()
-                    .toISOString()
-                    .slice(0, 10);
-
-            const upcoming =
-                (themeRows || [])
-                    .find(
-                        row =>
-                            row.date >= today &&
-                            row.theme &&
-                            String(
-                                row.theme
-                            ).trim() !== "" &&
-                            !blockedSet.has(
-                                row.date
-                            )
-                    );
-
-            const themeEl =
-                document.getElementById(
-                    "nextTheme"
-                );
-
-            if (
-                themeEl &&
-                upcoming
-            ) {
-
-                themeEl.textContent =
-                    "🎨 Volgende sessie: " +
-                    String(upcoming.theme).trim() +
-                    " — " +
-                    formatLongDate(
-                        new Date(
-                            upcoming.date + "T10:00:00"
-                        )
-                    );
-
-                themeEl.style.display =
-                    "block";
-
-            }
-
-        } catch (err) {
-
-            console.warn(
-                "Hero thema/badge mislukt:",
-                err
-            );
-
-        }
-
-    }
-
-
-    /* =========================================================
-       KOMENDE SESSIES LIJST
-    ========================================================= */
-
-    function buildUpcomingSessions(
-        themesMap,
-        counts,
-        blockedSet
-    ) {
-
-        const container =
-            document.getElementById(
-                "upcomingSessions"
-            );
-
-        if (!container) {
-            return;
-        }
-
-        const today =
-            new Date()
-                .toISOString()
-                .slice(0, 10);
-
-        const upcomingDates =
-            Object.keys(themesMap)
-                .filter(
-                    date =>
-                        date >= today &&
-                        !blockedSet.has(date)
-                )
-                .sort()
-                .slice(0, 5);
-
-        if (upcomingDates.length === 0) {
-
-            container.innerHTML =
-                `
-                <p style="text-align:center;color:#777;">
-                    🗓️ Nog geen zaterdagen ingepland.
-                    <br>
-                    Hou <a href="#Instagram">Instagram</a> in de gaten!
-                </p>
-                `;
-
-            return;
-
-        }
-
-        container.innerHTML =
-            upcomingDates
-                .map(
-                    date => {
-
-                        const theme =
-                            themesMap[date];
-
-                        const booked =
-                            counts[date] ||
-                            0;
-
-                        const available =
-                            MAX_CHILDREN -
-                            booked;
-
-                        const isFull =
-                            available <= 0;
-
-                        const dateObj =
-                            new Date(
-                                date + "T10:00:00"
-                            );
-
-                        return `
-                            <div class="session-card">
-
-                                <div class="session-main">
-
-                                    <div class="session-date">
-                                        ${formatLongDate(dateObj)}
-                                    </div>
-
-                                    <div class="session-theme">
-                                        🎨 ${escapeHtml(theme)}
-                                    </div>
-
-                                </div>
-
-                                ${
-                                    isFull
-                                        ? `
-                                            <span class="session-status full">
-                                                Volzet
-                                            </span>
-                                        `
-                                        : `
-                                            <span class="session-status">
-                                                ${available} plek${available === 1 ? "" : "ken"} vrij
-                                            </span>
-                                        `
-                                }
-
-                                <button class="btn session-btn"
-                                        ${isFull ? "disabled" : ""}
-                                        onclick="openForm('${date}')">
-                                    ${isFull ? "Volzet" : "Inschrijven"}
-                                </button>
-
-                            </div>
-                        `;
-
-                    }
-                )
-                .join("");
-
-    }
-
-
-    /* =========================================================
-       CONFETTI
-    ========================================================= */
-
-    function launchConfetti() {
-
-        const canvas =
-            document.createElement(
-                "canvas"
-            );
-
-        canvas.id =
-            "confettiCanvas";
-
-        canvas.style.cssText =
-            "position:fixed;inset:0;pointer-events:none;z-index:9998;";
-
-        document.body.appendChild(
-            canvas
-        );
-
-        const ctx =
-            canvas.getContext(
-                "2d"
-            );
-
-        const colors = [
-            "#ff6f86",
-            "#ffd6a5",
-            "#8b5cf6",
-            "#2ecc71",
-            "#ffb400",
-            "#4ecdc4"
-        ];
-
-        const particles =
-            Array.from(
-                { length: 140 },
-                () => ({
-
-                    x:
-                        Math.random() *
-                        canvas.width,
-
-                    y:
-                        -20 -
-                        Math.random() *
-                        80,
-
-                    w:
-                        6 +
-                        Math.random() * 6,
-
-                    h:
-                        8 +
-                        Math.random() * 8,
-
-                    vx:
-                        -2 +
-                        Math.random() * 4,
-
-                    vy:
-                        2 +
-                        Math.random() * 4,
-
-                    angle:
-                        Math.random() *
-                        Math.PI * 2,
-
-                    spin:
-                        -0.2 +
-                        Math.random() * 0.4,
-
-                    color:
-                        colors[
-                            Math.floor(
-                                Math.random() *
-                                colors.length
-                            )
-                        ]
-
-                })
-            );
-
-        let frame = 0;
-
-        canvas.width =
-            window.innerWidth;
-
-        canvas.height =
-            window.innerHeight;
-
-        const interval =
-            setInterval(
-                () => {
-
-                    frame++;
-
-                    ctx.clearRect(
-                        0,
-                        0,
-                        canvas.width,
-                        canvas.height
-                    );
-
-                    particles.forEach(
-                        particle => {
-
-                            particle.x +=
-                                particle.vx;
-
-                            particle.y +=
-                                particle.vy;
-
-                            particle.angle +=
-                                particle.spin;
-
-                            ctx.save();
-
-                            ctx.translate(
-                                particle.x,
-                                particle.y
-                            );
-
-                            ctx.rotate(
-                                particle.angle
-                            );
-
-                            ctx.fillStyle =
-                                particle.color;
-
-                            ctx.fillRect(
-                                -particle.w / 2,
-                                -particle.h / 2,
-                                particle.w,
-                                particle.h
-                            );
-
-                            ctx.restore();
-
-                        }
-                    );
-
-                    if (frame > 180) {
-
-                        clearInterval(
-                            interval
-                        );
-
-                        canvas.remove();
-
-                    }
-
-                },
-                30
-            );
-
-    }
-
-
-    /* =========================================================
-       BACK TO TOP
-    ========================================================= */
-
-    function initBackToTop() {
-
-        const btn =
-            document.getElementById(
-                "backToTop"
-            );
-
-        if (!btn) {
-            return;
-        }
-
-        const onScroll = () => {
-
-            const visible =
-                window.scrollY > 400;
-
-            btn.classList.toggle(
-                "visible",
-                visible
-            );
-
-        };
-
-        window.addEventListener(
-            "scroll",
-            onScroll,
-            { passive: true }
-        );
-
-        onScroll();
 
     }
 
@@ -6647,93 +5681,6 @@ margin-left:0;
             );
 
         }
-
-    }
-
-
-    /* =========================================================
-       NAV TOGGLE (HAMBURGER)
-    ========================================================= */
-
-    function initNavToggle() {
-
-        const burger =
-            document.getElementById(
-                "navBurger"
-            );
-
-        const links =
-            document.getElementById(
-                "navLinks"
-            );
-
-        if (!burger || !links) {
-            return;
-        }
-
-        const toggle = () => {
-
-            const open =
-                links.classList.toggle(
-                    "open"
-                );
-
-            burger.setAttribute(
-                "aria-expanded",
-                String(open)
-            );
-
-            burger.setAttribute(
-                "aria-label",
-                open ? "Menu sluiten" : "Menu openen"
-            );
-
-            burger.innerHTML =
-                open
-                    ? '<i class="fas fa-times"></i>'
-                    : '<i class="fas fa-bars"></i>';
-
-        };
-
-        burger.addEventListener(
-            "click",
-            toggle
-        );
-
-        links.querySelectorAll(
-            "a"
-        ).forEach(
-            link => {
-
-                link.addEventListener(
-                    "click",
-                    () => {
-
-                        if (
-                            links.classList.contains(
-                                "open"
-                            )
-                        ) {
-
-                            links.classList.remove(
-                                "open"
-                            );
-
-                            burger.setAttribute(
-                                "aria-expanded",
-                                "false"
-                            );
-
-                            burger.innerHTML =
-                                '<i class="fas fa-bars"></i>';
-
-                        }
-
-                    }
-                );
-
-            }
-        );
 
     }
 
