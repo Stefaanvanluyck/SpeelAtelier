@@ -919,6 +919,37 @@
 
     </section>
 
+    <!-- GETUIGENISSEN -->
+    <section class="admin-card">
+
+        <div class="dashboard-card-header">
+
+            <div>
+                <h3 style="margin-bottom:3px;">
+                    ⭐ Getuigenissen
+                </h3>
+
+                <div
+                        style="color:#6b7280;font-size:.78rem;">
+                    Reacties van gezinnen
+                </div>
+            </div>
+
+            <button
+                    class="btn btn-primary"
+                    onclick="openTestimonialEditor()">
+                ➕ Nieuwe getuigenis
+            </button>
+
+        </div>
+
+        <div
+                id="testimonialList"
+                class="booking-list">
+        </div>
+
+    </section>
+
     <!-- THEMA'S / BLOKKEREN -->
     <section class="admin-card">
         <h2>🎨 Thema's & geblokkeerde data</h2>
@@ -1294,6 +1325,83 @@
 
 <!-- APPOINTMENT/THEME MODAL -->
 
+<!-- GETUIGENIS EDIT MODAL -->
+<div class="modal" id="testimonialModal">
+
+    <div class="modal-box">
+
+        <h3 style="margin: 0 0 16px;">
+            ⭐ Getuigenis
+        </h3>
+
+        <div class="form-field" style="margin-bottom:10px;">
+            <label for="testimonialName">
+                Naam van het gezin
+            </label>
+
+            <input
+                    id="testimonialName"
+                    type="text"
+                    placeholder="bv. Familie Peeters">
+        </div>
+
+        <div class="form-field full" style="margin-bottom:10px;">
+            <label for="testimonialText">
+                Tekst van de getuigenis
+            </label>
+
+            <textarea
+                    id="testimonialText"
+                    rows="4"
+                    style="width:100%;padding:11px 12px;border:1px solid #d9dde4;border-radius:11px;background:white;outline:none;font:inherit;resize:vertical;"
+                    placeholder="Wat vond je van het speelatelier?"></textarea>
+        </div>
+
+        <div class="form-field full" style="margin-bottom:10px;">
+            <label for="testimonialRating">
+                Waardering
+            </label>
+
+            <select id="testimonialRating"
+                    style="width:100%;padding:11px 12px;border:1px solid #d9dde4;border-radius:11px;background:white;outline:none;">
+                <option value="5">★★★★★ (5)</option>
+                <option value="4">★★★★ (4)</option>
+                <option value="3">★★★ (3)</option>
+                <option value="2">★★ (2)</option>
+                <option value="1">★ (1)</option>
+            </select>
+        </div>
+
+        <label class="toggle-row" style="margin-top:6px;">
+            <input
+                    type="checkbox"
+                    id="testimonialPublished">
+            <span>Publiceren op de website</span>
+        </label>
+
+        <div class="modal-actions">
+            <div></div>
+
+            <div class="modal-actions-right">
+                <button
+                        class="btn btn-gray"
+                        onclick="closeTestimonialModal()">
+                    Annuleren
+                </button>
+
+                <button
+                        class="btn btn-green"
+                        onclick="saveTestimonial()">
+                    💾 Opslaan
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- APPOINTMENT / EDIT MODAL -->
 <div class="modal" id="editModal">
 
 
@@ -1585,12 +1693,15 @@
     let themes = [];
     let blockedDates = [];
     let waitlist = [];
+    let testimonials = [];
     let calendar = null;
     let monthlyChart = null;
+    let bookingToggle = null;
 
     let editMode = "appointment";
     let editId = null;
     let editWaitlistId = null;
+    let testimonialEditId = null;
 
     /* =========================================================
        HELPERS
@@ -1945,7 +2056,8 @@
                 appointmentsResult,
                 themesResult,
                 blockedResult,
-                waitlistResult
+                waitlistResult,
+                testimonialResult
             ] = await Promise.all([
 
                 sb
@@ -1986,6 +2098,16 @@
                         {
                             ascending: false
                         }
+                    ),
+
+                sb
+                    .from("testimonials")
+                    .select("*")
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
                     )
             ]);
 
@@ -2005,6 +2127,10 @@
                 throw waitlistResult.error;
             }
 
+            if (testimonialResult.error) {
+                throw testimonialResult.error;
+            }
+
             allData =
                 appointmentsResult.data || [];
 
@@ -2017,11 +2143,16 @@
             waitlist =
                 waitlistResult.data || [];
 
+            testimonials =
+                testimonialResult.data || [];
+
             updateDashboard();
 
             renderCalendar();
 
             renderWaitlist();
+
+            renderTestimonials();
 
         } catch (error) {
 
@@ -4794,6 +4925,340 @@
                 })
                 .join("");
     }
+
+    function renderTestimonials() {
+
+        const container =
+            document.getElementById(
+                "testimonialList"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        if (!testimonials.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    Geen getuigenissen.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML =
+            testimonials
+                .map(item => {
+
+                    const safeId =
+                        String(item.id).replace(
+                            /'/g,
+                            "\\'"
+                        );
+
+                    const stars =
+                        "⭐".repeat(
+                            Math.min(
+                                5,
+                                Math.max(
+                                    1,
+                                    Number(
+                                        item.rating
+                                    ) || 5
+                                )
+                            )
+                        );
+
+                    return `
+                        <div class="booking-item">
+
+                            <div class="booking-main">
+
+                                <div class="booking-name">
+                                    ${stars}
+                                    ${escapeHtml(
+                                        item.name ||
+                                        "Onbekend"
+                                    )}
+                                </div>
+
+                                <div class="booking-meta">
+                                    ${escapeHtml(
+                                        item.text ||
+                                        ""
+                                    )}
+                                </div>
+
+                            </div>
+
+                            <div class="booking-side">
+
+                                <span
+                                    class="payment-pill ${item.published
+                                        ? "paid"
+                                        : "pending"}">
+                                    ${item.published
+                                        ? "🌐 Gepubliceerd"
+                                        : "⏳ Concept"}
+                                </span>
+
+                                <div
+                                        style="
+                                        display:flex;
+                                        gap:6px;
+                                        flex-wrap:wrap;
+                                        justify-content:flex-end;
+                                        margin-top:8px;">
+
+                                    <button
+                                            class="btn btn-gray"
+                                            onclick="openTestimonialEditor('${safeId}')"
+                                            title="Getuigenis bewerken">
+                                        ✏️
+                                    </button>
+
+                                    <button
+                                            class="btn btn-red"
+                                            onclick="deleteTestimonial('${safeId}')"
+                                            title="Getuigenis verwijderen">
+                                        🗑️
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+    }
+
+
+    function openTestimonialEditor(id = null) {
+
+        const item =
+            id
+                ? testimonials.find(
+                    entry =>
+                        String(entry.id) ===
+                        String(id)
+                )
+                : null;
+
+        testimonialEditId =
+            item
+                ? String(item.id)
+                : null;
+
+        document
+            .getElementById(
+                "testimonialName"
+            ).value =
+            item
+                ? item.name || ""
+                : "";
+
+        document
+            .getElementById(
+                "testimonialText"
+            ).value =
+            item
+                ? item.text || ""
+                : "";
+
+        document
+            .getElementById(
+                "testimonialRating"
+            ).value =
+            String(
+                item
+                    ? Number(item.rating) || 5
+                    : 5
+            );
+
+        document
+            .getElementById(
+                "testimonialPublished"
+            ).checked =
+            item
+                ? !!item.published
+                : false;
+
+        document
+            .getElementById(
+                "testimonialModal"
+            ).style.display =
+            "flex";
+
+    }
+
+
+    function closeTestimonialModal() {
+
+        document
+            .getElementById(
+                "testimonialModal"
+            ).style.display =
+            "none";
+
+    }
+
+
+    async function saveTestimonial() {
+
+        const name =
+            document
+                .getElementById(
+                    "testimonialName"
+                ).value.trim();
+
+        const text =
+            document
+                .getElementById(
+                    "testimonialText"
+                ).value.trim();
+
+        const rating =
+            Number(
+                document
+                    .getElementById(
+                        "testimonialRating"
+                    ).value
+            ) || 5;
+
+        const published =
+            document
+                .getElementById(
+                    "testimonialPublished"
+                ).checked;
+
+        if (!name || !text) {
+
+            showToast(
+                "Naam en tekst zijn verplicht.",
+                true
+            );
+
+            return;
+
+        }
+
+        if (testimonialEditId) {
+
+            const {
+                error
+            } = await sb
+                .from("testimonials")
+                .update({
+                    name,
+                    text,
+                    rating,
+                    published
+                })
+                .eq(
+                    "id",
+                    testimonialEditId
+                );
+
+            if (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Opslaan mislukt: " +
+                    error.message,
+                    true
+                );
+
+                return;
+
+            }
+
+        } else {
+
+            const {
+                error
+            } = await sb
+                .from("testimonials")
+                .insert({
+                    name,
+                    text,
+                    rating,
+                    published
+                });
+
+            if (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Opslaan mislukt: " +
+                    error.message,
+                    true
+                );
+
+                return;
+
+            }
+
+        }
+
+        closeTestimonialModal();
+
+        showToast(
+            "💾 Getuigenis opgeslagen."
+        );
+
+        await loadData();
+
+    }
+
+
+    async function deleteTestimonial(id) {
+
+        if (
+            !confirm(
+                "Deze getuigenis definitief verwijderen?"
+            )
+        ) {
+            return;
+        }
+
+        const {
+            error
+        } = await sb
+            .from("testimonials")
+            .delete()
+            .eq(
+                "id",
+                id
+            );
+
+        if (error) {
+
+            console.error(error);
+
+            showToast(
+                "Verwijderen mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+
+        }
+
+        showToast(
+            "🗑️ Getuigenis verwijderd."
+        );
+
+        await loadData();
+
+    }
+
 
     function openWaitlistEditor(id) {
 

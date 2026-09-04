@@ -2009,6 +2009,104 @@
 
         }
 
+    /* =========================================================
+           GETUIGENISSEN
+        ========================================================= */
+
+        .testimonial-carousel {
+            position: relative;
+            max-width: 760px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .testimonial-track {
+            display: flex;
+            transition: transform .55s ease;
+        }
+
+        .testimonial-slide {
+            min-width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .testimonial-card {
+            background: rgba(255,255,255,.6);
+            backdrop-filter: blur(16px);
+            border-radius: 26px;
+            padding: 34px 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .testimonial-stars {
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .testimonial-text {
+            font-size: 1.15rem;
+            font-style: italic;
+            color: #444;
+            margin-bottom: 18px;
+        }
+
+        .testimonial-name {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .testimonial-nav {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        .testimonial-nav button {
+            background: rgba(255,255,255,.7);
+            border: 2px solid rgba(31,42,31,.12);
+            border-radius: 999px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: .2s;
+        }
+
+        .testimonial-nav button:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .testimonial-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .testimonial-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            border: none;
+            background: rgba(31,42,31,.18);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .testimonial-dot.active {
+            background: var(--accent);
+        }
+
+        .empty-state-testimonial {
+            text-align: center;
+            color: #888;
+        }
+
     </style>
 
 
@@ -2855,6 +2953,41 @@ margin-left:0;
 
     </div>
 
+
+</section>
+
+<!-- =========================================================
+     GETUIGENISSEN
+========================================================= -->
+
+<section id="getuigenissen">
+
+    <h2>💬 Wat gezinnen zeggen</h2>
+
+    <div class="testimonial-carousel"
+         id="testimonialCarousel">
+
+        <div class="testimonial-track"
+             id="testimonialTrack"></div>
+
+    </div>
+
+    <div class="testimonial-dots"
+         id="testimonialDots"></div>
+
+    <div class="testimonial-nav">
+
+        <button onclick="moveTestimonial(-1)"
+                aria-label="Vorige getuigenis">
+            ‹
+        </button>
+
+        <button onclick="moveTestimonial(1)"
+                aria-label="Volgende getuigenis">
+            ›
+        </button>
+
+    </div>
 
 </section>
 
@@ -5818,6 +5951,13 @@ margin-left:0;
 
 
             /*
+             * Getuigenissen laden
+             */
+
+            loadTestimonials();
+
+
+            /*
              * Animations
              */
 
@@ -8491,6 +8631,278 @@ margin-left:0;
         "DOMContentLoaded",
         startQuiz
     );
+
+
+    /* =========================================================
+       GETUIGENISSEN
+    ========================================================= */
+
+    let testimonialsList = [];
+
+    let testimonialIndex = 0;
+
+    let testimonialTimer = null;
+
+    async function loadTestimonials() {
+
+        const track =
+            document.getElementById(
+                "testimonialTrack"
+            );
+
+        if (!track) {
+
+            return;
+
+        }
+
+        try {
+
+            const {
+                data,
+                error
+            } = await sb
+                .from("testimonials")
+                .select(
+                    "name, text, rating"
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                );
+
+            if (error) {
+
+                throw error;
+
+            }
+
+            testimonialsList =
+                data || [];
+
+        } catch (err) {
+
+            console.error(
+                "Testimonials laden mislukt:",
+                err
+            );
+
+            testimonialsList = [];
+
+        }
+
+        renderTestimonialsIndex();
+
+    }
+
+    function renderTestimonialsIndex() {
+
+        const track =
+            document.getElementById(
+                "testimonialTrack"
+            );
+
+        if (!track) {
+
+            return;
+
+        }
+
+        const dots =
+            document.getElementById(
+                "testimonialDots"
+            );
+
+        if (!testimonialsList.length) {
+
+            track.innerHTML =
+                `<div class="empty-state-testimonial">
+                    Nog geen getuigenissen.
+                </div>`;
+
+            if (dots) {
+
+                dots.innerHTML = "";
+
+            }
+
+            testimonialIndex = 0;
+
+            return;
+
+        }
+
+        track.innerHTML =
+            testimonialsList
+                .map(testimonial => `
+
+                    <div class="testimonial-slide">
+
+                        <div class="testimonial-card">
+
+                            <div class="testimonial-stars">
+                                ${"⭐".repeat(
+                                    Math.min(
+                                        5,
+                                        Math.max(
+                                            1,
+                                            Number(
+                                                testimonial.rating
+                                            ) || 5
+                                        )
+                                    )
+                                )}
+                            </div>
+
+                            <div class="testimonial-text">
+                                "${escapeHtml(
+                                    testimonial.text
+                                )}"
+                            </div>
+
+                            <div class="testimonial-name">
+                                — ${escapeHtml(
+                                    testimonial.name
+                                )}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `)
+                .join("");
+
+        if (dots) {
+
+            dots.innerHTML =
+                testimonialsList
+                    .map(
+                        (testimonial, index) => `
+
+                            <button
+                                class="testimonial-dot ${index === testimonialIndex
+                                    ? "active"
+                                    : ""}"
+                                onclick="setTestimonial(${index})"
+                                aria-label="Getuigenis ${index + 1}">
+                            </button>
+
+                        `
+                    )
+                    .join("");
+
+        }
+
+        startTestimonialTimer();
+
+    }
+
+    function moveTestimonial(step) {
+
+        if (!testimonialsList.length) {
+
+            return;
+
+        }
+
+        testimonialIndex =
+            (
+                testimonialIndex +
+                step +
+                testimonialsList.length
+            ) %
+            testimonialsList.length;
+
+        updateTestimonial();
+
+    }
+
+    function setTestimonial(index) {
+
+        testimonialIndex = index;
+
+        updateTestimonial();
+
+    }
+
+    function updateTestimonial() {
+
+        const track =
+            document.getElementById(
+                "testimonialTrack"
+            );
+
+        if (track) {
+
+            track.style.transform =
+                `translateX(-${testimonialIndex * 100}%)`;
+
+        }
+
+        const dots =
+            document.getElementById(
+                "testimonialDots"
+            );
+
+        if (dots) {
+
+            dots
+                .querySelectorAll(
+                    ".testimonial-dot"
+                )
+                .forEach(
+                    (dot, index) => {
+
+                        dot.classList.toggle(
+                            "active",
+                            index ===
+                            testimonialIndex
+                        );
+
+                    }
+                );
+
+        }
+
+        startTestimonialTimer();
+
+    }
+
+    function startTestimonialTimer() {
+
+        if (testimonialTimer) {
+
+            clearInterval(testimonialTimer);
+
+        }
+
+        if (testimonialsList.length < 2) {
+
+            return;
+
+        }
+
+        testimonialTimer =
+            setInterval(
+                () => {
+
+                    testimonialIndex =
+                        (
+                            testimonialIndex +
+                            1
+                        ) %
+                        testimonialsList.length;
+
+                    updateTestimonial();
+
+                },
+                6500
+            );
+
+    }
 
 
     /* =========================================================
