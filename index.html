@@ -1178,7 +1178,13 @@
             font-weight: 600;
             font-size: 0.88rem;
 
+            cursor: pointer;
+
             animation: float 3.5s ease-in-out infinite;
+        }
+
+        .capacity-badge:hover {
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.25);
         }
 
         .capacity-badge.full {
@@ -6988,7 +6994,19 @@ margin-left:0;
             );
             badge.onclick =
                 function() {
-                    openForm(targetKey);
+
+                    const row =
+                        (themeRowsCache || [])
+                            .find(
+                                item =>
+                                    item.date ===
+                                    targetKey
+                            );
+
+                    openWaitlist(
+                        targetKey,
+                        row?.theme || ""
+                    );
                 };
 
         } else {
@@ -7002,8 +7020,14 @@ margin-left:0;
             badge.classList.remove(
                 "full"
             );
+            badge.setAttribute(
+                "role",
+                "button"
+            );
             badge.onclick =
-                null;
+                function() {
+                    openForm(targetKey);
+                };
         }
 
         badge.style.display =
@@ -7626,8 +7650,11 @@ margin-left:0;
                         dateStr + "T10:00:00"
                     )
                 ) +
-                " — " +
-                waitlistTheme;
+                (
+                    waitlistTheme
+                        ? " — " + waitlistTheme
+                        : ""
+                );
 
         }
 
