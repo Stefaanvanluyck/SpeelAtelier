@@ -110,12 +110,35 @@ Deno.serve(async (req: Request) => {
     }
 
     // ------------------------------------------------------------------
-    // 1. Mollie verstuurt enkel het payment-ID in de body: { "id": "tr_..." }
+    // 1. Mollie verstuurt enkel het payment-ID in de body.
+    //    BELANGRIJK: Mollie stuurt klassieke webhooks met Content-Type
+    //    "application/x-www-form-urlencoded" en body "id=tr_..." — NIET
+    //    als JSON. Verwerk daarom beide mogelijkheden.
     // ------------------------------------------------------------------
     let paymentId: string;
     try {
-        const body = await req.json();
-        paymentId = String(body.id ?? "");
+        const contentType = String(
+            req.headers.get("content-type") ?? "",
+        ).toLowerCase();
+        const rawBody = await req.text();
+        paymentId = "";
+
+        if (
+            contentType.includes("application/json") ||
+            rawBody.trimStart().startsWith("{")
+        ) {
+            try {
+                const parsed = JSON.parse(rawBody);
+                paymentId = String(parsed.id ?? "");
+            } catch {
+                // Geen geldige JSON → terugvallen op form-URL-parsing.
+            }
+        }
+
+        if (!paymentId) {
+            const params = new URLSearchParams(rawBody);
+            paymentId = params.get("id") ?? "";
+        }
     } catch {
         return new Response("nok", { status: 400 });
     }
