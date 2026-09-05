@@ -96,13 +96,19 @@ CREATE POLICY "public_read_gallery_objects"
     ON storage.objects FOR SELECT USING (bucket_id = 'gallery');
 
 DROP POLICY IF EXISTS "authenticated_write_gallery_objects"
+    ON storage.objects;
+CREATE POLICY "authenticated_write_gallery_objects"
     ON storage.objects FOR INSERT TO authenticated
     WITH CHECK (bucket_id = 'gallery');
 
 DROP POLICY IF EXISTS "authenticated_update_gallery_objects"
+    ON storage.objects;
+CREATE POLICY "authenticated_update_gallery_objects"
     ON storage.objects FOR UPDATE TO authenticated
     USING (bucket_id = 'gallery');
 
 DROP POLICY IF EXISTS "authenticated_delete_gallery_objects"
+    ON storage.objects;
+CREATE POLICY "authenticated_delete_gallery_objects"
     ON storage.objects FOR DELETE TO authenticated
     USING (bucket_id = 'gallery');
