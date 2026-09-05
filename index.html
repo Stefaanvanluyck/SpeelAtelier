@@ -4297,6 +4297,29 @@ margin-left:0;
 
 
         /* =====================================================
+           SESSION ALREADY ENDED
+        ===================================================== */
+
+        const bookingSessionEnd =
+            new Date(
+                selectedDate + "T11:00:00"
+            );
+
+        if (
+            bookingSessionEnd <=
+            new Date()
+        ) {
+
+            alert(
+                "⛔ Deze sessie is al afgelopen."
+            );
+
+            return;
+
+        }
+
+
+        /* =====================================================
            BLOCKED DATE
         ===================================================== */
 
@@ -5361,6 +5384,59 @@ margin-left:0;
                     }
 
                 });
+
+
+                /*
+                 * Sessie afgelopen?
+                 */
+
+                const sessionEnd =
+                    new Date(
+                        dateStr + "T11:00:00"
+                    );
+
+                if (
+                    now >= sessionEnd
+                ) {
+
+                    events.push({
+
+                        title:
+                            "Voorbij",
+
+                        start:
+                            dateStr,
+
+                        allDay:
+                            true,
+
+                        backgroundColor:
+                            "#9ca3af",
+
+                        borderColor:
+                            "#9ca3af",
+
+                        textColor:
+                            "#374151",
+
+                        extendedProps: {
+
+                            bookable:
+                                false,
+
+                            reason:
+                                "past",
+
+                            theme:
+                                theme
+
+                        }
+
+                    });
+
+                    continue;
+
+                }
 
 
                 /*
@@ -7103,7 +7179,10 @@ margin-left:0;
                     .filter(
                         date =>
                             date >= today &&
-                            !blockedSet.has(date)
+                            !blockedSet.has(date) &&
+                            new Date(
+                                date + "T11:00:00"
+                            ) > new Date()
                     )
                     .sort()
                     .map(
@@ -7255,7 +7334,10 @@ margin-left:0;
                 .filter(
                     date =>
                         date >= today &&
-                        !blockedSet.has(date)
+                        !blockedSet.has(date) &&
+                        new Date(
+                            date + "T11:00:00"
+                        ) > new Date()
                 )
                 .sort()
                 .slice(0, 5);
@@ -7694,6 +7776,23 @@ margin-left:0;
 
                 errorEl.textContent =
                     "Naam en e-mailadres zijn verplicht.";
+
+            }
+
+            return;
+
+        }
+
+        if (
+            new Date(
+                waitlistDate + "T11:00:00"
+            ) <= new Date()
+        ) {
+
+            if (errorEl) {
+
+                errorEl.textContent =
+                    "Deze sessie is al afgelopen.";
 
             }
 
