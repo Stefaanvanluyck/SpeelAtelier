@@ -882,6 +882,93 @@
 
         }
 
+        /* =====================================================
+           DARK MODE
+           ===================================================== */
+
+        :root.dark {
+            --bg: #10141c;
+            --card: rgba(24,30,41,.92);
+            --text: #e7ecf4;
+            --muted: #93a0b4;
+            --accent: #ff8fa0;
+            --accent-light: #3a2830;
+            --green: #34d399;
+            --green-light: #12351f;
+            --red: #f87171;
+            --red-light: #391c1f;
+            --blue: #7aa2ff;
+            --blue-light: #1b2842;
+            --purple: #a78bfa;
+            --orange: #fbbf24;
+            --orange-light: #382b09;
+            --shadow: 0 18px 50px rgba(0,0,0,.4);
+            --border: rgba(231,236,244,.12);
+        }
+
+        :root.dark body {
+            background:
+                radial-gradient(circle at top left,#241820,transparent 40%),
+                radial-gradient(circle at bottom right,#0f2318,transparent 40%),
+                var(--bg);
+        }
+
+        :root.dark .topbar {
+            background: rgba(16,20,28,.85);
+        }
+
+        :root.dark .stat-card,
+        :root.dark .admin-card,
+        :root.dark .status-card,
+        :root.dark .booking-item,
+        :root.dark .payment-box,
+        :root.dark .toast {
+            background: #171d29;
+            border-color: var(--border);
+        }
+
+        :root.dark .booking-item:hover {
+            background: #1d2431;
+        }
+
+        :root.dark .modal-box {
+            background: #161c27;
+            color: var(--text);
+        }
+
+        :root.dark input,
+        :root.dark select,
+        :root.dark textarea {
+            background: #10141c;
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        :root.dark .search-input,
+        :root.dark .filter-select {
+            background: #10141c;
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        :root.dark .children-box {
+            background: #1b2230;
+            border-color: var(--border);
+        }
+
+        :root.dark .toast.error {
+            background: #5b1f24;
+        }
+
+        :root.dark .btn-gray {
+            background: #1d2431;
+            color: var(--text);
+        }
+
+        :root.dark .btn-dark {
+            background: #0d1117;
+        }
+
     </style>
 
 
@@ -899,12 +986,20 @@
 
 
     <div class="topbar-actions">
+        <button class="btn btn-dark" id="darkModeBtn" onclick="toggleDarkMode()">
+            🌙 Donker
+        </button>
+
         <button class="btn btn-gray" onclick="refreshDashboard()">
             🔄 Vernieuwen
         </button>
 
         <button class="btn btn-gray" onclick="openPrintList()">
             🖨️ Zaterdaglijst
+        </button>
+
+        <button class="btn btn-gray" id="undoBtn" onclick="undoLast()" style="display:none;">
+            ↩️ Ongedaan maken
         </button>
 
         <button class="btn btn-green" onclick="exportCSV()">
@@ -1805,6 +1900,17 @@
     emailjs.init({
         publicKey: EMAILJS_PUBLIC_KEY
     });
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+            applyDarkMode(
+                localStorage.getItem(
+                    "adminDarkMode"
+                ) !== "0"
+            );
+        }
+    );
 
     const MAX_CHILDREN = 10;
 
@@ -3530,13 +3636,20 @@
 
     async function deleteAppointment() {
 
-        if (
-            !confirm(
+        if (!confirm(
                 "Deze inschrijving definitief verwijderen?"
             )
         ) {
             return;
         }
+
+        pushUndo(
+            "appointment",
+            allData.find(row =>
+                String(row.id) ===
+                String(editId)
+            )
+        );
 
         const {
             error
@@ -3596,6 +3709,11 @@
             return;
         }
 
+        pushUndo(
+            "theme",
+            theme
+        );
+
         const {
             error
         } = await sb
@@ -3653,6 +3771,11 @@
 
             return;
         }
+
+        pushUndo(
+            "blocked",
+            blocked
+        );
 
         const {
             error
@@ -5351,6 +5474,14 @@
             return;
         }
 
+        pushUndo(
+            "testimonial",
+            testimonials.find(entry =>
+                String(entry.id) ===
+                String(id)
+            )
+        );
+
         const {
             error
         } = await sb
@@ -6068,6 +6199,187 @@
 
     }
 
+    /* =========================================================
+       UNDO (laatste 5 verwijderingen)
+       ========================================================= */
+
+    const MAX_UNDO = 5;
+
+    let undoStack = [];
+
+    function updateUndoButton() {
+
+        const btn =
+            document.getElementById(
+                "undoBtn"
+            );
+
+        if (!btn) {
+            return;
+        }
+
+        if (undoStack.length > 0) {
+
+            btn.style.display = "";
+            btn.textContent =
+                `↩️ Ongedaan maken (${undoStack.length})`;
+
+        } else {
+
+            btn.style.display =
+                "none";
+
+        }
+    }
+
+    function pushUndo(kind, row) {
+
+        if (!row) {
+            return;
+        }
+
+        undoStack.push({
+            kind,
+            row
+        });
+
+        if (
+            undoStack.length >
+            MAX_UNDO
+        ) {
+            undoStack.shift();
+        }
+
+        updateUndoButton();
+    }
+
+    async function undoLast() {
+
+        const entry =
+            undoStack.pop();
+
+        updateUndoButton();
+
+        if (!entry) {
+            return;
+        }
+
+        const {
+            kind,
+            row
+        } = entry;
+
+        try {
+
+            if (
+                kind ===
+                "appointment"
+            ) {
+
+                await sb
+                    .from("appointments")
+                    .insert(row);
+
+            } else if (
+                kind === "theme"
+            ) {
+
+                await sb
+                    .from("themes")
+                    .insert(row);
+
+            } else if (
+                kind === "blocked"
+            ) {
+
+                await sb
+                    .from("blocked_dates")
+                    .insert(row);
+
+            } else if (
+                kind === "waitlist"
+            ) {
+
+                await sb
+                    .from("waitlist")
+                    .insert(row);
+
+            } else if (
+                kind === "testimonial"
+            ) {
+
+                await sb
+                    .from("testimonials")
+                    .insert(row);
+
+            }
+
+            showToast(
+                "↩️ Hersteld."
+            );
+
+            await loadData();
+
+        } catch (err) {
+
+            console.error(
+                "Undo mislukt:",
+                err
+            );
+
+            showToast(
+                "Ongedaan maken mislukt: " +
+                (err.message || "fout"),
+                true
+            );
+
+        }
+    }
+
+    /* =========================================================
+       DARK MODE
+       ========================================================= */
+
+    function applyDarkMode(enabled) {
+
+        document.documentElement.classList.toggle(
+            "dark",
+            enabled
+        );
+
+        const btn =
+            document.getElementById(
+                "darkModeBtn"
+            );
+
+        if (btn) {
+            btn.textContent =
+                enabled
+                    ? "☀️ Licht"
+                    : "🌙 Donker";
+        }
+
+        try {
+
+            localStorage.setItem(
+                "adminDarkMode",
+                enabled ? "1" : "0"
+            );
+
+        } catch (err) {
+            /* ignore */
+        }
+    }
+
+    function toggleDarkMode() {
+
+        applyDarkMode(
+            !document.documentElement.classList.contains(
+                "dark"
+            )
+        );
+    }
+
 
     async function sendBookingConfirmation({
         name,
@@ -6381,6 +6693,14 @@
             return;
         }
 
+        pushUndo(
+            "waitlist",
+            waitlist.find(entry =>
+                String(entry.id) ===
+                String(id)
+            )
+        );
+
         const {
             error
         } = await sb
@@ -6663,6 +6983,46 @@
                 "Escape"
             ) {
                 closeEditModal();
+                return;
+            }
+
+            const isTyping =
+                event.target.matches?.(
+                    "input, select, textarea, [contenteditable]"
+                );
+
+            if (
+                isTyping ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.altKey
+            ) {
+                return;
+            }
+
+            if (
+                event.key === "r" ||
+                event.key === "R"
+            ) {
+                refreshDashboard();
+                return;
+            }
+
+            if (
+                event.key === "d" ||
+                event.key === "D"
+            ) {
+                exportCSV();
+                return;
+            }
+
+            if (
+                event.key === "?"
+            ) {
+                showToast(
+                    "Sneltoetsen: R = vernieuwen · D = CSV · ? = deze help",
+                    false
+                );
             }
         }
     );
