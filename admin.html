@@ -458,14 +458,6 @@
             flex-wrap: wrap;
         }
 
-        #topUsers > div {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-
         /* progress bars in stat-cards */
         .stat-bar {
             margin-top: 12px;
@@ -643,6 +635,58 @@
         .booking-list {
             display: grid;
             gap: 10px;
+        }
+
+        .gallery-admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(230px,1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .gallery-admin-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            border: 1px solid #ececec;
+            border-radius: 16px;
+            background: #fafafa;
+        }
+
+        .gallery-admin-item img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #eee;
+        }
+
+        .gallery-admin-item input,
+        .gallery-admin-item textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .gallery-admin-item input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font: inherit;
+        }
+
+        .gallery-checkrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .85rem;
+            color: var(--muted);
+        }
+
+        .gallery-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .booking-item {
@@ -1026,6 +1070,7 @@
         :root.dark .admin-card,
         :root.dark .status-card,
         :root.dark .booking-item,
+        :root.dark .gallery-admin-item,
         :root.dark .payment-box,
         :root.dark .toast {
             background: #171d29;
@@ -1208,6 +1253,51 @@
         <div
                 id="testimonialList"
                 class="booking-list">
+        </div>
+
+    </section>
+
+    <!-- GALERIJ -->
+    <section class="admin-card">
+
+        <div class="dashboard-card-header">
+
+            <div>
+                <h3 style="margin-bottom:3px;">
+                    🖼️ Galerij
+                </h3>
+
+                <div
+                        style="color:#6b7280;font-size:.78rem;">
+                    Foto's die op de website in de galerij verschijnen.
+                    Gepubliceerde foto's zijn meteen online zichtbaar.
+                </div>
+            </div>
+
+            <label
+                    class="btn btn-primary"
+                    style="cursor:pointer;">
+                ⬆️ Foto's uploaden
+                <input
+                        type="file"
+                        id="galleryUpload"
+                        multiple
+                        accept="image/*"
+                        style="display:none;"
+                        onchange="uploadGallery(this)">
+            </label>
+
+        </div>
+
+        <div
+                id="galleryUploadStatus"
+                class="result-count"
+                style="display:none;">
+        </div>
+
+        <div
+                id="galleryList"
+                class="gallery-admin-grid">
         </div>
 
     </section>
@@ -1411,79 +1501,7 @@
 
         </div>
 
-        <!-- MAAND FINANCIEEL -->
-        <div class="dashboard-card" style="margin-bottom:20px;">
-
-            <h3>📅 Deze maand – financieel</h3>
-
-            <div class="payment-overview">
-
-                <div class="payment-box expected">
-                    <div class="payment-box-label">
-                        Verwacht
-                    </div>
-
-                    <div
-                            class="payment-box-value"
-                            id="monthExpectedRevenue">
-                        €0,00
-                    </div>
-                </div>
-
-                <div class="payment-box paid">
-                    <div class="payment-box-label">
-                        Effectief betaald
-                    </div>
-
-                    <div
-                            class="payment-box-value"
-                            id="monthPaidRevenue">
-                        €0,00
-                    </div>
-                </div>
-
-                <div class="payment-box open">
-                    <div class="payment-box-label">
-                        Nog te ontvangen
-                    </div>
-
-                    <div
-                            class="payment-box-value"
-                            id="monthOutstandingRevenue">
-                        €0,00
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- OPVOLGING – OPENSTAANDE BETALINGEN -->
-        <div class="dashboard-card" style="margin-bottom:20px;">
-
-            <div class="dashboard-card-header">
-
-                <div>
-                    <h3 style="margin-bottom:3px;">
-                        🔔 Opvolging – openstaande betalingen
-                    </h3>
-
-                    <div
-                            style="color:#6b7280;font-size:.78rem;">
-                        Onbetaalde inschrijvingen, eerstvolgende eerst
-                    </div>
-                </div>
-
-            </div>
-
-            <div
-                    id="followUpList"
-                    class="booking-list">
-            </div>
-
-        </div>
-
-        <!-- GRAFIEK + TOP USERS -->
+        <!-- GRAFIEK + BETAALSTATUS -->
         <div class="dashboard-grid">
 
             <div class="dashboard-card">
@@ -1493,32 +1511,6 @@
                 </div>
 
                 <canvas id="monthlyChart"></canvas>
-
-            </div>
-
-            <div class="dashboard-card">
-
-                <h3>🏆 Meest ingeschreven personen</h3>
-
-                <div id="topUsers"></div>
-
-            </div>
-
-        </div>
-
-        <!-- SESSIEBEZETTING + BETAALSTATUS -->
-        <div class="dashboard-grid">
-
-            <div class="dashboard-card">
-
-                <div class="dashboard-card-header">
-                    <h3>⏳ Sessiebezetting</h3>
-                </div>
-
-                <div
-                        id="occupancyList"
-                        class="occupancy-list">
-                </div>
 
             </div>
 
@@ -1539,33 +1531,16 @@
 
         </div>
 
-        <!-- KOMENDE INSCHRIJVINGEN -->
+        <!-- SESSIEBEZETTING -->
         <div class="dashboard-card" style="margin-bottom:20px;">
 
             <div class="dashboard-card-header">
-
-                <div>
-                    <h3 style="margin-bottom:3px;">
-                        👶 Komende inschrijvingen
-                    </h3>
-
-                    <div
-                            style="color:#6b7280;font-size:.78rem;">
-                        De eerstvolgende reservaties
-                    </div>
-                </div>
-
-                <button
-                        class="btn btn-gray"
-                        onclick="showAllUpcoming()">
-                    Alles tonen
-                </button>
-
+                <h3>⏳ Sessiebezetting</h3>
             </div>
 
             <div
-                    id="upcomingList"
-                    class="booking-list">
+                    id="occupancyList"
+                    class="occupancy-list">
             </div>
 
         </div>
@@ -1577,14 +1552,21 @@
 
                 <div>
                     <h3 style="margin-bottom:3px;">
-                        🔎 Inschrijvingen zoeken
+                        👶 Inschrijvingen
                     </h3>
 
                     <div
                             style="color:#6b7280;font-size:.78rem;">
-                        Zoek op ouder, e-mail of kind
+                        Open betalingen krijgen hier herinneringsknoppen
                     </div>
                 </div>
+
+                <button
+                        class="btn btn-gray"
+                        id="bookingViewToggle"
+                        onclick="toggleBookingView()">
+                    Alles tonen
+                </button>
 
             </div>
 
@@ -2119,6 +2101,8 @@
     let monthlyChart = null;
     let paymentStatusChart = null;
     let bookingToggle = null;
+    let galleryItems = [];
+    let showAllBookings = false;
 
     let editMode = "appointment";
     let editId = null;
@@ -2525,7 +2509,8 @@
                 themesResult,
                 blockedResult,
                 waitlistResult,
-                testimonialResult
+                testimonialResult,
+                galleryResult
             ] = await Promise.all([
 
                 sb
@@ -2576,6 +2561,22 @@
                         {
                             ascending: false
                         }
+                    ),
+
+                sb
+                    .from("gallery")
+                    .select("*")
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
                     )
             ]);
 
@@ -2597,6 +2598,25 @@
 
             if (testimonialResult.error) {
                 throw testimonialResult.error;
+            }
+
+            /*
+             * Galerij is optioneel (vereist gallery.sql). Tot die tabel
+             * bestaat blijft de admin-pagina gewoon werken.
+             */
+            if (galleryResult.error) {
+
+                console.warn(
+                    "Galerij niet beschikbaar:",
+                    galleryResult.error
+                );
+
+                galleryItems = [];
+
+            } else {
+
+                galleryItems =
+                    galleryResult.data || [];
             }
 
             allData =
@@ -2621,6 +2641,8 @@
             renderWaitlist();
 
             renderTestimonials();
+
+            renderGallery();
 
         } catch (error) {
 
@@ -4260,18 +4282,6 @@
                     0
                 );
 
-        const monthOutstandingRevenue =
-            monthActiveBookings
-                .filter(item =>
-                    isOpenPayment(item)
-                )
-                .reduce(
-                    (total, item) =>
-                        total +
-                        getStoredAmount(item),
-                    0
-                );
-
         /*
          * Komende afspraken
          */
@@ -4369,47 +4379,22 @@
             );
 
         document.getElementById(
-            "monthExpectedRevenue"
-        ).textContent =
-            formatEuro(
-                monthExpectedRevenue
-            );
-
-        document.getElementById(
-            "monthPaidRevenue"
+            "monthAppointmentsSub"
         ).textContent =
             formatEuro(
                 monthPaidRevenue
-            );
-
-        document.getElementById(
-            "monthOutstandingRevenue"
-        ).textContent =
+            ) +
+            " van " +
             formatEuro(
-                monthOutstandingRevenue
-            );
-
-        document.getElementById(
-            "monthAppointmentsSub"
-        ).textContent =
-            thisMonth.length +
-            (
-                thisMonth.length === 1
-                    ? " reservatie"
-                    : " reservaties"
-            );
+                monthExpectedRevenue
+            ) +
+            " betaald deze maand";
 
         renderMonthlyChart();
-
-        renderTopUsers();
-
-        renderUpcoming();
 
         renderBookingList();
 
         updateStatsBars();
-
-        renderFollowUp();
 
         renderOccupancy();
 
@@ -4692,81 +4677,6 @@
        TOP USERS
     ========================================================= */
 
-    function renderTopUsers() {
-
-        const counts = {};
-
-        allData
-            .filter(item =>
-                isActiveBooking(item)
-            )
-            .forEach(item => {
-
-                const key =
-                    String(
-                        item.email ||
-                        item.name ||
-                        "Onbekend"
-                    )
-                        .trim()
-                        .toLowerCase();
-
-                if (!counts[key]) {
-
-                    counts[key] = {
-
-                        name:
-                            item.name ||
-                            "Onbekend",
-
-                        count:
-                            0
-                    };
-                }
-
-                counts[key].count++;
-            });
-
-        const top =
-            Object.values(
-                counts
-            )
-                .sort(
-                    (a,b) =>
-                        b.count -
-                        a.count
-                )
-                .slice(0,10);
-
-        const container =
-            document.getElementById(
-                "topUsers"
-            );
-
-        if (!top.length) {
-
-            container.innerHTML =
-                "<p style='color:#6b7280'>Nog geen inschrijvingen.</p>";
-
-            return;
-        }
-
-        container.innerHTML =
-            top.map(user => `
-                <div>
-                    <span>
-                        ${escapeHtml(
-                            user.name
-                        )}
-                    </span>
-
-                    <strong>
-                        ${user.count}
-                    </strong>
-                </div>
-`).join("");
-    }
-
     /* =========================================================
        STATS BARS  (betaald % + foto-toestemming)
     ========================================================= */
@@ -4959,146 +4869,6 @@
 
         }
 
-    }
-
-    function renderFollowUp() {
-
-        const container =
-            document.getElementById(
-                "followUpList"
-            );
-
-        if (!container) {
-
-            return;
-
-        }
-
-        const open =
-            allData
-                .filter(item =>
-                    isOpenPayment(item)
-                )
-                .map(item => (
-                    {
-                        item,
-                        date:
-                            getAppointmentDate(
-                                item
-                            )
-                    }
-                ))
-                .filter(entry => entry.date)
-                .sort(
-                    (a,b) =>
-                        a.date -
-                        b.date
-                )
-                .slice(0,8);
-
-        if (!open.length) {
-
-            container.innerHTML =
-                `<div class="empty-state">
-                    🎉 Alle betalingen zijn in orde.
-                </div>`;
-
-            return;
-
-        }
-
-        const today =
-            new Date();
-
-        today.setHours(0,0,0,0);
-
-        container.innerHTML =
-            open.map(entry => {
-
-                const item =
-                    entry.item;
-
-                const date =
-                    entry.date;
-
-                const safeId =
-                    String(item.id)
-                        .replace(/'/g, "")
-                        .replace(/\\/g, "");
-
-                const children =
-                    getChildrenNames(
-                        item
-                    ).join(", ");
-
-                const theme =
-                    getThemeForDate(
-                        item.appointment_date
-                    );
-
-                const amount =
-                    formatEuro(
-                        getStoredAmount(
-                            item
-                        )
-                    );
-
-                const overdue =
-                    date.getTime() <
-                    today.getTime();
-
-                return `
-                    <div class="booking-item${overdue ? " followup-overdue" : ""}">
-
-                        <div class="booking-main">
-
-                            <div class="booking-name">
-                                ${escapeHtml(item.name || item.parent_name || "Onbekend")} • ${amount}
-                            </div>
-
-                            <div class="booking-meta">
-                                📅 ${formatDateDutch(date)}${theme ? " · " + escapeHtml(theme) : ""}
-                                ${children ? "<br>👶 " + escapeHtml(children) : ""}
-                            </div>
-
-                        </div>
-
-                        <div class="booking-side">
-
-                            <span class="payment-pill ${overdue ? "pending" : "other"}">
-                                ${overdue ? "⏳ Over tijd" : "📅 Nog te betalen"}
-                            </span>
-
-                            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:8px;">
-
-                                <button
-                                        class="btn btn-gray"
-                                        onclick="copyReminder('${safeId}')"
-                                        title="Betaalherinnering kopiëren">
-                                    📋
-                                </button>
-
-                                <button
-                                        class="btn btn-green"
-                                        onclick="quickSetStatus('${safeId}','paid')"
-                                        title="Markeer als betaald">
-                                    ✅
-                                </button>
-
-                                <button
-                                        class="btn btn-red"
-                                        onclick="quickSetStatus('${safeId}','cancelled')"
-                                        title="Annuleer inschrijving">
-                                    ❌
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>`;
-
-            }).join("");
     }
 
     async function copyReminder(id) {
@@ -5589,78 +5359,7 @@
 
         }
 
-    }
-
-    /* =========================================================
-       UPCOMING
-    ========================================================= */
-
-    function renderUpcoming() {
-
-        const container =
-            document.getElementById(
-                "upcomingList"
-            );
-
-        const upcoming =
-            allData
-                .filter(item =>
-                    isUpcoming(item)
-                )
-                .sort(
-                    (a,b) =>
-                        getAppointmentDate(a) -
-                        getAppointmentDate(b)
-                )
-                .slice(0,8);
-
-        if (!upcoming.length) {
-
-            container.innerHTML =
-                `<div class="empty-state">
-                    🎉 Geen komende inschrijvingen.
-                </div>`;
-
-            return;
-        }
-
-        container.innerHTML =
-            upcoming.map(
-                item =>
-                    createBookingHtml(item)
-            ).join("");
-    }
-
-    function showAllUpcoming() {
-
-        const search =
-            document.getElementById(
-                "bookingSearch"
-            );
-
-        const dateFilter =
-            document.getElementById(
-                "bookingDateFilter"
-            );
-
-        if (search) {
-            search.value = "";
-        }
-
-        if (dateFilter) {
-            dateFilter.value =
-                "upcoming";
-        }
-
-        renderBookingList();
-
-        document.getElementById(
-            "bookingList"
-        ).scrollIntoView({
-            behavior:
-                "smooth"
-        });
-    }
+}
 
     /* =========================================================
        BOOKING SEARCH
@@ -5700,6 +5399,26 @@
 
         let filtered =
             [...allData];
+
+        const today =
+            new Date();
+
+        today.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+        /*
+         * Standaardweergave: de eerstvolgende inschrijvingen.
+         * Via 'Alles tonen', een zoekopdracht of een datumfilter
+         * komt de volledige lijst in beeld.
+         */
+        const defaultUpcoming =
+            !search &&
+            dateFilter === "all" &&
+            !showAllBookings;
 
         if (search) {
 
@@ -5789,16 +5508,6 @@
                             return false;
                         }
 
-                        const today =
-                            new Date();
-
-                        today.setHours(
-                            0,
-                            0,
-                            0,
-                            0
-                        );
-
                         if (
                             dateFilter ===
                             "upcoming"
@@ -5837,6 +5546,28 @@
                         return true;
                     }
                 );
+
+        } else if (
+            defaultUpcoming
+        ) {
+
+            filtered =
+                filtered.filter(
+                    item => {
+
+                        const date =
+                            getAppointmentDate(
+                                item
+                            );
+
+                        return (
+                            date ?
+                                date >=
+                                    today :
+                                false
+                        );
+                    }
+                );
         }
 
         filtered.sort(
@@ -5848,12 +5579,35 @@
                 const db =
                     getAppointmentDate(b);
 
+                if (
+                    defaultUpcoming
+                ) {
+
+                    return (
+                        (da || 0) -
+                        (db || 0)
+                    );
+                }
+
                 return (
                     (db || 0) -
                     (da || 0)
                 );
             }
         );
+
+        const toggle =
+            document.getElementById(
+                "bookingViewToggle"
+            );
+
+        if (toggle) {
+
+            toggle.textContent =
+                showAllBookings
+                    ? "📆 Komende"
+                    : "Alles tonen";
+        }
 
         document.getElementById(
             "bookingResultCount"
@@ -5863,13 +5617,22 @@
                 filtered.length === 1
                     ? " inschrijving"
                     : " inschrijvingen"
+            ) +
+            (
+                defaultUpcoming
+                    ? " komend"
+                    : ""
             );
 
         if (!filtered.length) {
 
             container.innerHTML =
                 `<div class="empty-state">
-                    Geen inschrijvingen gevonden.
+                    ${
+                        defaultUpcoming
+                            ? "🎉 Geen komende inschrijvingen."
+                            : "Geen inschrijvingen gevonden."
+                    }
                 </div>`;
 
             return;
@@ -5883,6 +5646,42 @@
                         true
                     )
             ).join("");
+    }
+
+    function toggleBookingView() {
+
+        showAllBookings =
+            !showAllBookings;
+
+        if (showAllBookings) {
+
+            const search =
+                document.getElementById(
+                    "bookingSearch"
+                );
+
+            const dateFilter =
+                document.getElementById(
+                    "bookingDateFilter"
+                );
+
+            if (search) {
+                search.value = "";
+            }
+
+            if (dateFilter) {
+                dateFilter.value = "all";
+            }
+        }
+
+        renderBookingList();
+
+        document.getElementById(
+            "bookingList"
+        ).scrollIntoView({
+            behavior:
+                "smooth"
+        });
     }
 
     function createBookingHtml(
@@ -5990,6 +5789,9 @@
                 "\\'"
             );
 
+        const openPayment =
+            isOpenPayment(item);
+
         return `
             <div
                 class="booking-item"
@@ -6054,6 +5856,42 @@
                         class="payment-pill ${pillClass}">
                         ${statusText}
                     </span>
+
+                    ${
+                        openPayment
+                            ? `
+                        <div
+                                style="
+                                display:flex;
+                                gap:6px;
+                                flex-wrap:wrap;
+                                justify-content:flex-end;
+                                margin-top:8px;">
+
+                            <button
+                                    class="btn btn-gray"
+                                    onclick="event.stopPropagation();copyReminder('${safeId}')"
+                                    title="Betaalherinnering kopiëren">
+                                📋
+                            </button>
+
+                            <button
+                                    class="btn btn-green"
+                                    onclick="event.stopPropagation();quickSetStatus('${safeId}','paid')"
+                                    title="Markeer als betaald">
+                                ✅
+                            </button>
+
+                            <button
+                                    class="btn btn-red"
+                                    onclick="event.stopPropagation();quickSetStatus('${safeId}','cancelled')"
+                                    title="Annuleer inschrijving">
+                                ❌
+                            </button>
+
+                        </div>`
+                            : ""
+                    }
 
                 </div>
 
@@ -6361,6 +6199,359 @@ ${item.published
 
                 })
                 .join("");
+    }
+
+
+    /* =========================================================
+       GALERIJ  (foto-upload naar Storage + metadata)
+    ========================================================= */
+
+    function renderGallery() {
+
+        const container =
+            document.getElementById(
+                "galleryList"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        if (!galleryItems.length) {
+
+            container.innerHTML =
+                `<div class="empty-state"
+                     style="grid-column:1/-1;">
+                    Nog geen foto's geüpload — gebruik de knop
+                    'Foto's uploaden'.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML =
+            galleryItems
+                .map(item => {
+
+                    const safeId =
+                        String(item.id).replace(
+                            /'/g,
+                            "\\'"
+                        );
+
+                    const url =
+                        SUPABASE_URL +
+                        "/storage/v1/object/public/gallery/" +
+                        encodeURIComponent(
+                            item.storage_path
+                        );
+
+                    return `
+                        <div class="gallery-admin-item">
+
+                            <img
+                                src="${url}"
+                                loading="lazy"
+                                alt="${escapeHtml(item.alt)}">
+
+                            <input
+                                id="galleryAlt_${safeId}"
+                                type="text"
+                                value="${escapeHtml(item.alt || "")}"
+                                placeholder="Alt-tekst (korte beschrijving)">
+
+                            <input
+                                id="galleryCaption_${safeId}"
+                                type="text"
+                                value="${escapeHtml(item.caption || "")}"
+                                placeholder="Onderschrift (optioneel)">
+
+                            <label class="gallery-checkrow">
+                                <input
+                                    type="checkbox"
+                                    id="galleryPublished_${safeId}"
+                                    ${item.published ? "checked" : ""}>
+                                Gepubliceerd op de website
+                            </label>
+
+                            <div class="gallery-actions">
+
+                                <button
+                                        class="btn btn-primary"
+                                        onclick="saveGalleryItem('${safeId}')">
+                                    💾 Opslaan
+                                </button>
+
+                                <button
+                                        class="btn btn-red"
+                                        onclick="deleteGalleryItem('${safeId}')"
+                                        title="Foto verwijderen">
+                                    🗑️
+                                </button>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+    }
+
+    async function uploadGallery(input) {
+
+        const files =
+            Array.from(
+                input.files || []
+            );
+
+        if (!files.length) {
+            return;
+        }
+
+        const status =
+            document.getElementById(
+                "galleryUploadStatus"
+            );
+
+        status.style.display =
+            "block";
+
+        status.style.color = "";
+
+        let uploaded = 0;
+
+        for (
+            let i = 0;
+            i < files.length;
+            i++
+        ) {
+
+            const file =
+                files[i];
+
+            const path =
+                Date.now() +
+                "-" +
+                String(file.name)
+                    .replace(
+                        /[^a-zA-Z0-9._-]/g,
+                        "_"
+                    );
+
+            status.textContent =
+                `⬆️ Uploaden ${i + 1}/${files.length}...`;
+
+            try {
+
+                const {
+                    error: uploadError
+                } =
+                    await sb
+                        .storage
+                        .from("gallery")
+                        .upload(
+                            path,
+                            file,
+                            {
+                                contentType:
+                                    file.type ||
+                                    "application/octet-stream",
+                                upsert: false
+                            }
+                        );
+
+                if (uploadError) {
+                    throw uploadError;
+                }
+
+                const {
+                    error: insertError
+                } =
+                    await sb
+                        .from("gallery")
+                        .insert({
+                            storage_path: path,
+                            alt:
+                                String(file.name)
+                                    .replace(
+                                        /\.[^.]+$/,
+                                        ""
+                                    )
+                                    .replace(
+                                        /[_-]+/g,
+                                        " "
+                                    )
+                                    .trim()
+                        });
+
+                if (insertError) {
+                    throw insertError;
+                }
+
+                uploaded++;
+
+            } catch (err) {
+
+                console.error(
+                    "Fotoupload mislukt:",
+                    err
+                );
+            }
+        }
+
+        input.value = "";
+
+        if (
+            uploaded ===
+            files.length
+        ) {
+
+            status.textContent =
+                `✅ ${uploaded} ${
+                    uploaded === 1
+                        ? "foto geüpload"
+                        : "foto's geüpload"
+                }. Ze verschijnen nu in de galerij op de website.`;
+
+        } else {
+
+            status.textContent =
+                `⚠️ ${uploaded}/${files.length} ${
+                    files.length === 1
+                        ? "foto kon"
+                        : "foto's konden"
+                } niet worden geüpload. Controleer de console.`;
+        }
+
+        await loadData();
+    }
+
+    async function saveGalleryItem(id) {
+
+        const item =
+            galleryItems.find(
+                entry =>
+                    String(entry.id) ===
+                    String(id)
+            );
+
+        if (!item) {
+            return;
+        }
+
+        const alt =
+            (
+                document.getElementById(
+                    `galleryAlt_${id}`
+                )?.value || ""
+            ).trim();
+
+        const caption =
+            (
+                document.getElementById(
+                    `galleryCaption_${id}`
+                )?.value || ""
+            ).trim();
+
+        const published =
+            Boolean(
+                document.getElementById(
+                    `galleryPublished_${id}`
+                )?.checked
+            );
+
+        const {
+            error
+        } = await sb
+            .from("gallery")
+            .update({
+                alt,
+                caption,
+                published
+            })
+            .eq("id", id);
+
+        if (error) {
+
+            console.error(error);
+
+            showToast(
+                "Opslaan mislukt: " +
+                (
+                    error.message ||
+                    "onbekende fout"
+                ),
+                true
+            );
+
+            return;
+        }
+
+        showToast(
+            "✅ Foto-instellingen opgeslagen."
+        );
+
+        await loadData();
+    }
+
+    async function deleteGalleryItem(id) {
+
+        const item =
+            galleryItems.find(
+                entry =>
+                    String(entry.id) ===
+                    String(id)
+            );
+
+        if (!item) {
+            return;
+        }
+
+        const confirmed =
+            confirm(
+                "Deze foto verwijderen uit de galerij?"
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        const {
+            error: rowError
+        } = await sb
+            .from("gallery")
+            .delete()
+            .eq("id", id);
+
+        if (rowError) {
+
+            console.error(rowError);
+
+            showToast(
+                "Verwijderen mislukt: " +
+                (
+                    rowError.message ||
+                    "onbekende fout"
+                ),
+                true
+            );
+
+            return;
+        }
+
+        await sb
+            .storage
+            .from("gallery")
+            .remove(
+                [item.storage_path]
+            );
+
+        showToast(
+            "🗑️ Foto verwijderd."
+        );
+
+        await loadData();
     }
 
 

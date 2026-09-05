@@ -9,6 +9,8 @@ die niet vanuit de client-code geregeld kunnen worden:
 | 3 | `functions/create-mollie-payment/index.ts` | Edge Function die de online inschrijving en Mollie-betaallink server-side aanmaakt. Het bedrag wordt herberekend; de clientwaarde wordt genegeerd. |
 | + | `functions/mollie-webhook/index.ts` | Webhook die Mollie-status **opnieuw verifieert bij Mollie** (tegen vervalste webhooks), de inschrijving bijwerkt en bij succes de mails verstuurt |
 | 4 | `sql/rls_hardening.sql` | RLS-beveiliging: anon mag alleen minimale kolommen lezen (geen naam/e-mail/kinderen), alleen inschrijvingen aanmaken, en NOOIT iets muteren; volledige toegang vereist een admin-rij in `admin_users` |
+| + | `sql/testimonials.sql` | Reviews door gezinnen met een inschrijving (controle via e-mail) + beheer in admin.html |
+| + | `sql/gallery.sql` | Galerij-uploads: publieke Storage-bucket `gallery` + `gallery`-tabel met RLS (anon leest enkel gepubliceerde foto's) |
 
 ---
 
@@ -100,6 +102,18 @@ RLS-schema compatibel is):
 - `admin.html`
 
 ---
+
+## Stap 5 — Galerij-uploads (optioneel)
+
+1. Open `sql/gallery.sql`.
+2. In [Supabase Dashboard](https://supabase.com/dashboard) → **SQL Editor**
+   → de inhoud plakken → **Run**.
+3. Daarna in `admin.html` (👉 galerij) foto's uploaden. Ze verschijnen
+   automatisch in `index.html` zodra ze zijn gepubliceerd.
+
+> De website toont enkel rijen met `published = true`. Tot de SQL gedraaid
+> is, blijven de ingebouwde voorbeeldfoto's zichtbaar en blijft de rest van
+> `admin.html` gewoon werken.
 
 ## Controle na implementatie
 

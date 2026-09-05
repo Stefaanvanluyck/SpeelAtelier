@@ -2853,7 +2853,7 @@ margin-left:0;
 
     <h2>🖼️ Galerij</h2>
 
-    <div class="gallery">
+    <div class="gallery" id="galleryGrid">
 
         <img src="speelatteliervoorbeeld1.webp"
              width="1512"
@@ -9352,6 +9352,102 @@ margin-left:0;
     document.addEventListener(
         "DOMContentLoaded",
         startQuiz
+    );
+
+
+    /* =========================================================
+       GALERIJ  (foto's uit de gallery-tabel / Storage-bucket)
+    ========================================================= */
+
+    async function loadGallery() {
+
+        const grid =
+            document.getElementById(
+                "galleryGrid"
+            );
+
+        if (!grid) {
+            return;
+        }
+
+        let images = [];
+
+        try {
+
+            const {
+                data,
+                error
+            } = await sb
+                .from("gallery")
+                .select(
+                    "storage_path, alt, sort_order, created_at"
+                )
+                .order(
+                    "sort_order",
+                    {
+                        ascending: true
+                    }
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                );
+
+            if (error) {
+                throw error;
+            }
+
+            images =
+                (data || []).map(img => ({
+
+                    src:
+                        SUPABASE_URL +
+                        "/storage/v1/object/public/gallery/" +
+                        encodeURIComponent(
+                            img.storage_path
+                        ),
+
+                    alt:
+                        img.alt ||
+                        "Foto uit het speelatelier"
+                }));
+
+        } catch (err) {
+
+            console.error(
+                "Galerij laden mislukt:",
+                err
+            );
+
+            images = [];
+
+        }
+
+        /*
+         * Alleen als de beheerder foto's heeft geüpload vervangen we de
+         * standaardfoto's; anders blijven de ingebouwde voorbeelden staan.
+         */
+
+        if (images.length) {
+
+            grid.innerHTML =
+                images.map(img => `
+                    <img src="${img.src}"
+                         loading="lazy"
+                         decoding="async"
+                         alt="${escapeHtml(img.alt)}">
+                `).join("");
+
+            initLightbox();
+
+        }
+    }
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        loadGallery
     );
 
 
