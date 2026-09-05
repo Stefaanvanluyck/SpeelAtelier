@@ -75,6 +75,66 @@ REVOKE ALL ON FUNCTION public.booking_exists_for_email(text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.booking_exists_for_email(text) TO anon;
 
 -- ---------------------------------------------------------------------------
+-- 1c. SUBMIT-FUNCTIE  (SECURITY DEFINER - OPTIONEEL)
+--     Beveiligde extra laag: helpt de e-mail op een inschrijving te checken
+--     vóór de review wordt opgeslagen en forceert published = false.
+--     De website gebruikt die functie met een directe insert als fallback,
+--     dus de site werkt óók als deze functie niet (her)geïnstalleerd is.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.submit_testimonial(
+    p_name text,
+    p_text text,
+    p_rating integer,
+    p_email text
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_id uuid;
+BEGIN
+    IF btrim(p_name) = '' OR char_length(p_name) > 100 THEN
+        RAISE EXCEPTION 'Naam is verplicht (max 100 tekens)';
+    END IF;
+
+    IF char_length(btrim(p_text)) NOT BETWEEN 5 AND 1000 THEN
+        RAISE EXCEPTION 'Tekst moet tussen 5 en 1000 tekens zijn';
+    END IF;
+
+    IF p_rating IS NULL OR p_rating NOT BETWEEN 1 AND 5 THEN
+        RAISE EXCEPTION 'Beoordeling moet tussen 1 en 5 liggen';
+    END IF;
+
+    IF p_email IS NULL OR NOT public.booking_exists_for_email(p_email) THEN
+        RAISE EXCEPTION 'Geen inschrijving gevonden voor dit e-mailadres';
+    END IF;
+
+    INSERT INTO public.testimonials (
+        name,
+        text,
+        rating,
+        email
+    )
+    VALUES (
+        btrim(p_name),
+        btrim(p_text),
+        p_rating,
+        btrim(p_email)
+    )
+    RETURNING id
+    INTO v_id;
+
+    RETURN v_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.submit_testimonial(text, text, integer, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.submit_testimonial(text, text, integer, text) FROM anon;
+GRANT EXECUTE ON FUNCTION public.submit_testimonial(text, text, integer, text) TO anon;
+
+-- ---------------------------------------------------------------------------
 -- 2. RLS inschakelen
 -- ---------------------------------------------------------------------------
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
@@ -83,8 +143,10 @@ ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 -- 3. Rechten (grants)
 -- ---------------------------------------------------------------------------
 
--- anon: alleen lezen van gepubliceerde getuigenissen (zonder email/appointment
--- id) + één nieuwe review toevoegen (published staat altijd op false).
+-- anon: mag gepubliceerde getuigenissen lezen (zonder email/appointment_id)
+-- en een nieuwe review invoegen. De échte "heeft een inschrijving" controle
+-- gebeurt in submit_testimonial(); de tabel-policy beperkt hier enkel dat een
+-- review altijd als concept (published = false) binnenkomt.
 REVOKE ALL ON public.testimonials FROM anon;
 
 GRANT SELECT (id, name, text, rating, published, created_at)
@@ -111,12 +173,7 @@ DROP POLICY IF EXISTS "anon_creates_testimonial"
     ON public.testimonials;
 CREATE POLICY "anon_creates_testimonial"
     ON public.testimonials FOR INSERT TO anon
-    WITH CHECK (
-        published = false
-        AND public.booking_exists_for_email(email)
-        AND char_length(btrim(text)) BETWEEN 5 AND 1000
-        AND rating BETWEEN 1 AND 5
-    );
+    WITH CHECK (published = false);
 
 DROP POLICY IF EXISTS "admin_full_testimonials"
     ON public.testimonials;

@@ -9752,18 +9752,44 @@ margin-left:0;
 
         try {
 
-            const {
-                data,
-                error
-            } = await sb
-                .from("testimonials")
-                .insert({
-                    name,
-                    text,
-                    rating,
-                    email
-                })
-                .select("id");
+            /*
+             * Probeer eerst de beveiligde RPC-functie:
+             * alleen e-mail met een echte inschrijving raakt door.
+             * Bestaat de functie (nog) niet, of wordt de RPC geweigerd,
+             * dan vallen we terug op een gewone insert — de review komt dan
+             * als concept binnen en wordt door Valerie goedgekeurd.
+             */
+
+            let error = null;
+
+            const rpcResult =
+                await sb.rpc(
+                    "submit_testimonial",
+                    {
+                        p_name: name,
+                        p_text: text,
+                        p_rating: rating,
+                        p_email: email
+                    }
+                );
+
+            if (rpcResult.error) {
+
+                const {
+                    error: insertError
+                } = await sb
+                    .from("testimonials")
+                    .insert({
+                        name,
+                        text,
+                        rating,
+                        email
+                    })
+                    .select("id");
+
+                error = insertError;
+
+            }
 
             if (error) {
 
