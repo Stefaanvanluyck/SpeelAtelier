@@ -501,20 +501,26 @@
         .gallery {
             display: grid;
             grid-template-columns:
-                repeat(auto-fit,minmax(200px,1fr));
-            gap: 18px;
+                repeat(auto-fit,minmax(150px,1fr));
+            gap: 12px;
         }
 
         .gallery img {
             width: 100%;
-            height: 260px;
+            height: 175px;
             object-fit: cover;
-            border-radius: 20px;
+            border-radius: 16px;
             transition: 0.4s;
         }
 
         .gallery img:hover {
             transform: scale(1.08) rotate(1deg);
+        }
+
+        .gallery-more {
+            display: block;
+            margin: 26px auto 0;
+            cursor: pointer;
         }
 
         /* =========================================================
@@ -2891,6 +2897,14 @@ margin-left:0;
              alt="Logo van Kleine Wonderwereld">
 
     </div>
+
+    <button
+        id="galleryMore"
+        class="btn gallery-more"
+        style="display:none;"
+        onclick="galleryShowMore()">
+        Meer foto's tonen
+    </button>
 
     <div class="lightbox"
          id="lightbox"
@@ -8378,38 +8392,57 @@ margin-left:0;
 
     function initLightbox() {
 
-        const galleryImages =
+        const grid =
+            document.getElementById(
+                "galleryGrid"
+            );
+
+        if (
+            grid &&
+            !grid.dataset.lightboxBound
+        ) {
+
+            grid.dataset.lightboxBound = "1";
+
+            grid.addEventListener(
+                "click",
+                event => {
+
+                    const img =
+                        event.target.closest(
+                            ".gallery img"
+                        );
+
+                    if (!img) {
+                        return;
+                    }
+
+                    const images =
+                        Array.from(
+                            grid.querySelectorAll(
+                                "img"
+                            )
+                        );
+
+                    const index =
+                        images.indexOf(img);
+
+                    if (index >= 0) {
+                        openLightbox(index);
+                    }
+                }
+            );
+        }
+
+        lightboxState.images =
             Array.from(
                 document.querySelectorAll(
                     ".gallery img"
                 )
-            );
-
-        lightboxState.images =
-            galleryImages.map(
-                img => ({
-                    full: img.src,
-                    alt: img.alt || "Foto"
-                })
-            );
-
-        galleryImages.forEach(
-            (img, index) => {
-
-                img.addEventListener(
-                    "click",
-                    () =>
-                        openLightbox(
-                            index
-                        )
-                );
-
-                img.classList.add(
-                    "lightbox-trigger"
-                );
-
-            }
-        );
+            ).map(img => ({
+                full: img.src,
+                alt: img.alt || "Foto"
+            }));
 
         const closeBtn =
             document.getElementById(
@@ -8426,14 +8459,26 @@ margin-left:0;
                 "lightboxNext"
             );
 
-        if (closeBtn) {
+        if (
+            closeBtn &&
+            !closeBtn.dataset.bound
+        ) {
+
+            closeBtn.dataset.bound = "1";
+
             closeBtn.addEventListener(
                 "click",
                 closeLightbox
             );
         }
 
-        if (prevBtn) {
+        if (
+            prevBtn &&
+            !prevBtn.dataset.bound
+        ) {
+
+            prevBtn.dataset.bound = "1";
+
             prevBtn.addEventListener(
                 "click",
                 () =>
@@ -8441,7 +8486,13 @@ margin-left:0;
             );
         }
 
-        if (nextBtn) {
+        if (
+            nextBtn &&
+            !nextBtn.dataset.bound
+        ) {
+
+            nextBtn.dataset.bound = "1";
+
             nextBtn.addEventListener(
                 "click",
                 () =>
@@ -8454,7 +8505,12 @@ margin-left:0;
                 "lightbox"
             );
 
-        if (lightbox) {
+        if (
+            lightbox &&
+            !lightbox.dataset.bound
+        ) {
+
+            lightbox.dataset.bound = "1";
 
             lightbox.addEventListener(
                 "click",
@@ -8468,38 +8524,44 @@ margin-left:0;
 
                 }
             );
-
         }
 
-        document.addEventListener(
-            "keydown",
-            event => {
+        if (
+            !document.dataset.lightboxKeys
+        ) {
 
-                if (
-                    !lightbox ||
-                    !lightbox.classList.contains(
-                        "open"
-                    )
-                ) {
-                    return;
+            document.dataset.lightboxKeys = "1";
+
+            document.addEventListener(
+                "keydown",
+                event => {
+
+                    if (
+                        !lightbox ||
+                        !lightbox.classList.contains(
+                            "open"
+                        )
+                    ) {
+                        return;
+                    }
+
+                    if (
+                        event.key === "Escape"
+                    ) {
+                        closeLightbox();
+                    } else if (
+                        event.key === "ArrowLeft"
+                    ) {
+                        moveLightbox(-1);
+                    } else if (
+                        event.key === "ArrowRight"
+                    ) {
+                        moveLightbox(1);
+                    }
+
                 }
-
-                if (
-                    event.key === "Escape"
-                ) {
-                    closeLightbox();
-                } else if (
-                    event.key === "ArrowLeft"
-                ) {
-                    moveLightbox(-1);
-                } else if (
-                    event.key === "ArrowRight"
-                ) {
-                    moveLightbox(1);
-                }
-
-            }
-        );
+            );
+        }
 
     }
 
@@ -9359,6 +9421,12 @@ margin-left:0;
        GALERIJ  (foto's uit de gallery-tabel / Storage-bucket)
     ========================================================= */
 
+    const GALLERY_PAGE = 12;
+
+    let siteGalleryImages = [];
+
+    let siteGalleryVisible = 0;
+
     async function loadGallery() {
 
         const grid =
@@ -9370,7 +9438,7 @@ margin-left:0;
             return;
         }
 
-        let images = [];
+        let uploaded = [];
 
         try {
 
@@ -9399,7 +9467,7 @@ margin-left:0;
                 throw error;
             }
 
-            images =
+            uploaded =
                 (data || []).map(img => ({
 
                     src:
@@ -9421,8 +9489,7 @@ margin-left:0;
                 err
             );
 
-            images = [];
-
+            uploaded = [];
         }
 
         /*
@@ -9430,19 +9497,84 @@ margin-left:0;
          * standaardfoto's; anders blijven de ingebouwde voorbeelden staan.
          */
 
-        if (images.length) {
+        if (uploaded.length) {
 
-            grid.innerHTML =
-                images.map(img => `
-                    <img src="${img.src}"
-                         loading="lazy"
-                         decoding="async"
-                         alt="${escapeHtml(img.alt)}">
-                `).join("");
+            siteGalleryImages =
+                uploaded;
 
-            initLightbox();
+        } else {
 
+            siteGalleryImages =
+                Array.from(
+                    grid.querySelectorAll("img")
+                ).map(img => ({
+                    src: img.getAttribute("src"),
+                    alt: img.alt || "Foto"
+                }));
         }
+
+        siteGalleryVisible = 0;
+
+        renderGalleryGrid();
+    }
+
+    function renderGalleryGrid() {
+
+        const grid =
+            document.getElementById(
+                "galleryGrid"
+            );
+
+        if (!grid) {
+            return;
+        }
+
+        const visible =
+            siteGalleryImages.slice(
+                0,
+                siteGalleryVisible +
+                    GALLERY_PAGE
+            );
+
+        grid.innerHTML =
+            visible.map(img => `
+                <img src="${img.src}"
+                     loading="lazy"
+                     decoding="async"
+                     alt="${escapeHtml(img.alt)}">
+            `).join("");
+
+        siteGalleryVisible =
+            visible.length;
+
+        const moreBtn =
+            document.getElementById(
+                "galleryMore"
+            );
+
+        if (moreBtn) {
+
+            const remaining =
+                siteGalleryImages.length -
+                siteGalleryVisible;
+
+            moreBtn.style.display =
+                remaining > 0
+                    ? ""
+                    : "none";
+
+            moreBtn.textContent =
+                remaining > 0
+                    ? `Meer foto's tonen (${remaining} meer)`
+                    : "Meer foto's tonen";
+        }
+
+        initLightbox();
+    }
+
+    function galleryShowMore() {
+
+        renderGalleryGrid();
     }
 
     window.addEventListener(

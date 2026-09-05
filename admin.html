@@ -689,6 +689,53 @@
             flex-wrap: wrap;
         }
 
+        .gallery-admin-list {
+            margin-top: 14px;
+        }
+
+        .admin-collapse {
+            margin-top: 18px;
+            border-top: 1px solid #ececec;
+        }
+
+        .admin-collapse summary {
+            cursor: pointer;
+            font-weight: 700;
+            padding: 12px 0;
+            color: var(--muted);
+            user-select: none;
+            list-style: none;
+        }
+
+        .admin-collapse summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .admin-collapse summary::before {
+            content: "▸ ";
+            display: inline-block;
+            transition: transform .2s;
+        }
+
+        .admin-collapse[open] summary::before {
+            content: "▸ ";
+            transform: rotate(90deg);
+        }
+
+        .admin-collapse .gallery-admin-grid,
+        .admin-collapse .testimonial-grid {
+            margin-top: 6px;
+        }
+
+        .testimonial-checkrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .82rem;
+            color: var(--muted);
+            align-self: center;
+        }
+
         .booking-item {
             display: flex;
             justify-content: space-between;
@@ -1071,6 +1118,7 @@
         :root.dark .status-card,
         :root.dark .booking-item,
         :root.dark .gallery-admin-item,
+        :root.dark .admin-collapse,
         :root.dark .payment-box,
         :root.dark .toast {
             background: #171d29;
@@ -1295,10 +1343,10 @@
                 style="display:none;">
         </div>
 
-        <div
-                id="galleryList"
-                class="gallery-admin-grid">
-        </div>
+<div
+        id="galleryList"
+        class="gallery-admin-list">
+</div>
 
     </section>
 
@@ -5426,7 +5474,7 @@
                 filtered.filter(item => {
 
                     const children =
-                        getChildren(
+                        getChildrenNames(
                             item
                         ).join(" ");
 
@@ -6127,98 +6175,141 @@
             return;
         }
 
-        container.innerHTML =
-            testimonials
-                .map(item => {
+        const pending =
+            testimonials.filter(item =>
+                !item.published
+            );
 
-                    const safeId =
-                        String(item.id).replace(
-                            /'/g,
-                            "\\'"
-                        );
+        const published =
+            testimonials.filter(item =>
+                item.published
+            );
 
-                    const stars =
-                        "⭐".repeat(
-                            Math.min(
-                                5,
-                                Math.max(
-                                    1,
-                                    Number(
-                                        item.rating
-                                    ) || 5
-                                )
+        const renderItem =
+            item => {
+
+                const safeId =
+                    String(item.id).replace(
+                        /'/g,
+                        "\\'"
+                    );
+
+                const stars =
+                    "⭐".repeat(
+                        Math.min(
+                            5,
+                            Math.max(
+                                1,
+                                Number(
+                                    item.rating
+                                ) || 5
                             )
-                        );
+                        )
+                    );
 
-                    return `
-                        <div class="booking-item">
+                return `
+                    <div class="booking-item">
 
-                            <div class="booking-main">
+                        <div class="booking-main">
 
-                                <div class="booking-name">
-                                    ${stars}
-                                    ${escapeHtml(
-                                        item.name ||
-                                        "Onbekend"
-                                    )}
-                                </div>
-
-                                <div class="booking-meta">
-                                    ${escapeHtml(
-                                        item.text ||
-                                        ""
-                                    )}
-                                    ${item.email
-                                        ? `<div style="margin-top:4px;font-size:.78rem;color:#8a8f98;">✉️ ${escapeHtml(item.email)}</div>`
-                                        : ""}
-                                </div>
-
+                            <div class="booking-name">
+                                ${stars}
+                                ${escapeHtml(
+                                    item.name ||
+                                    "Onbekend"
+                                )}
                             </div>
 
-                            <div class="booking-side">
+                            <div class="booking-meta">
+                                ${escapeHtml(
+                                    item.text ||
+                                    ""
+                                )}
+                                ${item.email
+                                    ? `<div style="margin-top:4px;font-size:.78rem;color:#8a8f98;">✉️ ${escapeHtml(item.email)}</div>`
+                                    : ""}
+                            </div>
 
-                                <span
-                                    class="payment-pill ${item.published
-                                        ? "paid"
-                                        : "pending"}">
+                        </div>
+
+                        <div class="booking-side">
+
+                            <span
+                                class="payment-pill ${item.published
+                                    ? "paid"
+                                    : "pending"}">
 ${item.published
-                                        ? "🌐 Gepubliceerd"
-                                        : item.email
-                                            ? "✍️ Review via website"
-                                            : "⏳ Concept"}
-                                    </span>
+                                    ? "🌐 Gepubliceerd"
+                                    : item.email
+                                        ? "✍️ Review via website"
+                                        : "⏳ Concept"}
+                                </span>
 
-                                <div
-                                        style="
-                                        display:flex;
-                                        gap:6px;
-                                        flex-wrap:wrap;
-                                        justify-content:flex-end;
-                                        margin-top:8px;">
+                            <div
+                                    style="
+                                    display:flex;
+                                    gap:6px;
+                                    flex-wrap:wrap;
+                                    justify-content:flex-end;
+                                    margin-top:8px;">
 
-                                    <button
-                                            class="btn btn-gray"
-                                            onclick="openTestimonialEditor('${safeId}')"
-                                            title="Getuigenis bewerken">
-                                        ✏️
-                                    </button>
+                                ${
+                                    !item.published
+                                        ? ` <button
+                                            class="btn btn-primary"
+                                            onclick="approveTestimonial('${safeId}')"
+                                            title="Publiceren op de website">
+                                            ✅ Goedkeuren
+                                        </button>`
+                                        : ""
+                                }
 
-                                    <button
-                                            class="btn btn-red"
-                                            onclick="deleteTestimonial('${safeId}')"
-                                            title="Getuigenis verwijderen">
-                                        🗑️
-                                    </button>
+                                <button
+                                        class="btn btn-gray"
+                                        onclick="openTestimonialEditor('${safeId}')"
+                                        title="Getuigenis bewerken">
+                                    ✏️
+                                </button>
 
-                                </div>
+                                <button
+                                        class="btn btn-red"
+                                        onclick="deleteTestimonial('${safeId}')"
+                                        title="Getuigenis verwijderen">
+                                    🗑️
+                                </button>
 
                             </div>
 
                         </div>
-                    `;
 
-                })
-                .join("");
+                    </div>
+                `;
+            };
+
+        container.innerHTML =
+            `
+                ${
+                    pending.length
+                        ? pending
+                            .map(renderItem)
+                            .join("")
+                        : `<div class="empty-state">
+                            Geen getuigenissen in afwachting
+                            van goedkeuring.
+                        </div>`
+                }
+
+                ${
+                    published.length
+                        ? `<details class="admin-collapse">
+                            <summary>🌐 Gepubliceerde getuigenissen (${published.length})</summary>
+                            <div class="booking-list">
+                                ${published.map(renderItem).join("")}
+                            </div>
+                        </details>`
+                        : ""
+                }
+            `;
     }
 
 
@@ -6240,8 +6331,7 @@ ${item.published
         if (!galleryItems.length) {
 
             container.innerHTML =
-                `<div class="empty-state"
-                     style="grid-column:1/-1;">
+                `<div class="empty-state">
                     Nog geen foto's geüpload — gebruik de knop
                     'Foto's uploaden'.
                 </div>`;
@@ -6249,73 +6339,106 @@ ${item.published
             return;
         }
 
-        container.innerHTML =
-            galleryItems
-                .map(item => {
+        const unpublished =
+            galleryItems.filter(item =>
+                !item.published
+            );
 
-                    const safeId =
-                        String(item.id).replace(
-                            /'/g,
-                            "\\'"
-                        );
+        const published =
+            galleryItems.filter(item =>
+                item.published
+            );
 
-                    const url =
-                        SUPABASE_URL +
-                        "/storage/v1/object/public/gallery/" +
-                        encodeURIComponent(
-                            item.storage_path
-                        );
+        const renderItem =
+            item => {
 
-                    return `
-                        <div class="gallery-admin-item">
+                const safeId =
+                    String(item.id).replace(
+                        /'/g,
+                        "\\'"
+                    );
 
-                            <img
-                                src="${url}"
-                                loading="lazy"
-                                alt="${escapeHtml(item.alt)}">
+                const url =
+                    SUPABASE_URL +
+                    "/storage/v1/object/public/gallery/" +
+                    encodeURIComponent(
+                        item.storage_path
+                    );
 
+                return `
+                    <div class="gallery-admin-item">
+
+                        <img
+                            src="${url}"
+                            loading="lazy"
+                            alt="${escapeHtml(item.alt)}">
+
+                        <input
+                            id="galleryAlt_${safeId}"
+                            type="text"
+                            value="${escapeHtml(item.alt || "")}"
+                            placeholder="Alt-tekst (korte beschrijving)">
+
+                        <input
+                            id="galleryCaption_${safeId}"
+                            type="text"
+                            value="${escapeHtml(item.caption || "")}"
+                            placeholder="Onderschrift (optioneel)">
+
+                        <label class="gallery-checkrow">
                             <input
-                                id="galleryAlt_${safeId}"
-                                type="text"
-                                value="${escapeHtml(item.alt || "")}"
-                                placeholder="Alt-tekst (korte beschrijving)">
+                                type="checkbox"
+                                id="galleryPublished_${safeId}"
+                                ${item.published ? "checked" : ""}>
+                            Gepubliceerd op de website
+                        </label>
 
-                            <input
-                                id="galleryCaption_${safeId}"
-                                type="text"
-                                value="${escapeHtml(item.caption || "")}"
-                                placeholder="Onderschrift (optioneel)">
+                        <div class="gallery-actions">
 
-                            <label class="gallery-checkrow">
-                                <input
-                                    type="checkbox"
-                                    id="galleryPublished_${safeId}"
-                                    ${item.published ? "checked" : ""}>
-                                Gepubliceerd op de website
-                            </label>
+                            <button
+                                    class="btn btn-primary"
+                                    onclick="saveGalleryItem('${safeId}')">
+                                💾 Opslaan
+                            </button>
 
-                            <div class="gallery-actions">
-
-                                <button
-                                        class="btn btn-primary"
-                                        onclick="saveGalleryItem('${safeId}')">
-                                    💾 Opslaan
-                                </button>
-
-                                <button
-                                        class="btn btn-red"
-                                        onclick="deleteGalleryItem('${safeId}')"
-                                        title="Foto verwijderen">
-                                    🗑️
-                                </button>
-
-                            </div>
+                            <button
+                                    class="btn btn-red"
+                                    onclick="deleteGalleryItem('${safeId}')"
+                                    title="Foto verwijderen">
+                                🗑️
+                            </button>
 
                         </div>
-                    `;
 
-                })
-                .join("");
+                    </div>
+                `;
+            };
+
+        container.innerHTML =
+            `
+                <div class="gallery-admin-grid">
+
+                    ${
+                        unpublished.length
+                            ? unpublished
+                                .map(renderItem)
+                                .join("")
+                            : `<div class="empty-state" style="grid-column:1/-1;">Alle foto's zijn gepubliceerd op de website.</div>`
+                    }
+
+                </div>
+
+                ${
+                    published.length
+                        ? `<details class="admin-collapse">
+                            <summary>📸 Gepubliceerde foto's (${published.length})</summary>
+                            <div class="gallery-admin-grid">
+                                ${published.map(renderItem).join("")}
+                            </div>
+                        </details>`
+                        : ""
+                }
+            `;
     }
 
     async function uploadGallery(input) {
@@ -6822,6 +6945,43 @@ ${item.published
     }
 
 
+    async function approveTestimonial(id) {
+
+        const {
+            error
+        } = await sb
+            .from("testimonials")
+            .update({
+                published: true
+            })
+            .eq(
+                "id",
+                id
+            );
+
+        if (error) {
+
+            console.error(error);
+
+            showToast(
+                "Goedkeuren mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+
+        }
+
+        showToast(
+            "✅ Getuigenis goedgekeurd en gepubliceerd op de website."
+        );
+
+        await loadData();
+
+    }
+
+
     function openWaitlistEditor(id) {
 
         const item =
@@ -7005,7 +7165,7 @@ ${item.published
                 ),
 
             children:
-                getChildren(item),
+                getChildrenNames(item),
 
             amount:
                 getStoredAmount(item),
@@ -7164,7 +7324,7 @@ ${item.published
                 .map(item => {
 
                     const children =
-                        getChildren(item);
+                        getChildrenNames(item);
 
                     const statusText =
                         isPaidBooking(item)
