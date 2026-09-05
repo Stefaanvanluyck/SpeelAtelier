@@ -2244,6 +2244,94 @@
             color: #888;
         }
 
+        .review-cta {
+            display: flex;
+            justify-content: center;
+            margin-top: 26px;
+        }
+
+        .review-cta button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 13px 26px;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+            transition: .2s;
+        }
+
+        .review-cta button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0,0,0,.18);
+        }
+
+        .modal-content select,
+        .modal-content textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            font: inherit;
+            box-sizing: border-box;
+        }
+
+        .modal-content textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .review-error {
+            color: #c0392b;
+            font-size: .85rem;
+            margin: 4px 0 10px;
+        }
+
+        .review-success {
+            background: #eafaf1;
+            border: 1px solid #71c69a;
+            color: #1d7a46;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: .92rem;
+            margin-top: 8px;
+        }
+
+        .modal-actions-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .modal-actions-row button {
+            flex: 1;
+            padding: 13px;
+            border-radius: 12px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .15s;
+        }
+
+        .btn-review-submit {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-review-close {
+            background: #ecf0f3;
+            color: #444;
+        }
+
+        .btn-review-submit:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
     </style>
 
 
@@ -3020,7 +3108,89 @@ margin-left:0;
 
     </div>
 
+    <div class="review-cta">
+
+        <button onclick="openReviewModal()"
+                aria-label="Open het reviewformulier">
+            ✍️ Zelf een review schrijven
+        </button>
+
+    </div>
+
 </section>
+
+<!-- =========================================================
+     REVIEW MODAL  (enkel voor gezinnen mét inschrijving)
+========================================================= -->
+
+<div class="modal"
+     id="reviewModal">
+
+    <div class="modal-content">
+
+        <h3 style="margin-top:0;">
+            💬 Jouw review
+        </h3>
+
+        <p style="font-size:.88rem; color:#666; margin:0 0 8px;">
+            Enkel voor gezinnen die een inschrijving hadden. Je e-mail wordt
+            enkel gebruikt ter controle en wordt nooit getoond.
+        </p>
+
+        <input type="email"
+               id="reviewEmail"
+               maxlength="254"
+               autocomplete="email"
+               placeholder="E-mail van je inschrijving">
+
+        <input type="text"
+               id="reviewName"
+               maxlength="100"
+               autocomplete="name"
+               placeholder="Jouw naam">
+
+        <select id="reviewRating"
+                aria-label="Beoordeling in sterren">
+            <option value="5">★★★★★ (5)</option>
+            <option value="4">★★★★ (4)</option>
+            <option value="3">★★★ (3)</option>
+            <option value="2">★★ (2)</option>
+            <option value="1">★ (1)</option>
+        </select>
+
+        <textarea id="reviewText"
+                  maxlength="1000"
+                  rows="4"
+                  placeholder="Vertel iets over jullie bezoek…"></textarea>
+
+        <div id="reviewError"
+             class="review-error"></div>
+
+        <div class="modal-actions-row">
+
+            <button class="btn-review-close"
+                    onclick="closeReviewModal()">
+                Sluiten
+            </button>
+
+            <button class="btn-review-submit"
+                    id="reviewSubmitBtn"
+                    onclick="submitReview()">
+                Verstuur review
+            </button>
+
+        </div>
+
+        <div id="reviewSuccess"
+             class="review-success"
+             style="display:none;">
+            ✅ Bedankt! Je review wordt eerst nog door Valerie nagelezen
+            voor ze op de website verschijnt.
+        </div>
+
+    </div>
+
+</div>
 
 <!-- =========================================================
      BOOKING MODAL
@@ -9456,6 +9626,205 @@ margin-left:0;
 
     }
 
+
+    /* =========================================================
+       REVIEW DOOR GEZINNEN MET INSCHRIJVING
+    ========================================================= */
+
+    function openReviewModal() {
+
+        document.getElementById(
+            "reviewError"
+        ).innerText = "";
+
+        document.getElementById(
+            "reviewSuccess"
+        ).style.display =
+            "none";
+
+        const button =
+            document.getElementById(
+                "reviewSubmitBtn"
+            );
+
+        if (button) {
+
+            button.disabled = false;
+            button.innerText =
+                "Verstuur review";
+
+        }
+
+        document.getElementById(
+            "reviewModal"
+        ).style.display =
+            "flex";
+
+    }
+
+    function closeReviewModal() {
+
+        document.getElementById(
+            "reviewModal"
+        ).style.display =
+            "none";
+
+    }
+
+    async function submitReview() {
+
+        const email =
+            document
+                .getElementById(
+                    "reviewEmail"
+                ).value.trim();
+
+        const name =
+            document
+                .getElementById(
+                    "reviewName"
+                ).value.trim();
+
+        const rating =
+            Number(
+                document
+                    .getElementById(
+                        "reviewRating"
+                    ).value
+            ) || 5;
+
+        const text =
+            document
+                .getElementById(
+                    "reviewText"
+                ).value.trim();
+
+        const errorBox =
+            document.getElementById(
+                "reviewError"
+            );
+
+        errorBox.innerText = "";
+
+        if (
+            !email ||
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                email
+            )
+        ) {
+
+            errorBox.innerText =
+                "Vul een geldig e-mailadres in.";
+
+            return;
+
+        }
+
+        if (!name) {
+
+            errorBox.innerText =
+                "Vul je naam in.";
+
+            return;
+
+        }
+
+        if (
+            text.length < 5 ||
+            text.length > 1000
+        ) {
+
+            errorBox.innerText =
+                "Schrijf een korte review (tussen 5 en 1000 tekens).";
+
+            return;
+
+        }
+
+        const button =
+            document.getElementById(
+                "reviewSubmitBtn"
+            );
+
+        button.disabled = true;
+        button.innerText =
+            "Versturen…";
+
+        try {
+
+            const {
+                data,
+                error
+            } = await sb
+                .from("testimonials")
+                .insert({
+                    name,
+                    text,
+                    rating,
+                    email
+                })
+                .select("id");
+
+            if (error) {
+
+                console.error(
+                    "Review submit error:",
+                    error
+                );
+
+                errorBox.innerText =
+                    "We konden je review niet opslaan. " +
+                    "Controleer of je e-mailadres overeenkomt " +
+                    "met dat van je inschrijving.";
+
+                return;
+
+            }
+
+            document.getElementById(
+                "reviewEmail"
+            ).value = "";
+
+            document.getElementById(
+                "reviewName"
+            ).value = "";
+
+            document.getElementById(
+                "reviewRating"
+            ).value = "5";
+
+            document.getElementById(
+                "reviewText"
+            ).value = "";
+
+            document.getElementById(
+                "reviewSuccess"
+            ).style.display =
+                "block";
+
+        } catch (error) {
+
+            console.error(
+                "Review submit mislukt:",
+                error
+            );
+
+            errorBox.innerText =
+                "Er ging iets mis. Probeer het later opnieuw.";
+
+        } finally {
+
+            if (button) {
+
+                button.disabled = false;
+                button.innerText =
+                    "Verstuur review";
+
+            }
+
+        }
+
+    }
 
     /* =========================================================
        START MOLLIE RETURN CHECK

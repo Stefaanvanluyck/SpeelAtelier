@@ -51,8 +51,12 @@ ALTER TABLE public.children ENABLE ROW LEVEL SECURITY;
 -- 3. Rechten (grants)
 -- ---------------------------------------------------------------------------
 
--- anon: volledig intrekken (privilegedata, niet voor de website).
+-- anon: alles intrekken, daarna enkel INSERT toekennen.
+-- (De website voegt bij een inschrijving kindrijen toe vanuit de browser;
+--  lezen/wijzigen/verwijderen blijft volledig verboden voor anon.)
 REVOKE ALL ON public.children FROM anon;
+
+GRANT INSERT ON public.children TO anon;
 
 -- authenticated (aangemelde gebruiker): volledige tabelrechten,
 -- maar de policy bepaalt dat alleen een admin_users-lid er iets mee mag.
@@ -62,6 +66,17 @@ GRANT ALL ON public.children TO authenticated;
 -- 4. Policies
 -- ---------------------------------------------------------------------------
 
+-- anon: alleen kindrijen TOEVOEGEN, enkel voor een bestaande inschrijving
+-- (hetzelfde principe als anon_creates_appointments op appointments).
+DROP POLICY IF EXISTS "anon_creates_children" ON public.children;
+CREATE POLICY "anon_creates_children"
+    ON public.children FOR INSERT TO anon
+    WITH CHECK (EXISTS (
+        SELECT 1 FROM public.appointments
+        WHERE id = appointment_id
+    ));
+
+DROP POLICY IF EXISTS "admin_full_children" ON public.children;
 CREATE POLICY "admin_full_children"
     ON public.children TO authenticated
     USING (EXISTS (
@@ -93,7 +108,11 @@ CROSS JOIN LATERAL (
         (a.child4)
 ) AS c(name)
 WHERE c.name IS NOT NULL
-  AND btrim(c.name) <> '';
+  AND btrim(c.name) <> ''
+  AND NOT EXISTS (
+      SELECT 1 FROM public.children ch
+      WHERE ch.appointment_id = a.id
+  );
 
 -- ---------------------------------------------------------------------------
 -- OPTIONEEL: de oude kinderkolommen verwijderen uit appointments nadat u de

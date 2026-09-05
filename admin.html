@@ -466,6 +466,111 @@
             border-bottom: 1px solid #eee;
         }
 
+        /* progress bars in stat-cards */
+        .stat-bar {
+            margin-top: 12px;
+            height: 8px;
+            border-radius: 999px;
+            background: #eef0f4;
+            overflow: hidden;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #22a06b, #34d399);
+            transition: width .5s ease;
+        }
+
+        .stat-bar-fill.orange {
+            background: linear-gradient(90deg, #b45309, #f59e0b);
+        }
+
+        /* sessiebezetting */
+        .occupancy-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .occupancy-item {
+            border: 1px solid #ececec;
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #fafafa;
+        }
+
+        .occupancy-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .occupancy-head .occupancy-title {
+            font-weight: 800;
+            font-size: .9rem;
+        }
+
+        .occupancy-head .occupancy-count {
+            font-size: .8rem;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .occupancy-bar {
+            height: 9px;
+            border-radius: 999px;
+            background: #eef0f4;
+            overflow: hidden;
+        }
+
+        .occupancy-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent), #ffb3c0);
+            transition: width .5s ease;
+        }
+
+        .occupancy-bar-fill.full {
+            background: linear-gradient(90deg, #ef4444, #ff8a8a);
+        }
+
+        .occupancy-waitlist {
+            margin-top: 6px;
+            font-size: .74rem;
+            color: #b45309;
+        }
+
+        /* opvolging */
+        .followup-overdue {
+            border-color: rgba(239,68,68,.45) !important;
+            background: #fef7f7;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 5px 2px;
+            font-size: .8rem;
+            color: var(--muted);
+        }
+
+        .legend-row .legend-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            display: inline-block;
+        }
+
         /* =====================================================
            PAYMENT OVERVIEW
            ===================================================== */
@@ -1276,6 +1381,34 @@
                 </div>
             </div>
 
+            <div class="stat-card green">
+                <div class="stat-label">📈 Betaald</div>
+                <div class="stat-value" id="paidPercentage">
+                    0%
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill"
+                         id="paidBarFill"></div>
+                </div>
+                <div class="stat-sub" id="paidPercentageSub">
+                    van de verwachte omzet
+                </div>
+            </div>
+
+            <div class="stat-card blue">
+                <div class="stat-label">📸 Foto-toestemming</div>
+                <div class="stat-value" id="photoAllowedCount">
+                    0
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill orange"
+                         id="photoBarFill"></div>
+                </div>
+                <div class="stat-sub" id="photoAllowedSub">
+                    van de ingeschreven kinderen ja
+                </div>
+            </div>
+
         </div>
 
         <!-- MAAND FINANCIEEL -->
@@ -1325,6 +1458,31 @@
 
         </div>
 
+        <!-- OPVOLGING – OPENSTAANDE BETALINGEN -->
+        <div class="dashboard-card" style="margin-bottom:20px;">
+
+            <div class="dashboard-card-header">
+
+                <div>
+                    <h3 style="margin-bottom:3px;">
+                        🔔 Opvolging – openstaande betalingen
+                    </h3>
+
+                    <div
+                            style="color:#6b7280;font-size:.78rem;">
+                        Onbetaalde inschrijvingen, eerstvolgende eerst
+                    </div>
+                </div>
+
+            </div>
+
+            <div
+                    id="followUpList"
+                    class="booking-list">
+            </div>
+
+        </div>
+
         <!-- GRAFIEK + TOP USERS -->
         <div class="dashboard-grid">
 
@@ -1343,6 +1501,39 @@
                 <h3>🏆 Meest ingeschreven personen</h3>
 
                 <div id="topUsers"></div>
+
+            </div>
+
+        </div>
+
+        <!-- SESSIEBEZETTING + BETAALSTATUS -->
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+                    <h3>⏳ Sessiebezetting</h3>
+                </div>
+
+                <div
+                        id="occupancyList"
+                        class="occupancy-list">
+                </div>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <h3>💳 Betaalstatus</h3>
+
+                <div style="max-width:210px;margin:6px auto 0;">
+                    <canvas id="paymentStatusChart"></canvas>
+                </div>
+
+                <div
+                        id="paymentStatusLegend"
+                        style="margin-top:14px;">
+                </div>
 
             </div>
 
@@ -1548,6 +1739,11 @@
                     id="testimonialName"
                     type="text"
                     placeholder="bv. Familie Peeters">
+
+            <input
+                    id="testimonialEmail"
+                    type="email"
+                    placeholder="E-mail van de inschrijving (wordt niet getoond)">
         </div>
 
         <div class="form-field full" style="margin-bottom:10px;">
@@ -1921,6 +2117,7 @@
     let testimonials = [];
     let calendar = null;
     let monthlyChart = null;
+    let paymentStatusChart = null;
     let bookingToggle = null;
 
     let editMode = "appointment";
@@ -4209,6 +4406,14 @@
         renderUpcoming();
 
         renderBookingList();
+
+        updateStatsBars();
+
+        renderFollowUp();
+
+        renderOccupancy();
+
+        renderPaymentStatusChart();
     }
 
     /* =========================================================
@@ -4559,12 +4764,836 @@
                         ${user.count}
                     </strong>
                 </div>
-            `).join("");
+`).join("");
+    }
+
+    /* =========================================================
+       STATS BARS  (betaald % + foto-toestemming)
+    ========================================================= */
+
+    function updateStatsBars() {
+
+        const active =
+            allData.filter(
+                item =>
+                    isActiveBooking(item)
+            );
+
+        const expected =
+            active.reduce(
+                (total, item) =>
+                    total +
+                    getStoredAmount(item),
+                0
+            );
+
+        const paidAmount =
+            allData
+                .filter(item =>
+                    isPaidBooking(item)
+                )
+                .reduce(
+                    (total, item) =>
+                        total +
+                        getStoredAmount(item),
+                    0
+                );
+
+        const pct =
+            expected > 0
+                ? Math.round(
+                    (
+                        paidAmount /
+                        expected
+                    ) * 100
+                )
+                : 0;
+
+        document
+            .getElementById(
+                "paidPercentage"
+            ).textContent =
+            pct +
+            "%";
+
+        const paidFill =
+            document.getElementById(
+                "paidBarFill"
+            );
+
+        paidFill.style.width =
+            pct +
+            "%";
+
+        paidFill.classList.toggle(
+            "orange",
+            pct < 100
+        );
+
+        document
+            .getElementById(
+                "paidPercentageSub"
+            ).textContent =
+            formatEuro(paidAmount) +
+            " van " +
+            formatEuro(expected) +
+            " ontvangen";
+
+        /*
+         * Foto-toestemming: tel enkel kinderen waarvoor
+         * expliciet een keuze werd vastgelegd.
+         */
+
+        let withConsent =
+            0;
+
+        let consentKnown =
+            0;
+
+        active.forEach(item => {
+
+            getChildren(item).forEach(
+                child => {
+
+                    if (
+                        typeof child.photo_allowed !==
+                        "undefined"
+                    ) {
+
+                        consentKnown++;
+
+                        if (
+                            child.photo_allowed
+                        ) {
+
+                            withConsent++;
+
+                        }
+
+                    }
+
+                }
+            );
+        });
+
+        const photoCount =
+            document.getElementById(
+                "photoAllowedCount"
+            );
+
+        const photoFill =
+            document.getElementById(
+                "photoBarFill"
+            );
+
+        const photoSub =
+            document.getElementById(
+                "photoAllowedSub"
+            );
+
+        if (!consentKnown) {
+
+            photoCount.textContent =
+                "0";
+
+            photoFill.style.width =
+                "0%";
+
+            photoSub.textContent =
+                "nog geen keuze vastgelegd";
+
+            return;
+
+        }
+
+        photoCount.textContent =
+            withConsent +
+            "/" +
+            consentKnown;
+
+        photoFill.style.width =
+            Math.max(
+                4,
+                Math.round(
+                    (
+                        withConsent /
+                        consentKnown
+                    ) * 100
+                )
+            ) +
+            "%";
+
+        photoSub.textContent =
+            "van de " +
+            consentKnown +
+            " ingeschreven kinderen ja";
+
+    }
+
+    /* =========================================================
+       OPVOLGING – OPENSTAANDE BETALINGEN
+    ========================================================= */
+
+    function formatDateDutch(date) {
+
+        if (!date) {
+
+            return "";
+
+        }
+
+        try {
+
+            return date.toLocaleDateString(
+                "nl-BE",
+                {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "long"
+                }
+            );
+
+        } catch (error) {
+
+            return "";
+
+        }
+
+    }
+
+    function renderFollowUp() {
+
+        const container =
+            document.getElementById(
+                "followUpList"
+            );
+
+        if (!container) {
+
+            return;
+
+        }
+
+        const open =
+            allData
+                .filter(item =>
+                    isOpenPayment(item)
+                )
+                .map(item => (
+                    {
+                        item,
+                        date:
+                            getAppointmentDate(
+                                item
+                            )
+                    }
+                ))
+                .filter(entry => entry.date)
+                .sort(
+                    (a,b) =>
+                        a.date -
+                        b.date
+                )
+                .slice(0,8);
+
+        if (!open.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    🎉 Alle betalingen zijn in orde.
+                </div>`;
+
+            return;
+
+        }
+
+        const today =
+            new Date();
+
+        today.setHours(0,0,0,0);
+
+        container.innerHTML =
+            open.map(entry => {
+
+                const item =
+                    entry.item;
+
+                const date =
+                    entry.date;
+
+                const safeId =
+                    String(item.id)
+                        .replace(/'/g, "")
+                        .replace(/\\/g, "");
+
+                const children =
+                    getChildrenNames(
+                        item
+                    ).join(", ");
+
+                const theme =
+                    getThemeForDate(
+                        item.appointment_date
+                    );
+
+                const amount =
+                    formatEuro(
+                        getStoredAmount(
+                            item
+                        )
+                    );
+
+                const overdue =
+                    date.getTime() <
+                    today.getTime();
+
+                return `
+                    <div class="booking-item${overdue ? " followup-overdue" : ""}">
+
+                        <div class="booking-main">
+
+                            <div class="booking-name">
+                                ${escapeHtml(item.name || item.parent_name || "Onbekend")} • ${amount}
+                            </div>
+
+                            <div class="booking-meta">
+                                📅 ${formatDateDutch(date)}${theme ? " · " + escapeHtml(theme) : ""}
+                                ${children ? "<br>👶 " + escapeHtml(children) : ""}
+                            </div>
+
+                        </div>
+
+                        <div class="booking-side">
+
+                            <span class="payment-pill ${overdue ? "pending" : "other"}">
+                                ${overdue ? "⏳ Over tijd" : "📅 Nog te betalen"}
+                            </span>
+
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:8px;">
+
+                                <button
+                                        class="btn btn-gray"
+                                        onclick="copyReminder('${safeId}')"
+                                        title="Betaalherinnering kopiëren">
+                                    📋
+                                </button>
+
+                                <button
+                                        class="btn btn-green"
+                                        onclick="quickSetStatus('${safeId}','paid')"
+                                        title="Markeer als betaald">
+                                    ✅
+                                </button>
+
+                                <button
+                                        class="btn btn-red"
+                                        onclick="quickSetStatus('${safeId}','cancelled')"
+                                        title="Annuleer inschrijving">
+                                    ❌
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>`;
+
+            }).join("");
+    }
+
+    async function copyReminder(id) {
+
+        const item =
+            allData.find(entry =>
+                String(entry.id) ===
+                String(id)
+            );
+
+        if (!item) {
+
+            return;
+
+        }
+
+        const date =
+            getAppointmentDate(item);
+
+        const when =
+            date
+                ? date.toLocaleDateString(
+                    "nl-BE",
+                    {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric"
+                    }
+                )
+                : item.appointment_date ||
+                    "binnenkort";
+
+        const theme =
+            getThemeForDate(
+                item.appointment_date
+            );
+
+        const children =
+            getChildrenNames(
+                item
+            ).join(", ");
+
+        const amount =
+            formatEuro(
+                getStoredAmount(
+                    item
+                )
+            );
+
+        const name =
+            item.name ||
+            item.parent_name ||
+            "";
+
+        const message =
+            "Hoi " +
+            name +
+            ",\n\n" +
+            "Nog een kleine herinnering voor jullie " +
+            "speelafspraak" +
+            (
+                theme
+                    ? " aan '" +
+                        theme +
+                        "'"
+                    : ""
+            ) +
+            " op " +
+            when +
+            (
+                children
+                    ? " (met " +
+                        children +
+                        ")"
+                    : ""
+            ) +
+            ".\n\n" +
+            "Er staat nog " +
+            amount +
+            " open. Een betaallink vind je " +
+            "in de bevestigingsmail. Alvast bedankt!\n\n" +
+            "Groetjes, Valerie\njufvalerie.be";
+
+        try {
+
+            await navigator.clipboard.writeText(
+                message
+            );
+
+            showToast(
+                "📋 Herinnering gekopieerd."
+            );
+
+        } catch (error) {
+
+            console.error(error);
+
+            showToast(
+                "Kopiëren mislukt.",
+                true
+            );
+
+        }
+
+    }
+
+    async function quickSetStatus(id, status) {
+
+        const {
+            error
+        } = await sb
+            .from("appointments")
+            .update({
+                payment_status:
+                    status
+            })
+            .eq("id", id);
+
+        if (error) {
+
+            console.error(error);
+
+            showToast(
+                "Bijwerken mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+
+        }
+
+        showToast(
+            status === "paid"
+                ? "✅ Gemarkeerd als betaald."
+                : "❌ Inschrijving geannuleerd."
+        );
+
+        await loadData();
+
+    }
+
+    /* =========================================================
+       SESSIEBEZETTING
+    ========================================================= */
+
+    function renderOccupancy() {
+
+        const container =
+            document.getElementById(
+                "occupancyList"
+            );
+
+        if (!container) {
+
+            return;
+
+        }
+
+        const today =
+            new Date();
+
+        today.setHours(0,0,0,0);
+
+        const byDate = {};
+
+        allData
+            .filter(item =>
+                isActiveBooking(item)
+            )
+            .forEach(item => {
+
+                const date =
+                    getAppointmentDate(
+                        item
+                    );
+
+                if (
+                    !date ||
+                    date < today
+                ) {
+
+                    return;
+
+                }
+
+                const key =
+                    item.appointment_date;
+
+                if (!byDate[key]) {
+
+                    byDate[key] = {
+
+                        key,
+                        date,
+                        count: 0,
+                        waitlist: 0
+
+                    };
+
+                }
+
+                byDate[key].count +=
+                    getAppointmentChildrenCount(
+                        item
+                    );
+
+            });
+
+        waitlist.forEach(entry => {
+
+            if (!entry.appointment_date) {
+
+                return;
+
+            }
+
+            const key =
+                entry.appointment_date;
+
+            const date =
+                getAppointmentDate(entry);
+
+            if (
+                !date ||
+                date < today
+            ) {
+
+                return;
+
+            }
+
+            if (!byDate[key]) {
+
+                byDate[key] = {
+
+                    key,
+                    date,
+                    count: 0,
+                    waitlist: 0
+
+                };
+
+            }
+
+            byDate[key].waitlist++;
+
+        });
+
+        const entries =
+            Object.values(byDate)
+                .sort(
+                    (a,b) =>
+                        a.date -
+                        b.date
+                )
+                .slice(0,8);
+
+        if (!entries.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    Nog geen sessies ingepland.
+                </div>`;
+
+            return;
+
+        }
+
+        container.innerHTML =
+            entries.map(entry => {
+
+                const fill =
+                    Math.min(
+                        100,
+                        Math.round(
+                            (
+                                entry.count /
+                                MAX_CHILDREN
+                            ) * 100
+                        )
+                    );
+
+                const full =
+                    entry.count >=
+                    MAX_CHILDREN;
+
+                const theme =
+                    getThemeForDate(
+                        entry.key
+                    );
+
+                return `
+                    <div class="occupancy-item">
+
+                        <div class="occupancy-head">
+
+                            <span class="occupancy-title">
+                                ${escapeHtml(theme || "Zonder thema")}
+                            </span>
+
+                            <span class="occupancy-count">
+                                📅 ${formatDateDutch(entry.date)} · ${entry.count}/${MAX_CHILDREN}
+                            </span>
+
+                        </div>
+
+                        <div class="occupancy-bar">
+
+                            <div class="occupancy-bar-fill${full ? " full" : ""}"
+                                 style="width:${fill}%;"></div>
+
+                        </div>
+
+                        ${entry.waitlist
+                            ? `<div class="occupancy-waitlist">⏳ +${entry.waitlist} op de wachtlijst</div>`
+                            : ""}
+
+                    </div>`;
+
+            }).join("");
+    }
+
+    /* =========================================================
+       BETAALSTATUS – DOUGHNUT
+    ========================================================= */
+
+    function renderPaymentStatusChart() {
+
+        const canvas =
+            document.getElementById(
+                "paymentStatusChart"
+            );
+
+        if (!canvas) {
+
+            return;
+
+        }
+
+        const legend =
+            document.getElementById(
+                "paymentStatusLegend"
+            );
+
+        const paid =
+            allData.filter(
+                item =>
+                    isPaidBooking(item)
+            ).length;
+
+        const open =
+            allData.filter(
+                item =>
+                    isOpenPayment(item)
+            ).length;
+
+        const cancelled =
+            allData.filter(
+                item =>
+                    isCancelledBooking(item)
+            ).length;
+
+        const colors = {
+            paid: "#22c55e",
+            open: "#f59e0b",
+            cancelled: "#ef5858"
+        };
+
+        if (paymentStatusChart) {
+
+            paymentStatusChart.destroy();
+
+        }
+
+        if (
+            paid +
+            open +
+            cancelled ===
+            0
+        ) {
+
+            canvas.style.display =
+                "none";
+
+            if (legend) {
+
+                legend.innerHTML =
+                    `<div class="empty-state">
+                        Nog geen betalingen.
+                    </div>`;
+
+            }
+
+            return;
+
+        }
+
+        canvas.style.display =
+            "block";
+
+        paymentStatusChart =
+            new Chart(canvas, {
+                type: "doughnut",
+                data: {
+
+                    labels: [
+                        "Betaald",
+                        "Nog te betalen",
+                        "Geannuleerd"
+                    ],
+
+                    datasets: [{
+
+                        data: [
+                            paid,
+                            open,
+                            cancelled
+                        ],
+
+                        backgroundColor: [
+                            colors.paid,
+                            colors.open,
+                            colors.cancelled
+                        ],
+
+                        borderWidth: 0,
+                        hoverOffset: 6
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    cutout: "62%",
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        },
+
+                        tooltip: {
+                            enabled: true
+                        }
+
+                    }
+
+                }
+            });
+
+        if (legend) {
+
+            const rows = [
+                {
+                    label: "Betaald",
+                    value: paid,
+                    color: colors.paid
+                },
+                {
+                    label: "Nog te betalen",
+                    value: open,
+                    color: colors.open
+                },
+                {
+                    label: "Geannuleerd",
+                    value: cancelled,
+                    color: colors.cancelled
+                }
+            ].filter(row => row.value > 0);
+
+            legend.innerHTML =
+                rows.map(row => `
+                    <div class="legend-row">
+
+                        <span class="legend-label">
+                            <span class="legend-swatch" style="background:${row.color}"></span>
+                            ${row.label}
+                        </span>
+
+                        <strong>${row.value}</strong>
+
+                    </div>
+                `).join("");
+
+        }
+
     }
 
     /* =========================================================
        UPCOMING
-       ========================================================= */
+    ========================================================= */
 
     function renderUpcoming() {
 
@@ -5281,6 +6310,9 @@
                                         item.text ||
                                         ""
                                     )}
+                                    ${item.email
+                                        ? `<div style="margin-top:4px;font-size:.78rem;color:#8a8f98;">✉️ ${escapeHtml(item.email)}</div>`
+                                        : ""}
                                 </div>
 
                             </div>
@@ -5291,10 +6323,12 @@
                                     class="payment-pill ${item.published
                                         ? "paid"
                                         : "pending"}">
-                                    ${item.published
+${item.published
                                         ? "🌐 Gepubliceerd"
-                                        : "⏳ Concept"}
-                                </span>
+                                        : item.email
+                                            ? "✍️ Review via website"
+                                            : "⏳ Concept"}
+                                    </span>
 
                                 <div
                                         style="
@@ -5364,6 +6398,14 @@
 
         document
             .getElementById(
+                "testimonialEmail"
+            ).value =
+            item
+                ? item.email || ""
+                : "";
+
+        document
+            .getElementById(
                 "testimonialRating"
             ).value =
             String(
@@ -5414,6 +6456,12 @@
                     "testimonialText"
                 ).value.trim();
 
+        const email =
+            document
+                .getElementById(
+                    "testimonialEmail"
+                ).value.trim();
+
         const rating =
             Number(
                 document
@@ -5449,6 +6497,7 @@
                     name,
                     text,
                     rating,
+                    email,
                     published
                 })
                 .eq(
@@ -5480,6 +6529,7 @@
                     name,
                     text,
                     rating,
+                    email,
                     published
                 });
 
