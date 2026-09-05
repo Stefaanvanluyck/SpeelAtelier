@@ -6259,8 +6259,8 @@ margin-left:0;
 
         /*
          * Zaterdag = 6.
-         * Indien vandaag zaterdag en nog vóór 11u,
-         * is de sessie vandaag.
+         * Indien vandaag zaterdag en nog vóór de start
+         * (10u), is de sessie vandaag.
          */
 
         while (
@@ -6282,6 +6282,17 @@ margin-left:0;
 
         const target =
             getNextSaturday();
+
+        const targetKey =
+            toDateKey(target);
+
+        if (
+            themeRowsCache.length > 0 &&
+            targetKey !==
+                renderedTargetKey
+        ) {
+            renderNextTheme(targetKey);
+        }
 
         const now =
             new Date();
@@ -6385,6 +6396,74 @@ margin-left:0;
 
     }
 
+    let themeRowsCache = [];
+    let blockedSetCache = new Set();
+    let renderedTargetKey = null;
+
+    function toDateKey(date) {
+
+        return (
+            date.getFullYear() +
+            "-" +
+            pad2(date.getMonth() + 1) +
+            "-" +
+            pad2(date.getDate())
+        );
+    }
+
+    function renderNextTheme(targetKey) {
+
+        const themeEl =
+            document.getElementById(
+                "nextTheme"
+            );
+
+        if (!themeEl) {
+            return;
+        }
+
+        renderedTargetKey =
+            targetKey;
+
+        const upcoming =
+            (themeRowsCache || [])
+                .find(
+                    row =>
+                        row.date ===
+                            targetKey &&
+                        row.theme &&
+                        String(
+                            row.theme
+                        ).trim() !== "" &&
+                        !blockedSetCache.has(
+                            row.date
+                        )
+                );
+
+        if (upcoming) {
+
+            themeEl.textContent =
+                "🎨 Volgende sessie: " +
+                String(upcoming.theme).trim() +
+                " — " +
+                formatLongDate(
+                    new Date(
+                        upcoming.date +
+                            "T10:00:00"
+                    )
+                );
+
+        } else {
+
+            themeEl.textContent =
+                "🎨 Thema van de volgende sessie volgt binnenkort";
+        }
+
+        themeEl.style.display =
+            "block";
+
+    }
+
     async function loadNextTheme() {
 
         try {
@@ -6413,9 +6492,15 @@ margin-left:0;
 
 
             /*
-             * Ontdek het thema van de eerstvolgende
-             * zaterdag met een sessie.
+             * Vindt het thema van de eerstvolgende
+             * zaterdag waarnaar de countdown telt.
              */
+
+            const target =
+                getNextSaturday();
+
+            const targetKey =
+                toDateKey(target);
 
             const {
                 data: themeRows,
@@ -6426,9 +6511,7 @@ margin-left:0;
                     .select("date,theme")
                     .gte(
                         "date",
-                        new Date()
-                            .toISOString()
-                            .slice(0, 10)
+                        targetKey
                     )
                     .order(
                         "date",
@@ -6459,7 +6542,10 @@ margin-left:0;
                 );
             }
 
-            const blockedSet =
+            themeRowsCache =
+                themeRows || [];
+
+            blockedSetCache =
                 new Set(
                     (blockedRows || [])
                         .map(
@@ -6468,49 +6554,7 @@ margin-left:0;
                         )
                 );
 
-            const today =
-                new Date()
-                    .toISOString()
-                    .slice(0, 10);
-
-            const upcoming =
-                (themeRows || [])
-                    .find(
-                        row =>
-                            row.date >= today &&
-                            row.theme &&
-                            String(
-                                row.theme
-                            ).trim() !== "" &&
-                            !blockedSet.has(
-                                row.date
-                            )
-                    );
-
-            const themeEl =
-                document.getElementById(
-                    "nextTheme"
-                );
-
-            if (
-                themeEl &&
-                upcoming
-            ) {
-
-                themeEl.textContent =
-                    "🎨 Volgende sessie: " +
-                    String(upcoming.theme).trim() +
-                    " — " +
-                    formatLongDate(
-                        new Date(
-                            upcoming.date + "T10:00:00"
-                        )
-                    );
-
-                themeEl.style.display =
-                    "block";
-
-            }
+            renderNextTheme(targetKey);
 
         } catch (err) {
 
