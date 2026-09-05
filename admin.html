@@ -6042,6 +6042,26 @@
                                         )
                                     )}
 
+                                    ${
+                                        (() => {
+                                            const booked =
+                                                getBookedCountForDate(
+                                                    item.appointment_date
+                                                );
+                                            const need =
+                                                Number(
+                                                    item.children_count ||
+                                                    1
+                                                );
+                                            return (
+                                                booked + need >
+                                                MAX_CHILDREN
+                                            )
+                                                ? `<div style="margin-top:6px;color:#d97706;font-weight:600;">⚠️ Sessie vol (${booked}/${MAX_CHILDREN} bezet) — je boekt over de capaciteit.</div>`
+                                                : "";
+                                        })()
+                                    }
+
                                 </div>
 
                             </div>
@@ -7245,6 +7265,24 @@ ${item.published
     }
 
 
+    function getBookedCountForDate(
+        date
+    ) {
+
+        return allData
+            .filter(item =>
+                isActiveBooking(item) &&
+                String(item.appointment_date) ===
+                    String(date)
+            )
+            .reduce(
+                (sum, item) =>
+                    sum +
+                    getAppointmentChildrenCount(item),
+                0
+            );
+    }
+
     async function autofillWaitlist() {
 
         const pending =
@@ -7897,6 +7935,30 @@ ${item.published
             payment_status:
                 paymentStatus
         };
+
+        const bookedForDate =
+            getBookedCountForDate(
+                date
+            );
+
+        if (
+            Number(childrenCount || 1) >
+            MAX_CHILDREN - bookedForDate
+        ) {
+
+            const overbook =
+                confirm(
+                    `⚠️ Deze sessie heeft nog maar ${MAX_CHILDREN - bookedForDate} van de ${MAX_CHILDREN} plaatsen vrij (${bookedForDate} bezet).\n` +
+                    `Dit gezin telt ${childrenCount} kind(eren), dus je boekt OVER de capaciteit.\n\n` +
+                    "Toch toevoegen als overboeking?"
+                );
+
+            if (!overbook) {
+
+                return;
+
+            }
+        }
 
         const {
             error
