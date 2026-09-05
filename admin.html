@@ -2042,12 +2042,58 @@
 
     function getChildren(item) {
 
+        // Kinderen komen uit de aparte 'children'-tabel
+        // (geladen via appointments select *, children(*)).
+        if (
+            Array.isArray(item?.children) &&
+            item.children.length
+        ) {
+            return item.children;
+        }
+
+        // Fallback voor reserveringen die nog geen
+        // children-rijen hebben (bv. net aangemaakt).
         return [
             item.child1,
             item.child2,
             item.child3,
             item.child4
-        ].filter(Boolean);
+        ]
+            .filter(Boolean)
+            .map(name => ({ name }));
+    }
+
+    function getChildrenNames(item) {
+
+        return getChildren(item)
+            .map(child =>
+                String(
+                    child.name ||
+                    child ||
+                    ""
+                )
+            )
+            .filter(Boolean);
+    }
+
+    function childPhotosAllowed(item) {
+
+        return getChildren(item)
+            .filter(child =>
+                Boolean(child.photo_allowed)
+            )
+            .map(child =>
+                child.name || ""
+            )
+            .filter(Boolean);
+    }
+
+    function getCheckedInChildren(item) {
+
+        return getChildren(item)
+            .filter(child =>
+                Boolean(child.checked_in)
+            );
     }
 
     function getAppointmentChildrenCount(item) {
@@ -2287,7 +2333,7 @@
 
                 sb
                     .from("appointments")
-                    .select("*")
+                    .select("*, children(*)")
                     .order(
                         "appointment_date",
                         {
@@ -2619,7 +2665,7 @@
                 );
 
             const children =
-                getChildren(item);
+                getChildrenNames(item);
 
             const childText =
                 children.length
@@ -4816,7 +4862,7 @@
     ) {
 
         const children =
-            getChildren(item);
+            getChildrenNames(item);
 
         const count =
             getAppointmentChildrenCount(

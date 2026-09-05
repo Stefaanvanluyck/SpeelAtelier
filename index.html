@@ -664,6 +664,34 @@
             margin: 4px 0 8px !important;
         }
 
+        /*
+         * Per kind: naast de naam ook de
+         * foto-toestemming als vinkje.
+         */
+
+        .child-photo-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            margin: 0 0 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .child-photo-wrapper label {
+            margin: 0;
+        }
+
+        .child-photo-wrapper input[type="checkbox"] {
+            flex: 0 0 auto;
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            accent-color: var(--accent, #e6b04a);
+            cursor: pointer;
+        }
+
         /* =========================================================
            PAYMENT METHOD
         ========================================================= */
@@ -3565,6 +3593,18 @@ margin-left:0;
                     input.value
             );
 
+        const existingPhotos =
+            Array.from(
+                container.querySelectorAll(
+                    ".child-photo"
+                )
+            ).map(
+                check =>
+                    check.checked
+                        ? "true"
+                        : "false"
+            );
+
 
         container.innerHTML = "";
 
@@ -3671,6 +3711,72 @@ margin-left:0;
                 input
             );
 
+            /*
+             * Foto-toestemming per kind: één vinkje
+             * waarmee de ouder kan aan- of uitvinken
+             * of er foto's mogen genomen worden.
+             */
+
+            const photoWrapper =
+                document.createElement(
+                    "div"
+                );
+
+            photoWrapper.className =
+                "child-photo-wrapper";
+
+            const photoLabel =
+                document.createElement(
+                    "label"
+                );
+
+            photoLabel.setAttribute(
+                "for",
+                `childPhoto${i}`
+            );
+
+            photoLabel.innerText =
+                "📷 Foto's mogen?";
+
+            photoLabel.style.flex =
+                "0 0 auto";
+
+            const photoCheckbox =
+                document.createElement(
+                    "input"
+                );
+
+            photoCheckbox.type =
+                "checkbox";
+
+            photoCheckbox.id =
+                `childPhoto${i}`;
+
+            photoCheckbox.className =
+                "child-photo";
+
+            if (
+                existingPhotos[i - 1] === "true"
+            ) {
+
+                photoCheckbox.checked =
+                    true;
+
+            }
+
+            photoWrapper.appendChild(
+                photoLabel
+            );
+
+            photoWrapper.appendChild(
+                photoCheckbox
+            );
+
+            wrapper.appendChild(
+                photoWrapper
+            );
+
+
             container.appendChild(
                 wrapper
             );
@@ -3694,6 +3800,48 @@ margin-left:0;
         .map(
             input =>
                 input.value.trim()
+        );
+
+    }
+
+
+    /* =========================================================
+       GET CHILD DATA (naam + foto-toestemming)
+    ========================================================= */
+
+    function getChildrenData() {
+
+        const names =
+            Array.from(
+                document.querySelectorAll(
+                    ".child-name"
+                )
+            );
+
+        const photos =
+            Array.from(
+                document.querySelectorAll(
+                    ".child-photo"
+                )
+            );
+
+        return names.map(
+            (input, index) => {
+
+                const photoInput =
+                    photos[index] ||
+                    { checked: false };
+
+                return {
+                    name:
+                        input.value.trim(),
+                    photo_allowed:
+                        photoInput.checked === true
+                            ? true
+                            : false
+                };
+
+            }
         );
 
     }
@@ -4176,6 +4324,9 @@ margin-left:0;
         const childNames =
             getChildNames();
 
+        const childrenData =
+            getChildrenData();
+
 
         const paymentMethod =
             document.querySelector(
@@ -4395,31 +4546,21 @@ margin-left:0;
 
 
         /* =====================================================
-           CHILD NAMES FOR DATABASE
+           CHILD DATA FOR DATABASE
         =====================================================
 
-           De database heeft nu:
-
-               child1
-               child2
-               child3
-               child4
-
-           Daarom wordt NIET langer child_names
-           naar Supabase gestuurd.
+           Kinderen worden per kind opgeslagen in de
+           aparte 'children'-tabel (naam + foto-toestemming).
         */
 
-        const child1 =
-            childNames[0] || null;
-
-        const child2 =
-            childNames[1] || null;
-
-        const child3 =
-            childNames[2] || null;
-
-        const child4 =
-            childNames[3] || null;
+        const childrenDataForDb =
+            childrenData.map(child => ({
+                name:
+                    child.name ||
+                    null,
+                photo_allowed:
+                    child.photo_allowed
+            }));
 
 
         /* =====================================================
@@ -4472,10 +4613,8 @@ margin-left:0;
                  * Reservatie opslaan
                  *
                  * BELANGRIJK:
-                 * child_names bestaat niet meer in
-                 * de appointments tabel.
-                 *
-                 * We gebruiken nu child1 t/m child4.
+                 * Kinderen worden per kind in de
+                 * aparte 'children'-tabel bewaard.
                  */
 
                 const {
@@ -4498,18 +4637,6 @@ margin-left:0;
                             children_count:
                                 childrenCount,
 
-                            child1:
-                                child1,
-
-                            child2:
-                                child2,
-
-                            child3:
-                                child3,
-
-                            child4:
-                                child4,
-
                             amount:
                                 amount,
 
@@ -4519,7 +4646,9 @@ margin-left:0;
                             payment_status:
                                 "pending"
 
-                        }]);
+                        }])
+                        .select("id")
+                        .single();
 
 
                 if (bookingError) {
@@ -4532,6 +4661,46 @@ margin-left:0;
                     throw new Error(
                         bookingError.message ||
                         "De inschrijving kon niet worden opgeslagen."
+                    );
+
+                }
+
+
+                const bookingId =
+                    booking.id;
+
+                /*
+                 * Kinderen per kind opslaan met
+                 * foto-toestemming.
+                 */
+
+                const childRows =
+                    childrenDataForDb
+                        .map(child => ({
+                            appointment_id:
+                                bookingId,
+                            name:
+                                child.name,
+                            photo_allowed:
+                                child.photo_allowed
+                        }));
+
+                const {
+                    error: childrenError
+                } =
+                    await sb
+                        .from("children")
+                        .insert(childRows);
+
+                if (childrenError) {
+
+                    console.error(
+                        "Children insert error:",
+                        childrenError
+                    );
+
+                    throw new Error(
+                        "De kindgegevens konden niet worden opgeslagen."
                     );
 
                 }
@@ -4756,17 +4925,8 @@ margin-left:0;
                             children_count:
                                 childrenCount,
 
-                            child1:
-                                child1,
-
-                            child2:
-                                child2,
-
-                            child3:
-                                child3,
-
-                            child4:
-                                child4,
+                            children:
+                                childrenDataForDb,
 
                             amount:
                                 amount,

@@ -11,7 +11,7 @@
 // Aanroep (vanuit index.html):
 //   sb.functions.invoke("create-mollie-payment", { body: {
 //       appointment_date, name, email, children_count,
-//       child1..child4, payment_method
+//       children: [{ name, photo_allowed }], payment_method
 //   }})
 //
 // Antwoord:
@@ -130,9 +130,12 @@ Deno.serve(async (req: Request) => {
     const email = String(body.email ?? "").trim();
     const childrenCount = Number(body.children_count);
     const paymentMethod = String(body.payment_method ?? "onsite");
-    const childNames = [1, 2, 3, 4].map((i) =>
-        String(body[`child${i}`] ?? "").trim() || null
-    );
+    const children = Array.isArray(body.children)
+        ? body.children.map((c: Record<string, unknown>) => ({
+            name: String(c?.name ?? "").trim(),
+            photo_allowed: Boolean(c?.photo_allowed),
+        }))
+        : [];
 
     if (!appointmentDate) {
         return json({ error: "Datum ontbreekt." }, 400, headers);
@@ -145,6 +148,12 @@ Deno.serve(async (req: Request) => {
     }
     if (!Number.isInteger(childrenCount) || childrenCount < 1 || childrenCount > 4) {
         return json({ error: "Ongeldig aantal kinderen (1-4)." }, 400, headers);
+    }
+    if (children.length !== childrenCount) {
+        return json({ error: "Geef voor elk kind een naam en optioneel foto-toestemming op." }, 400, headers);
+    }
+    if (children.some((c) => !c.name)) {
+        return json({ error: "Geef voor elk kind een naam op." }, 400, headers);
     }
 
     // ------------------------------------------------------------------
@@ -203,10 +212,6 @@ Deno.serve(async (req: Request) => {
             name,
             email,
             children_count: childrenCount,
-            child1: childNames[0],
-            child2: childNames[1],
-            child3: childNames[2],
-            child4: childNames[3],
             amount,
             payment_method: paymentMethod,
             payment_status: "pending",
@@ -223,6 +228,29 @@ Deno.serve(async (req: Request) => {
         );
     }
     const bookingId = booking.id;
+
+    // Kinderen opslaan (per kind een rij met naam + foto-toestemming).
+    const childRows = children.map((c) => ({
+        appointment_id: bookingId,
+        name: c.name,
+        photo_allowed: c.photo_allowed,
+    }));
+    const { error: childrenError } = await sb
+        .from("children")
+        .insert(childRows);
+
+    if (childrenError) {
+        console.error("Children insert error:", childrenError);
+        await sb
+            .from("appointments")
+            .update({ payment_status: "cancelled" })
+            .eq("id", bookingId);
+        return json(
+            { error: "De kindgegevens konden niet worden opgeslagen. Probeer opnieuw." },
+            500,
+            headers,
+        );
+    }
 
     // ------------------------------------------------------------------
     // 7. Mollie-betaling aanmaken
@@ -274,11 +302,18 @@ Deno.serve(async (req: Request) => {
 
     // ------------------------------------------------------------------
     // 8. Mollie-payment-ID koppelen aan de inschrijving
+    //    De webhook zoekt de inschrijving primair via booking_id uit de
+    //    metadata, dus deze koppeling is niet kritiek voor het verwerken
+    //    van de betaling, maar blijft nuttig voor de admin om te zoeken.
     // ------------------------------------------------------------------
-    await sb
+    const { error: linkError } = await sb
         .from("appointments")
         .update({ mollie_payment_id: mollieData.id })
         .eq("id", bookingId);
+
+    if (linkError) {
+        console.error("Mollie payment id koppelen mislukt:", linkError);
+    }
 
     // ------------------------------------------------------------------
     // 9. Antwoord aan index.html

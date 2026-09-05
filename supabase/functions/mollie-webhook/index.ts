@@ -63,7 +63,7 @@ const STATUS_MAP: Record<string, string> = {
     failed: "failed",
 };
 
-function sendEmail(templateId: string, params: Record<string, unknown>) {
+async function sendEmail(templateId: string, params: Record<string, unknown>): Promise<boolean> {
     const body: Record<string, unknown> = {
         service_id: EMAILJS_SERVICE,
         template_id: templateId,
@@ -73,15 +73,34 @@ function sendEmail(templateId: string, params: Record<string, unknown>) {
     if (EMAILJS_PRIVATE_KEY) {
         body.accessToken = EMAILJS_PRIVATE_KEY;
     }
-    return fetch("https://api.emailjs.com/api/v1.0/email/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-    });
+
+    try {
+        const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+            console.error(
+                `EmailJS-fout (${res.status}) voor template ${templateId}:`,
+                await res.text(),
+            );
+            return false;
+        }
+        console.log(`✅ Email verzonden via template ${templateId}`);
+        return true;
+    } catch (err) {
+        console.error(`EmailJS-uitzondering voor template ${templateId}:`, err);
+        return false;
+    }
 }
 
 function formatDate(dateString: string): string {
-    const [y, m, d] = dateString.split("-");
+    const datePart = String(dateString ?? "").split("T")[0];
+    const [y, m, d] = datePart.split("-");
+    if (!d || !m || !y) {
+        return dateString;
+    }
     return `${d}/${m}/${y}`;
 }
 
@@ -132,20 +151,59 @@ Deno.serve(async (req: Request) => {
     const bookingId = metadata.booking_id ?? payment.booking_id ?? "";
 
     // ------------------------------------------------------------------
-    // 3. De inschrijving ophalen (via mollie_payment_id of booking_id)
+    // 3. De inschrijving ophalen.
+    //    Primair via booking_id uit de Mollie-metadata (die is bij het
+    //    aanmaken van de betaling door ons ingesteld en onveranderbaar).
+    //    Daarna pas via mollie_payment_id als fallback.
+    //
+    //    BELANGRIJK: NIET beide filters combineren. Als de webhook
+    //    binnenkomt voordat create-mollie-payment de mollie_payment_id
+    //    aan de inschrijving heeft gekoppeld (of als die koppeling ooit
+    //    faalde), zou een AND-query de inschrijving nooit vinden en zou
+    //    elke webhook met 404 "nok" afgewezen worden.
     // ------------------------------------------------------------------
-    let query = sb.from("appointments").select("*");
-    if (paymentId) {
-        query = query.eq("mollie_payment_id", paymentId);
-    }
+    let booking: Record<string, any> | null = null;
+    let findError: { message: string } | null = null;
+
     if (bookingId) {
-        query = query.eq("id", bookingId);
+        const result = await sb
+            .from("appointments")
+            .select("*")
+            .eq("id", bookingId)
+            .maybeSingle();
+        booking = result.data;
+        findError = result.error;
     }
-    const { data: booking, error: findError } = await query.maybeSingle();
+
+    if (findError || !booking) {
+        const result = await sb
+            .from("appointments")
+            .select("*")
+            .eq("mollie_payment_id", paymentId)
+            .maybeSingle();
+        booking = result.data;
+        findError = result.error;
+    }
 
     if (findError || !booking) {
         console.error("Booking niet gevonden:", { paymentId, bookingId, findError });
         return new Response("nok", { status: 404 });
+    }
+
+    // ------------------------------------------------------------------
+    // 3b. Bedrag van Mollie controleren t.o.v. de inschrijving.
+    //     Niet blokkerend, maar wél loggen als deze niet overeenkomt
+    //     (mogelĳke onderbetaling of een verkeerd gekoppelde betaling).
+    // ------------------------------------------------------------------
+    const mollieAmount = Number(payment.amount?.value);
+    const bookingAmount = Number(booking.amount || 0);
+    if (mollieAmount && Math.abs(mollieAmount - bookingAmount) > 0.01) {
+        console.warn("Bedrag komt niet overeen met de inschrijving:", {
+            mollie: payment.amount?.value,
+            booking: booking.amount,
+            paymentId,
+            bookingId,
+        });
     }
 
     // ------------------------------------------------------------------
@@ -169,45 +227,58 @@ Deno.serve(async (req: Request) => {
     }
 
     // ------------------------------------------------------------------
-    // 5. Emails enkel bij succesvolle betaling
+    // 5. Emails enkel bij de OVERGANG naar 'betaald', zodat een herhaalde
+    //    "paid"-webhook van Mollie (retry) of een extra statuswijziging
+    //    geen tweede bevestigingsmail verstuurt.
+    //    Een fout bij het versturen mag de statusupdate niet ongedaan
+    //    maken en mag dus niet naar Mollie terug 'nok' geven (anders
+    //    hertelt Mollie en krijgt de klant meermaals een mail).
     // ------------------------------------------------------------------
-    if (dbStatus === "paid") {
-        const children = [
-            booking.child1,
-            booking.child2,
-            booking.child3,
-            booking.child4,
-        ].filter(Boolean);
+    if (dbStatus === "paid" && booking.payment_status !== "paid") {
+        try {
+            console.log("💌 Betaling betaald, bevestigingsmails versturen…");
 
-        const childNamesText = children
-            .map((c, i) => `Kind ${i + 1}: ${c}`)
-            .join("\n");
+            // Kinderen ophalen uit de children-tabel.
+            const { data: children, error: childrenError } = await sb
+                .from("children")
+                .select("name")
+                .eq("appointment_id", booking.id)
+                .order("created_at", { ascending: true });
 
-        // Klant: bevestigingsmail
-        await sendEmail(EMAILJS_CONFIRMATION_TEMPLATE, {
-            name: booking.name,
-            email: booking.email,
-            date: formatDate(booking.appointment_date),
-            children_count: booking.children_count,
-            child_names: childNamesText,
-            child1: booking.child1 ?? "",
-            child2: booking.child2 ?? "",
-            child3: booking.child3 ?? "",
-            child4: booking.child4 ?? "",
-            amount: Number(booking.amount || 0).toFixed(2).replace(".", ","),
-            payment_method: "Online betaling via Mollie",
-        });
+            const childNamesList = childrenError ? [] : (children ?? []).map((c: { name: string }) => c.name);
 
-        // Beheerder: meldingsmail
-        await sendEmail(EMAILJS_ADMIN_TEMPLATE, {
-            name: booking.name,
-            email: booking.email,
-            date: formatDate(booking.appointment_date),
-            children_count: booking.children_count,
-            child_names: childNamesText,
-            amount: Number(booking.amount || 0).toFixed(2).replace(".", ","),
-            payment_method: "Online betaling via Mollie",
-        });
+            const childNamesText = childNamesList
+                .map((c, i) => `Kind ${i + 1}: ${c}`)
+                .join("\n");
+
+            // Klant: bevestigingsmail
+            await sendEmail(EMAILJS_CONFIRMATION_TEMPLATE, {
+                name: booking.name,
+                email: booking.email,
+                date: formatDate(booking.appointment_date),
+                children_count: booking.children_count,
+                child_names: childNamesText,
+                child1: childNamesList[0] ?? "",
+                child2: childNamesList[1] ?? "",
+                child3: childNamesList[2] ?? "",
+                child4: childNamesList[3] ?? "",
+                amount: Number(booking.amount || 0).toFixed(2).replace(".", ","),
+                payment_method: "Online betaling via Mollie",
+            });
+
+            // Beheerder: meldingsmail
+            await sendEmail(EMAILJS_ADMIN_TEMPLATE, {
+                name: booking.name,
+                email: booking.email,
+                date: formatDate(booking.appointment_date),
+                children_count: booking.children_count,
+                child_names: childNamesText,
+                amount: Number(booking.amount || 0).toFixed(2).replace(".", ","),
+                payment_method: "Online betaling via Mollie",
+            });
+        } catch (err) {
+            console.error("E-mail verzending mislukt (status blijft correct bijgewerkt):", err);
+        }
     }
 
     return new Response("ok", { status: 200 });
