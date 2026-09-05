@@ -1127,42 +1127,12 @@
             opacity: 0.92;
         }
 
-        .hero-badge {
-            display: inline-flex;
-
-            align-items: center;
-            gap: 8px;
-
-            padding: 8px 18px;
-
-            margin-bottom: 20px;
-
-            border-radius: 999px;
-
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(8px);
-
-            border: 1px solid rgba(255,255,255,0.35);
-
-            color: white;
-
-            font-weight: 600;
-
-            font-size: 0.9rem;
-
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .hero-badge.closed {
-            background: rgba(0,0,0,0.35);
-        }
-
         .capacity-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
 
-            margin-top: -8px;
+            margin-top: 0;
             margin-bottom: 18px;
             padding: 7px 17px;
 
@@ -2337,10 +2307,6 @@ margin-left:0;
 
 
     <div class="hero-content">
-
-        <div class="hero-badge"
-             id="heroBadge">
-        </div>
 
         <p class="capacity-badge"
            id="capacityBadge"
@@ -7037,29 +7003,6 @@ margin-left:0;
     async function loadNextTheme() {
 
         try {
-
-            const badgeEl =
-                document.getElementById(
-                    "heroBadge"
-                );
-
-            if (badgeEl) {
-
-                const enabled =
-                    await isBookingEnabled();
-
-                badgeEl.innerHTML =
-                    enabled
-                        ? "🎟️ Inschrijvingen geopend"
-                        : "🕐 Inschrijvingen volgen binnenkort";
-
-                badgeEl.classList.toggle(
-                    "closed",
-                    !enabled
-                );
-
-            }
-
 
             /*
              * Vindt het thema van de eerstvolgende
