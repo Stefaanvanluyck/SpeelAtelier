@@ -831,6 +831,57 @@
                 text-align: left;
             }
         }
+    .empty-state-testimonial{
+            text-align:center;
+            color:#888;
+        }
+
+        /* =====================================================
+           ZATERDAGLIJST PRINT
+           ===================================================== */
+
+        .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .92rem;
+        }
+
+        .print-table th,
+        .print-table td {
+            border: 1px solid #e5e7eb;
+            padding: 9px 10px;
+            text-align: left;
+            vertical-align: top;
+            background: white;
+        }
+
+        .print-table th {
+            background: #f6f8f4;
+            font-weight: 700;
+        }
+
+        @media print {
+
+            body.printing-list * {
+                visibility: hidden;
+            }
+
+            body.printing-list #printListArea,
+            body.printing-list #printListArea * {
+                visibility: visible;
+            }
+
+            body.printing-list #printListArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+        }
+
     </style>
 
 
@@ -850,6 +901,10 @@
     <div class="topbar-actions">
         <button class="btn btn-gray" onclick="refreshDashboard()">
             🔄 Vernieuwen
+        </button>
+
+        <button class="btn btn-gray" onclick="openPrintList()">
+            🖨️ Zaterdaglijst
         </button>
 
         <button class="btn btn-green" onclick="exportCSV()">
@@ -903,6 +958,13 @@
                     Gezinnen die een volzet thema willen volgen
                 </div>
             </div>
+
+            <button
+                    class="btn btn-primary"
+                    onclick="autofillWaitlist()"
+                    title="Zet wachtlijstgezinnen om zodra er plaats vrijkomt">
+                ⚡ Vul vrije plaatsen
+            </button>
 
         </div>
 
@@ -1325,6 +1387,54 @@
 
 <!-- APPOINTMENT/THEME MODAL -->
 
+<!-- ZATERDAGLIJST PRINT MODAL -->
+<div class="modal" id="printListModal">
+
+    <div class="modal-box" style="max-width: 820px;">
+
+        <h3 style="margin: 0 0 16px;">
+            🖨️ Zaterdaglijst
+        </h3>
+
+        <div class="admin-actions" style="margin-bottom:14px;">
+
+            <input
+                    type="date"
+                    id="printListDate"
+                    onchange="renderPrintList()">
+
+            <button
+                    class="btn btn-primary"
+                    onclick="window.print()">
+                🖨️ Afdrukken (PDF)
+            </button>
+
+            <button
+                    class="btn btn-gray"
+                    onclick="closePrintList()">
+                Sluiten
+            </button>
+
+        </div>
+
+        <div id="printListArea">
+
+            <h4 id="printListTitle"
+                style="margin: 0 0 4px;">
+            </h4>
+
+            <div style="color:#6b7280;font-size:.85rem;margin-bottom:12px;">
+                Kleine Wonderwereld · speelatelier · Canadezenlaan 7, 2920 Kalmthout
+            </div>
+
+            <div id="printListBody"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
 <!-- GETUIGENIS EDIT MODAL -->
 <div class="modal" id="testimonialModal">
 
@@ -1632,6 +1742,15 @@
                         class="btn btn-gray"
                         onclick="closeEditModal()">
                     Sluiten
+                </button>
+
+                <button
+                        class="btn btn-gray"
+                        id="resendMailBtn"
+                        style="display:none;"
+                        onclick="resendConfirmation()"
+                        title="Bevestigings- en adminmail opnieuw versturen">
+                    📧 Mail opnieuw
                 </button>
 
                 <button
@@ -2973,6 +3092,11 @@
             "deleteButton"
         ).textContent =
             "🗑️ Inschrijving verwijderen";
+
+        document.getElementById(
+            "resendMailBtn"
+        ).style.display =
+            "";
 
         document.getElementById(
             "editModal"
@@ -5396,6 +5520,554 @@
         ).style.display =
             "flex";
     }
+
+    async function resendConfirmation() {
+
+        if (
+            editMode !==
+            "appointment" ||
+            !editId
+        ) {
+
+            return;
+
+        }
+
+        const item =
+            allData.find(
+                entry =>
+                    String(entry.id) ===
+                    String(editId)
+            );
+
+        if (!item) {
+
+            showToast(
+                "Inschrijving niet gevonden.",
+                true
+            );
+
+            return;
+
+        }
+
+        await sendBookingConfirmation({
+            name:
+                item.name || "",
+
+            email:
+                item.email || "",
+
+            date:
+                item.appointment_date || "",
+
+            childrenCount:
+                getAppointmentChildrenCount(
+                    item
+                ),
+
+            children:
+                getChildren(item),
+
+            amount:
+                getStoredAmount(item),
+
+            paymentMethod:
+                item.payment_method ||
+                "onsite"
+        });
+
+        showToast(
+            "📧 Mails verstuurd (klant + admin)."
+        );
+
+    }
+
+
+    async function openPrintList() {
+
+        const picker =
+            document.getElementById(
+                "printListDate"
+            );
+
+        picker.value =
+            getNextSessionDate() ||
+            "";
+
+        document.body.classList.add(
+            "printing-list"
+        );
+
+        document
+            .getElementById(
+                "printListModal"
+            ).style.display =
+            "flex";
+
+        renderPrintList();
+
+    }
+
+    function closePrintList() {
+
+        document.body.classList.remove(
+            "printing-list"
+        );
+
+        document
+            .getElementById(
+                "printListModal"
+            ).style.display =
+            "none";
+
+    }
+
+    function getNextSessionDate() {
+
+        const today =
+            new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+        const dates =
+            allData
+                .map(item =>
+                    item.appointment_date
+                )
+                .filter(Boolean)
+                .filter(
+                    date =>
+                        new Date(
+                            date +
+                            "T00:00:00"
+                        ) >=
+                        today
+                )
+                .sort();
+
+        return dates[0] || "";
+    }
+
+    function renderPrintList() {
+
+        const date =
+            document
+                .getElementById(
+                    "printListDate"
+                ).value;
+
+        const title =
+            document.getElementById(
+                "printListTitle"
+            );
+
+        const body =
+            document.getElementById(
+                "printListBody"
+            );
+
+        if (!date) {
+
+            title.textContent =
+                "Kies een datum";
+
+            body.innerHTML =
+                `<div class="empty-state">
+                    Geen datum gekozen.
+                </div>`;
+
+            return;
+
+        }
+
+        const theme =
+            getThemeForDate(date) ||
+            "Thema onbekend";
+
+        const bookings =
+            allData
+                .filter(
+                    item =>
+                        String(
+                            item.appointment_date
+                        ) ===
+                        String(date) &&
+                        isActiveBooking(item)
+                )
+                .sort(
+                    (a, b) =>
+                        String(
+                            a.name || ""
+                        ).localeCompare(
+                            String(
+                                b.name || ""
+                            ),
+                            "nl"
+                        )
+                );
+
+        title.textContent =
+            `📅 ${formatDate(date)} — ${theme}`;
+
+        if (!bookings.length) {
+
+            body.innerHTML =
+                `<div class="empty-state">
+                    Geen inschrijvingen op deze datum.
+                </div>`;
+
+            return;
+
+        }
+
+        const rows =
+            bookings
+                .map(item => {
+
+                    const children =
+                        getChildren(item);
+
+                    const statusText =
+                        isPaidBooking(item)
+                            ? "✅ Betaald"
+                            : "⏳ Open";
+
+                    const method =
+                        (
+                            item.payment_method ||
+                            "onsite"
+                        ) === "onsite"
+                            ? "Ter plaatse"
+                            : "Online";
+
+                    return `
+
+                        <tr>
+
+                            <td>
+                                ${escapeHtml(
+                                    item.name ||
+                                    "Onbekend"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    item.email ||
+                                    ""
+                                )}
+                            </td>
+
+                            <td>
+                                ${children
+                                    .map(escapeHtml)
+                                    .join(", ") ||
+                                    "—"}
+                            </td>
+
+                            <td>
+                                ${getAppointmentChildrenCount(
+                                    item
+                                )}
+                            </td>
+
+                            <td>
+                                ${statusText}
+                            </td>
+
+                            <td>
+                                €${Number(
+                                    getStoredAmount(
+                                        item
+                                    )
+                                ).toFixed(2)}
+                            </td>
+
+                            <td>
+                                ${method}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                })
+                .join("");
+
+        body.innerHTML =
+            `
+
+                <table class="print-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Ouder</th>
+                            <th>E-mail</th>
+                            <th>Kinderen</th>
+                            <th>Aantal</th>
+                            <th>Betaling</th>
+                            <th>Bedrag</th>
+                            <th>Wijze</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+                        ${rows}
+                    </tbody>
+
+                </table>
+
+            `;
+
+    }
+
+
+    async function autofillWaitlist() {
+
+        const pending =
+            waitlist
+                .filter(entry =>
+                    (
+                        entry.status ||
+                        "pending"
+                    ) === "pending"
+                )
+                .sort(
+                    (a, b) =>
+                        new Date(
+                            a.created_at
+                        ) -
+                        new Date(
+                            b.created_at
+                        )
+                );
+
+        if (!pending.length) {
+
+            showToast(
+                "Er staan geen wachtlijstaanvragen klaar.",
+                true
+            );
+
+            return;
+
+        }
+
+        const asked =
+            confirm(
+                `${pending.length} wachtlijstaanvra(a)g(en) klaar. ` +
+                "Alleen gezinnen die volledig passen worden omgezet. " +
+                "Doorgaan?"
+            );
+
+        if (!asked) {
+
+            return;
+
+        }
+
+        const bookedByDate = {};
+
+        allData.forEach(item => {
+
+            if (!isActiveBooking(item)) {
+
+                return;
+
+            }
+
+            const date =
+                String(
+                    item.appointment_date
+                );
+
+            bookedByDate[date] =
+                (
+                    bookedByDate[date] || 0
+                ) +
+                getAppointmentChildrenCount(
+                    item
+                );
+
+        });
+
+        let converted = 0;
+
+        let skipped = 0;
+
+        for (const entry of pending) {
+
+            const date =
+                String(
+                    entry.appointment_date
+                );
+
+            const count =
+                Number(
+                    entry.children_count
+                ) || 1;
+
+            const available =
+                MAX_CHILDREN -
+                (
+                    bookedByDate[date] || 0
+                );
+
+            if (count > available) {
+
+                skipped++;
+
+                continue;
+
+            }
+
+            const children =
+                String(
+                    entry.child_names || ""
+                )
+                    .split(",")
+                    .map(
+                        child =>
+                            child.trim()
+                    )
+                    .filter(Boolean);
+
+            const payload = {
+
+                name:
+                    entry.parent_name,
+
+                email:
+                    entry.email,
+
+                appointment_date:
+                    date,
+
+                children_count:
+                    count,
+
+                child1:
+                    children[0] || null,
+
+                child2:
+                    children[1] || null,
+
+                child3:
+                    children[2] || null,
+
+                child4:
+                    children[3] || null,
+
+                amount:
+                    calculateAmount(count),
+
+                payment_method:
+                    "onsite",
+
+                payment_status:
+                    "pending"
+
+            };
+
+            const {
+                data: inserted,
+                error: insertError
+            } = await sb
+                .from("appointments")
+                .insert(payload)
+                .select()
+                .single();
+
+            if (insertError) {
+
+                console.error(
+                    "Auto-fill insert error:",
+                    insertError
+                );
+
+                continue;
+
+            }
+
+            const {
+                error: deleteError
+            } = await sb
+                .from("waitlist")
+                .delete()
+                .eq(
+                    "id",
+                    entry.id
+                );
+
+            if (deleteError) {
+
+                console.error(
+                    "Auto-fill delete error:",
+                    deleteError
+                );
+
+                await sb
+                    .from("appointments")
+                    .delete()
+                    .eq(
+                        "id",
+                        inserted?.id
+                    );
+
+                continue;
+
+            }
+
+            await sendBookingConfirmation({
+                name:
+                    entry.parent_name,
+
+                email:
+                    entry.email,
+
+                date,
+
+                childrenCount:
+                    count,
+
+                children,
+
+                amount:
+                    calculateAmount(count),
+
+                paymentMethod:
+                    "onsite"
+            });
+
+            bookedByDate[date] =
+                (
+                    bookedByDate[date] || 0
+                ) +
+                count;
+
+            converted++;
+
+        }
+
+        showToast(
+            `⚡ ${converted} gezin(zen) omgezet` +
+            (
+                skipped
+                    ? ` — ${skipped} past/passen niet`
+                    : ""
+            ) +
+            "."
+        );
+
+        await loadData();
+
+    }
+
 
     async function sendBookingConfirmation({
         name,
