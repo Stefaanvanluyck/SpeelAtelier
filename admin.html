@@ -1274,6 +1274,42 @@
 
     </section>
 
+    <!-- GEEN FOTO-TOESTEMMING -->
+    <section class="admin-card">
+
+        <div class="dashboard-card-header">
+
+            <div>
+                <h3 style="margin-bottom:3px;">
+                    🚫 Geen foto-toestemming
+                </h3>
+
+                <div
+                        style="color:#6b7280;font-size:.78rem;">
+                    Kinderen waarvoor geen foto-toestemming werd gegeven
+                </div>
+            </div>
+
+        </div>
+
+        <div
+                id="noPhotoConsentCount"
+                class="result-count">
+            0 kinderen
+        </div>
+
+        <details class="admin-collapse">
+            <summary>
+                🚫 Kinderen zonder foto-toestemming
+            </summary>
+            <div
+                    id="noPhotoConsentList"
+                    class="booking-list">
+            </div>
+        </details>
+
+    </section>
+
     <!-- GETUIGENISSEN -->
     <section class="admin-card">
 
@@ -2138,7 +2174,7 @@
         }
     );
 
-    const MAX_CHILDREN = 10;
+    const MAX_CHILDREN = 12;
 
     let allData = [];
     let themes = [];
@@ -2687,6 +2723,8 @@
             renderCalendar();
 
             renderWaitlist();
+
+            renderNoPhotoConsent();
 
             renderTestimonials();
 
@@ -6143,6 +6181,168 @@
                                         🗑️
                                     </button>
 
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+    }
+
+    function renderNoPhotoConsent() {
+
+        const container =
+            document.getElementById(
+                "noPhotoConsentList"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        const noConsent = [];
+
+        allData.forEach(item => {
+
+            if (isCancelledBooking(item)) {
+                return;
+            }
+
+            const children =
+                getChildren(item);
+
+            children.forEach(child => {
+
+                if (child?.photo_allowed === false) {
+
+                    noConsent.push({
+                        childName:
+                            child.name ||
+                            "Onbekend kind",
+                        parentName:
+                            item.name ||
+                            "Onbekend",
+                        date:
+                            getAppointmentDate(
+                                item
+                            ),
+                        dateString:
+                            item.appointment_date,
+                        theme:
+                            getThemeForDate(
+                                item.appointment_date
+                            )
+                    });
+
+                }
+
+            });
+
+        });
+
+        const unique =
+            [];
+
+        const seen =
+            new Set();
+
+        noConsent.forEach(entry => {
+
+            const key =
+                String(entry.childName)
+                    .trim()
+                    .toLowerCase();
+
+            if (!key) {
+                return;
+            }
+
+            if (seen.has(key)) {
+                return;
+            }
+
+            seen.add(key);
+
+            unique.push(entry);
+
+        });
+
+        unique.sort((a, b) => {
+
+            const da =
+                a.dateString || "";
+
+            const db =
+                b.dateString || "";
+
+            return da.localeCompare(
+                db
+            );
+
+        });
+
+        document.getElementById(
+            "noPhotoConsentCount"
+        ).textContent =
+            unique.length +
+            (
+                unique.length === 1
+                    ? " kind"
+                    : " kinderen"
+            );
+
+        if (!unique.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    Alle kinderen hebben foto-toestemming gegeven.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML =
+            unique
+                .map(entry => {
+
+                    const themeText =
+                        entry.theme
+                            ? ` · 🎨 ${escapeHtml(entry.theme)}`
+                            : "";
+
+                    const dateText =
+                        entry.date
+                            ? formatDateDutch(
+                                  entry.date
+                              )
+                            : "Datum onbekend";
+
+                    return `
+                        <div class="booking-item">
+
+                            <div class="booking-main">
+
+                                <div class="booking-name">
+                                    🚫
+                                    ${escapeHtml(
+                                        entry.childName
+                                    )}
+                                </div>
+
+                                <div class="booking-meta">
+                                    👤
+                                    ${escapeHtml(
+                                        entry.parentName
+                                    )}
+                                    <br>
+                                    📅
+                                    ${escapeHtml(
+                                        dateText
+                                    )}
+                                    ${themeText}
                                 </div>
 
                             </div>

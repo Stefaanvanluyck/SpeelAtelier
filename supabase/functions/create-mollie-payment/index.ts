@@ -20,7 +20,7 @@
 // Vereiste environment variabelen (Supabase → Edge Functions → Secrets):
 //   MOLLIE_API_KEY             -> live/test Mollie API-sleutel
 //   BASE_URL                   -> https://jufvalerie.be
-//   MAX_CHILDREN               -> 10  (optioneel, default 10)
+//   MAX_CHILDREN               -> 12  (optioneel, default 12)
 //
 // Deploy:
 //   supabase functions deploy create-mollie-payment
@@ -33,7 +33,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MOLLIE_API_KEY = Deno.env.get("MOLLIE_API_KEY")!;
 const BASE_URL = (Deno.env.get("BASE_URL") ?? "https://jufvalerie.be")
     .replace(/\/+$/, "");
-const MAX_CHILDREN = Number(Deno.env.get("MAX_CHILDREN") ?? 10);
+const MAX_CHILDREN = Number(Deno.env.get("MAX_CHILDREN") ?? 12);
 
 const sb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },

@@ -779,7 +779,7 @@ flex-wrap: wrap;
 
         <h3>👶 Plaatsen</h3>
         <p>
-            Er is per speelsessie plaats voor maximaal <strong>10 kindjes</strong>.
+            Er is per speelsessie plaats voor maximaal <strong>12 kindjes</strong>.
         </p>
 
         <h3>❌ Annulatie</h3>
@@ -1028,8 +1028,8 @@ async function submitForm() {
         // 3. CHECK MAX 10
         // ==========================
 
-        if (existing.length >= 10) {
-            alert("❌ Helaas, deze datum is volzet (max 10 inschrijvingen).");
+        if (existing.length >= 12) {
+            alert("❌ Helaas, deze datum is volzet (max 12 inschrijvingen).");
             return;
         }
 
@@ -1354,7 +1354,7 @@ loadAppointments();
                   console.error("Theme error:", themeError);
               }
 
-              const MAX = 10;
+              const MAX = 12;
 
               // =========================
               // COUNT PER DAG

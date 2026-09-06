@@ -11,7 +11,7 @@
 --      zodat een bezoeker zichzelf nooit als 'paid' kan markeren.
 --   4. Datumcontroles: niet in het verleden + enkel zaterdagen.
 --   5. E-mailformaat wordt gecontroleerd.
---   6. Capaciteit van maximaal 10 kinderen per sessie wordt bewaakt (anon).
+--   6. Capaciteit van maximaal 12 kinderen per sessie wordt bewaakt (anon).
 --      Een beheerder (lid van admin_users) mag bewust overboeken, bv. om
 --      iemand van de wachtlijst toch toe te voegen aan een volzette sessie.
 --
@@ -81,11 +81,11 @@ BEGIN
         -- 2.7  Nieuwe inschrijvingen beginnen altijd als 'pending'
         NEW.payment_status := 'pending';
 
-        -- 2.8  Capaciteit: maximaal 10 kinderen per sessie.
+        -- 2.8  Capaciteit: maximaal 12 kinderen per sessie.
         --      Uitzondering: een ingelogde beheerder (admin_users) mag
         --      overboeken, bv. om een wachtlijstgezin toch toe te voegen aan
         --      een volzette sessie. Bezoekers (anon / geen admin) blijven
-        --      strikt aan de limiet van 10 gebonden.
+        --      strikt aan de limiet van 12 gebonden.
         IF NOT EXISTS (
             SELECT 1 FROM public.admin_users
             WHERE email = LOWER(COALESCE(
@@ -106,9 +106,9 @@ BEGIN
             WHERE  appointment_date = NEW.appointment_date
               AND  payment_status NOT IN ('cancelled', 'failed', 'expired');
 
-            IF v_booked + NEW.children_count > 10 THEN
-                RAISE EXCEPTION 'Maximaal 10 kinderen per sessie (nog % plaats(en) vrij)',
-                       GREATEST(0, 10 - v_booked)
+            IF v_booked + NEW.children_count > 12 THEN
+                RAISE EXCEPTION 'Maximaal 12 kinderen per sessie (nog % plaats(en) vrij)',
+                       GREATEST(0, 12 - v_booked)
                     USING ERRCODE = '23514';
             END IF;
 
