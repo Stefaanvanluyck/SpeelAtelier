@@ -8,10 +8,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Kleine Wonderwereld</title>
+    <title>Sensorisch Speelatelier Kalmthout | Kleine Wonderwereld</title>
 
 <meta name="description"
-          content="Kleine Wonderwereld: sensorisch speelatelier voor kinderen van 2 tot 6 jaar in Kalmthout. Op zaterdagvoormiddag ouder en kind samen spelen, voelen en ontdekken.">
+          content="Sensorisch speelatelier in Kalmthout voor kinderen van 2 tot 6 jaar. Elke zaterdagvoormiddag (10-11u) ouder en kind samen spelen, voelen en ontdekken. Maximaal 12 kindjes per sessie, vanaf €18.">
 
     <link rel="canonical" href="https://jufvalerie.be/">
 
@@ -33,6 +33,8 @@
     <meta name="twitter:image" content="https://jufvalerie.be/logosite.jpeg">
 
     <link rel="manifest" href="manifest.webmanifest">
+
+    <link rel="preload" as="image" href="gekleurderijst.webp" fetchpriority="high">
 
     <script type="application/ld+json">
         {
@@ -117,8 +119,8 @@
           content="
               default-src 'self';
               script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://widgets.sociablekit.com;
-              style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://widgets.sociablekit.com https://maxcdn.bootstrapcdn.com;
-              font-src 'self' data: https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;
+              style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://widgets.sociablekit.com https://maxcdn.bootstrapcdn.com https://fonts.googleapis.com;
+              font-src 'self' data: https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com https://fonts.gstatic.com;
               img-src 'self' data: blob: https:;
               connect-src 'self' https://nafajvywiknelkgufpac.supabase.co https://*.supabase.co https://api.emailjs.com https://*.emailjs.com https://*.accentapi.com https://*.sociablekit.com;
               frame-src https://widgets.sociablekit.com https://payment.mollie.com https://www.mollie.com https://www.google.com;
@@ -131,9 +133,11 @@
     <link rel="icon" sizes="32x32" href="favicon.png">
     <link rel="icon" sizes="192x192" href="favicon.png">
 
-    <!-- Flatpickr -->
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://nafajvywiknelkgufpac.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <!-- Font Awesome -->
     <link rel="stylesheet"
@@ -148,7 +152,7 @@
     <!-- FullCalendar -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 
     <style>
 
@@ -287,7 +291,7 @@
                     rgba(0,0,0,0.35),
                     rgba(0,0,0,0.45)
                 ),
-                url('gekleurderijst.jpeg') center/cover no-repeat;
+                url('gekleurderijst.webp') center/cover no-repeat;
         }
 
         .hero::after {
@@ -384,6 +388,28 @@
             background: rgba(255,255,255,0.2);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .section-cta {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .section-cta .btn {
+            margin-top: 0;
+        }
+
+        .instagram-intro {
+            text-align: center;
+            max-width: 600px;
+            margin: -20px auto 30px;
+            color: #374151;
+            font-size: .95rem;
+        }
+
+        .instagram-intro a {
+            color: var(--accent);
+            font-weight: 600;
         }
 
         /* =========================================================
@@ -545,6 +571,35 @@
 
         .faq-item:hover {
             transform: translateY(-4px);
+        }
+
+        .faq-item .faq-question {
+            background: transparent;
+            border: none;
+            display: block;
+            width: 100%;
+            text-align: left;
+            font: inherit;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text);
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .faq-item .faq-question::after {
+            content: " ▾";
+            color: var(--accent);
+        }
+
+        .faq-item.open .faq-question::after {
+            content: " ▴";
+        }
+
+        .faq-item .faq-question:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 4px;
+            border-radius: 6px;
         }
 
         .faq-answer {
@@ -1000,6 +1055,15 @@
         .footer-social a {
             font-size: 1.8rem;
             color: var(--accent);
+        }
+
+        .footer-links {
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: var(--accent);
+            font-size: .9rem;
         }
 
         /* =========================================================
@@ -1588,6 +1652,19 @@
 
         .cookie-banner .btn {
             margin-top: 0;
+        }
+
+        .cookie-banner .btn-ghost {
+            margin-top: 0;
+            margin-left: 8px;
+            background: transparent;
+            color: #ffd6a5;
+            box-shadow: none;
+            border: 1px solid rgba(255,255,255,0.35);
+        }
+
+        .cookie-banner .btn-ghost:hover {
+            background: rgba(255,255,255,0.12);
         }
 
         /* =========================================================
@@ -2338,7 +2415,41 @@
             cursor: not-allowed;
         }
 
+        /* =========================================================
+           AVOID MOTION
+        ========================================================= */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001s !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001s !important;
+                scroll-behavior: auto !important;
+            }
+
+            section,
+            .teacher,
+            .card {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
     </style>
+
+    <noscript>
+        <style>
+            section,
+            .teacher,
+            .card {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        </style>
+    </noscript>
 
 
 </head>
@@ -2396,7 +2507,8 @@ margin-left:0;
 
         <a href="https://www.instagram.com/juf__valerie"
            target="_blank"
-           rel="noopener">
+           rel="noopener"
+           aria-label="Volg ons op Instagram">
 
             <i class="fa-brands fa-instagram"></i>
 
@@ -2437,12 +2549,12 @@ margin-left:0;
 
         <h1>Kleine Wonderwereld</h1>
 
-        <p>
+        <p class="hero-tagline">
 
-            De Kleine Wonderwereld kijkt ernaar uit
-            om jullie kleintjes te verwelkomen.<br>
+            Een sensorisch speelatelier waar ouder en kind samen
+            spelen, voelen en ontdekken. <br>
 
-            Tot snel! 💛
+            Elke zaterdagvoormiddag, voor kindjes van 2 tot 6 jaar.
 
         </p>
 
@@ -2480,6 +2592,18 @@ margin-left:0;
            id="nextTheme"
            style="display:none;">
         </p>
+
+        <button class="btn"
+                id="heroCtaBtn"
+                onclick="
+    document
+        .getElementById('planning')
+        .scrollIntoView({behavior:'smooth'})
+    ">
+
+            Schrijf je kindje in
+
+        </button>
 
         <button class="btn secondary"
                 onclick="
@@ -2847,6 +2971,21 @@ margin-left:0;
 
     </div>
 
+    <div class="section-cta">
+
+        <button class="btn"
+                onclick="
+    document
+        .getElementById('planning')
+        .scrollIntoView({behavior:'smooth'})
+    ">
+
+            📅 Kies een datum en schrijf in
+
+        </button>
+
+    </div>
+
 
 </section>
 
@@ -2942,15 +3081,22 @@ margin-left:0;
 </section>
 
 <!-- =========================================================
-     KLEURPLAAT
-========================================================= -->
-
-<!-- =========================================================
      INSTAGRAM
 ========================================================= -->
 
 <section id="Instagram">
 
+    <h2>📸 Volg ons op Instagram</h2>
+
+    <p class="instagram-intro">
+        Sfeerbeelden, thema's en andere avonturen van de
+        Kleine Wonderwereld — elke week iets nieuws op
+        <a href="https://www.instagram.com/juf__valerie"
+           target="_blank"
+           rel="noopener">
+            @juf__valerie
+        </a>.
+    </p>
 
     <div class="sk-instagram-feed"
          data-embed-id="25687504">
@@ -2974,11 +3120,14 @@ margin-left:0;
 
     <div class="faq-item">
 
-        <strong>
+        <button class="faq-question"
+                aria-expanded="false"
+                aria-controls="faqA1">
             Leeftijd?
-        </strong>
+        </button>
 
-        <div class="faq-answer">
+        <div class="faq-answer"
+             id="faqA1">
             2 tot 6 jaar
         </div>
 
@@ -2986,11 +3135,14 @@ margin-left:0;
 
     <div class="faq-item">
 
-        <strong>
+        <button class="faq-question"
+                aria-expanded="false"
+                aria-controls="faqA2">
             Wanneer?
-        </strong>
+        </button>
 
-        <div class="faq-answer">
+        <div class="faq-answer"
+             id="faqA2">
             Zaterdagvoormiddag tussen 10 en 11u, zie planner.
         </div>
 
@@ -2998,11 +3150,14 @@ margin-left:0;
 
     <div class="faq-item">
 
-        <strong>
+        <button class="faq-question"
+                aria-expanded="false"
+                aria-controls="faqA3">
             Kledij?
-        </strong>
+        </button>
 
-        <div class="faq-answer">
+        <div class="faq-answer"
+             id="faqA3">
 
             Praktisch: Alles wat gebruikt wordt tijdens het
             sensorisch speelatelier is normaal uitwasbaar,
@@ -3015,11 +3170,14 @@ margin-left:0;
 
     <div class="faq-item">
 
-        <strong>
+        <button class="faq-question"
+                aria-expanded="false"
+                aria-controls="faqA4">
             Voorbereiding?
-        </strong>
+        </button>
 
-        <div class="faq-answer">
+        <div class="faq-answer"
+             id="faqA4">
 
             <ul class="checklist">
 
@@ -3051,13 +3209,17 @@ margin-left:0;
 
     <div class="faq-item">
 
-        <strong>
+        <button class="faq-question"
+                aria-expanded="false"
+                aria-controls="faqA5">
             Locatie?
-        </strong>
+        </button>
 
-        <div class="faq-answer">
+        <div class="faq-answer"
+             id="faqA5">
 
             GO! Basisschool 3D
+
             <br>
 
             <a href="https://www.google.com/maps/search/?api=1&query=Canadezenlaan+7+2920+Kalmthout"
@@ -3131,6 +3293,21 @@ margin-left:0;
 
     </div>
 
+    <div class="section-cta">
+
+        <button class="btn"
+                onclick="
+    document
+        .getElementById('planning')
+        .scrollIntoView({behavior:'smooth'})
+    ">
+
+            💛 Kom jullie eigen avontuur maken — schrijf in
+
+        </button>
+
+    </div>
+
 </section>
 
 <!-- =========================================================
@@ -3138,11 +3315,15 @@ margin-left:0;
 ========================================================= -->
 
 <div class="modal"
-     id="reviewModal">
+     id="reviewModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="reviewTitle">
 
     <div class="modal-content">
 
-        <h3 style="margin-top:0;">
+        <h3 style="margin-top:0;"
+            id="reviewTitle">
             💬 Jouw review
         </h3>
 
@@ -3155,12 +3336,14 @@ margin-left:0;
                id="reviewEmail"
                maxlength="254"
                autocomplete="email"
+               aria-label="E-mail van je inschrijving"
                placeholder="E-mail van je inschrijving">
 
         <input type="text"
                id="reviewName"
                maxlength="100"
                autocomplete="name"
+               aria-label="Jouw naam"
                placeholder="Jouw naam">
 
         <select id="reviewRating"
@@ -3202,6 +3385,13 @@ margin-left:0;
             voor ze op de website verschijnt.
         </div>
 
+        <p style="font-size:.8rem;color:#6b7280;margin-top:12px;">
+            Je e-mail wordt enkel gebruikt ter controle en nooit getoond. Meer info in ons
+            <a href="privacy.html"
+               target="_blank"
+               rel="noopener">privacybeleid</a>.
+        </p>
+
     </div>
 
 </div>
@@ -3211,14 +3401,29 @@ margin-left:0;
 ========================================================= -->
 
 <div class="modal"
-     id="modal">
+     id="modal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="bookingTitle">
 
 
     <div class="modal-content">
 
-        <h3>
+        <h3 id="bookingTitle">
             Inschrijving
         </h3>
+
+        <label for="datePicker"
+               style="
+           display:block;
+           margin-bottom:2px;
+           font-weight:600;
+           font-size:.9rem;
+       ">
+
+            Kies een datum
+
+        </label>
 
         <input type="date"
                id="datePicker">
@@ -3231,11 +3436,13 @@ margin-left:0;
         <input type="text"
                id="parentName"
                maxlength="100"
+               aria-label="Naam ouder of contactpersoon"
                placeholder="Naam ouder / contactpersoon">
 
         <input type="email"
                id="email"
                maxlength="254"
+               aria-label="E-mailadres"
                placeholder="Email">
 
         <!-- AANTAL KINDEREN -->
@@ -3276,6 +3483,13 @@ margin-left:0;
             </option>
 
         </select>
+
+        <p style="font-size:.78rem;color:#6b7280;margin:-4px 0 8px;"
+           id="childrenCountHint">
+            Per inschrijving kan je maximaal 4 kindjes registreren.
+            Wil je met meer komen? Schrijf dan een tweede inschrijving
+            of het extra kindje apart.
+        </p>
 
 
         <!-- NAMEN KINDEREN -->
@@ -3377,6 +3591,13 @@ margin-left:0;
 
         <p id="confirm"></p>
 
+        <p style="font-size:.8rem;color:#6b7280;margin-top:12px;">
+            Door in te schrijven ga je akkoord met ons
+            <a href="privacy.html"
+               target="_blank"
+               rel="noopener">privacybeleid</a>.
+        </p>
+
     </div>
 
 
@@ -3388,21 +3609,26 @@ margin-left:0;
 
 <div class="modal"
      id="loginModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="loginTitle"
      style="display:none;">
 
 
     <div class="modal-content">
 
-        <h3>
+        <h3 id="loginTitle">
             Admin login
         </h3>
 
         <input type="email"
                id="loginEmail"
+               aria-label="Admin e-mailadres"
                placeholder="Email">
 
         <input type="password"
                id="loginPass"
+               aria-label="Wachtwoord"
                placeholder="Wachtwoord">
 
         <button class="btn"
@@ -3523,6 +3749,13 @@ margin-left:0;
 
             </div>
 
+            <p style="font-size:.8rem;color:#6b7280;margin-top:12px;">
+                Door je in te schrijven op de wachtlijst ga je akkoord met ons
+                <a href="privacy.html"
+                   target="_blank"
+                   rel="noopener">privacybeleid</a>.
+            </p>
+
         </div>
 
         <div class="waitlist-success"
@@ -3581,7 +3814,8 @@ margin-left:0;
 
         <a href="https://www.instagram.com/juf__valerie"
            target="_blank"
-           rel="noopener">
+           rel="noopener"
+           aria-label="Volg ons op Instagram">
 
             <i class="fab fa-instagram"></i>
 
@@ -3591,6 +3825,13 @@ margin-left:0;
 
     <p>
         © 2026 Kleine Wonderwereld
+    </p>
+
+    <p class="footer-links">
+        <a href="privacy.html"
+           rel="noopener">
+            Privacybeleid
+        </a>
     </p>
 
 
@@ -3616,6 +3857,14 @@ margin-left:0;
         Ok, duidelijk!
 
     </button>
+
+    <a class="btn btn-ghost"
+       href="privacy.html"
+       style="margin-left:8px;">
+
+        Privacybeleid
+
+    </a>
 
 </div>
 
@@ -4049,14 +4298,48 @@ margin-left:0;
         document.getElementById("modal")
             .style.display = "flex";
 
+        lockBodyScroll();
+
         const datePicker =
             document.getElementById("datePicker");
+
+        clearFormError();
+
+        document.getElementById("confirm")
+            .innerText = "";
+
+        document.getElementById("parentName")
+            .value = "";
+
+        document.getElementById("email")
+            .value = "";
+
+        document.getElementById("childrenCount")
+            .value = "1";
 
         if (date) {
 
             datePicker.value = date;
 
+        } else {
+
+            datePicker.value = "";
+
         }
+
+        datePicker.focus();
+
+        /*
+         * Submit-knop terug actief maken voor een
+         * volgende inschrijving.
+         */
+
+        const submitBtn =
+            document.getElementById("submitBtn");
+
+        submitBtn.disabled = false;
+
+        updatePaymentButton();
 
         /*
          * Zorg ervoor dat de juiste
@@ -4076,10 +4359,36 @@ margin-left:0;
        CLOSE BOOKING FORM
     ========================================================= */
 
+    let modalLockCount = 0;
+
+    function lockBodyScroll() {
+
+        modalLockCount++;
+
+        document.body.style.overflow =
+            "hidden";
+    }
+
+    function unlockBodyScroll() {
+
+        modalLockCount =
+            Math.max(
+                0,
+                modalLockCount - 1
+            );
+
+        if (modalLockCount === 0) {
+
+            document.body.style.overflow = "";
+        }
+    }
+
     function closeForm() {
 
         document.getElementById("modal")
             .style.display = "none";
+
+        unlockBodyScroll();
 
     }
 
@@ -4459,11 +4768,40 @@ margin-left:0;
        SUBMIT BOOKING
     ========================================================= */
 
+    function showFormError(message) {
+
+        const box =
+            document.getElementById(
+                "errorMsg"
+            );
+
+        if (box) {
+
+            box.textContent =
+                message;
+        }
+    }
+
+    function clearFormError() {
+
+        const box =
+            document.getElementById(
+                "errorMsg"
+            );
+
+        if (box) {
+
+            box.textContent = "";
+        }
+    }
+
     async function submitForm() {
 
         if (isSubmitting) {
             return;
         }
+
+        clearFormError();
 
         const submitBtn =
             document.getElementById(
@@ -4530,7 +4868,7 @@ margin-left:0;
             !paymentMethod
         ) {
 
-            alert(
+            showFormError(
                 "Vul alle velden in 💛"
             );
 
@@ -4542,7 +4880,7 @@ margin-left:0;
         if (childrenCount < 1 ||
             childrenCount > 4) {
 
-            alert(
+            showFormError(
                 "Je kan maximaal 4 kinderen per inschrijving registreren."
             );
 
@@ -4561,7 +4899,7 @@ margin-left:0;
             childrenCount
         ) {
 
-            alert(
+            showFormError(
                 "Vul de naam van elk kind in 💛"
             );
 
@@ -4581,7 +4919,7 @@ margin-left:0;
             missingChildName
         ) {
 
-            alert(
+            showFormError(
                 "Vul de naam van elk kind in 💛"
             );
 
@@ -4596,7 +4934,7 @@ margin-left:0;
 
         if (!(await isBookingEnabled())) {
 
-            alert(
+            showFormError(
                 "⛔ Inschrijvingen zijn momenteel gesloten."
             );
 
@@ -4622,7 +4960,7 @@ margin-left:0;
             selectedDateObject.getDay() !== 6
         ) {
 
-            alert(
+            showFormError(
                 "❌ Alleen zaterdagen zijn toegestaan."
             );
 
@@ -4645,7 +4983,7 @@ margin-left:0;
             new Date()
         ) {
 
-            alert(
+            showFormError(
                 "⛔ Deze sessie is al afgelopen."
             );
 
@@ -4664,7 +5002,7 @@ margin-left:0;
             )
         ) {
 
-            alert(
+            showFormError(
                 "⛔ Deze datum is momenteel geblokkeerd."
             );
 
@@ -4697,7 +5035,7 @@ margin-left:0;
                 themeError
             );
 
-            alert(
+            showFormError(
                 "De sessie kon niet worden gecontroleerd."
             );
 
@@ -4710,7 +5048,7 @@ margin-left:0;
             String(theme.theme).trim() === ""
         ) {
 
-            alert(
+            showFormError(
                 "⛔ Voor deze datum is momenteel geen sessie gepland."
             );
 
@@ -5056,27 +5394,19 @@ margin-left:0;
 
 
                 /*
-                 * Modal nog even laten staan
+                 * Modal blijft openstaande zodat de ouder de
+                 * bevestiging rustig kan lezen en de datum kan
+                 * toevoegen aan de agenda. Het formulier wordt
+                 * bij de volgende opening via openForm() gereset.
                  */
 
-                setTimeout(
-                    () => {
+                submitBtn.disabled =
+                    true;
 
-                        closeForm();
+                isSubmitting =
+                    false;
 
-                        confirmMsg.innerText = "";
-
-                        submitBtn.disabled =
-                            false;
-
-                        isSubmitting =
-                            false;
-
-                        updatePaymentButton();
-
-                    },
-                    5000
-                );
+                updatePaymentButton();
 
 
                 return;
@@ -5275,14 +5605,14 @@ margin-left:0;
                 checkoutUrl;
 
 
-        } catch (err) {
+} catch (err) {
 
             console.error(
                 "Submit error:",
                 err
             );
 
-            alert(
+            showFormError(
                 `❌ ${
                     err.message ||
                     "Er ging iets mis. Probeer opnieuw."
@@ -6100,6 +6430,10 @@ margin-left:0;
         ).style.display =
             "flex";
 
+        document.getElementById(
+            "loginEmail"
+        ).focus();
+
     }
 
 
@@ -6328,19 +6662,110 @@ margin-left:0;
                 .forEach(
                     item => {
 
-                        item.addEventListener(
-                            "click",
-                            () => {
+                        const question =
+                            item.querySelector(
+                                ".faq-question"
+                            );
 
+                        const toggle = () => {
+
+                            const isOpen =
                                 item.classList.toggle(
                                     "open"
                                 );
 
+                            if (question) {
+
+                                question.setAttribute(
+                                    "aria-expanded",
+                                    String(
+                                        isOpen
+                                    )
+                                );
                             }
-                        );
+                        };
+
+                        if (question) {
+
+                            question.addEventListener(
+                                "click",
+                                toggle
+                            );
+
+                        }
 
                     }
                 );
+
+
+            /*
+             * Escape sluit elke open modal.
+             */
+
+            document.addEventListener(
+                "keydown",
+                (event) => {
+
+                    if (
+                        event.key !== "Escape"
+                    ) {
+                        return;
+                    }
+
+                    const modal =
+                        document.getElementById(
+                            "modal"
+                        );
+
+                    const reviewModal =
+                        document.getElementById(
+                            "reviewModal"
+                        );
+
+                    const loginModal =
+                        document.getElementById(
+                            "loginModal"
+                        );
+
+                    const waitlistModal =
+                        document.getElementById(
+                            "waitlistModal"
+                        );
+
+                    if (
+                        modal &&
+                        modal.style.display ===
+                            "flex"
+                    ) {
+                        closeForm();
+                    }
+
+                    if (
+                        reviewModal &&
+                        reviewModal.style.display ===
+                            "flex"
+                    ) {
+                        closeReviewModal();
+                    }
+
+                    if (
+                        loginModal &&
+                        loginModal.style.display ===
+                            "flex"
+                    ) {
+                        closeLogin();
+                    }
+
+                    if (
+                        waitlistModal &&
+                        waitlistModal.classList
+                            .contains("open")
+                    ) {
+                        closeWaitlist();
+                    }
+
+                }
+            );
 
 
             /*
@@ -8059,6 +8484,8 @@ margin-left:0;
             modal.classList.add("open");
         }
 
+        lockBodyScroll();
+
     }
 
 
@@ -8072,6 +8499,8 @@ margin-left:0;
         if (modal) {
             modal.classList.remove("open");
         }
+
+        unlockBodyScroll();
 
     }
 
@@ -9887,6 +10316,10 @@ margin-left:0;
             "reviewModal"
         ).style.display =
             "flex";
+
+        document.getElementById(
+            "reviewEmail"
+        ).focus();
 
     }
 
