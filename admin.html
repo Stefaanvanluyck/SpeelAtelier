@@ -1058,22 +1058,62 @@
 
         @media print {
 
-            body.printing-list * {
-                visibility: hidden;
+            @page {
+                size: A4;
+                margin: 14mm;
             }
 
-            body.printing-list #printListArea,
+            /*
+             * Alleen de lijst afdrukken: de rest van de
+             * admin-pagina volledig uit de lay-out halen
+             * (display:none), anders worden al die lege
+             * pagina's mee afgedrukt.
+             */
+
+            body.printing-list > * {
+                display: none !important;
+            }
+
+            body.printing-list > #printListModal {
+                display: block !important;
+                position: static !important;
+                inset: auto !important;
+                background: none !important;
+                overflow: visible !important;
+            }
+
+            body.printing-list #printListModal .modal-box {
+                max-width: none !important;
+                max-height: none !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                background: white !important;
+                padding: 0 !important;
+            }
+
+            body.printing-list #printListModal .admin-actions,
+            body.printing-list #printListModal > h3 {
+                display: none !important;
+            }
+
+            body.printing-list #printListArea {
+                visibility: visible;
+            }
+
             body.printing-list #printListArea * {
                 visibility: visible;
             }
 
-            body.printing-list #printListArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
+            body.printing-list .print-table {
+                margin-top: 14px;
+            }
+
+            body.printing-list .print-table tr {
+                break-inside: avoid;
+            }
+
+            body.printing-list .print-table thead {
+                display: table-header-group;
             }
 
         }
@@ -7660,8 +7700,30 @@ ${item.published
             bookings
                 .map(item => {
 
-                    const children =
-                        getChildrenNames(item);
+                    const childrenData =
+                        getChildren(item);
+
+                    const childrenNames =
+                        childrenData
+                            .map(child =>
+                                String(
+                                    child.name ||
+                                    ""
+                                )
+                            )
+                            .filter(Boolean);
+
+                    const photoMarks =
+                        childrenData
+                            .map(child =>
+                                child.photo_allowed ===
+                                true
+                                    ? "✓"
+                                    : child.photo_allowed ===
+                                        false
+                                        ? "✗"
+                                        : "?"
+                            );
 
                     const statusText =
                         isPaidBooking(item)
@@ -7695,9 +7757,22 @@ ${item.published
                             </td>
 
                             <td>
-                                ${children
-                                    .map(escapeHtml)
-                                    .join(", ") ||
+                                ${childrenNames
+                                    .map(
+                                        name =>
+                                            `<div>${escapeHtml(name)}</div>`
+                                    )
+                                    .join("") ||
+                                    "—"}
+                            </td>
+
+                            <td>
+                                ${photoMarks
+                                    .map(
+                                        mark =>
+                                            `<div>${mark}</div>`
+                                    )
+                                    .join("") ||
                                     "—"}
                             </td>
 
@@ -7742,6 +7817,7 @@ ${item.published
                             <th>Ouder</th>
                             <th>E-mail</th>
                             <th>Kinderen</th>
+                            <th>📷 Foto</th>
                             <th>Aantal</th>
                             <th>Betaling</th>
                             <th>Bedrag</th>
@@ -7756,6 +7832,10 @@ ${item.published
                     </tbody>
 
                 </table>
+
+                <div style="margin-top:10px;font-size:.8rem;color:#6b7280;">
+                    ✓ = foto's mogen · ✗ = geen foto-toestemming · ? = nog niet ingevuld
+                </div>
 
             `;
 
