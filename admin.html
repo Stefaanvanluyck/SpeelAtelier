@@ -2341,6 +2341,116 @@
             .filter(Boolean);
     }
 
+    /*
+     * De kindernamen van een inschrijving per rij
+     * in de children-tabel bijwerken. Bestaande
+     * foto-toestemming blijft per positie behouden.
+     */
+    async function replaceChildrenRows(appointmentId, names) {
+
+        const nameList =
+            names
+                .map(name =>
+                    String(name || "")
+                        .trim()
+                )
+                .filter(Boolean);
+
+        const {
+            data: existing,
+            error: fetchError
+        } = await sb
+            .from("children")
+            .select("id, photo_allowed")
+            .eq("appointment_id", appointmentId)
+            .order("created_at", {
+                ascending: true
+            });
+
+        if (fetchError) {
+            throw fetchError;
+        }
+
+        const rows =
+            existing || [];
+
+        const max =
+            Math.max(
+                nameList.length,
+                rows.length
+            );
+
+        for (
+            let i = 0;
+            i < max;
+            i++
+        ) {
+
+            const currentName =
+                nameList[i] || "";
+
+            if (
+                i < rows.length
+            ) {
+
+                if (
+                    i >= nameList.length
+                ) {
+
+                    const {
+                        error
+                    } = await sb
+                        .from("children")
+                        .delete()
+                        .eq(
+                            "id",
+                            rows[i].id
+                        );
+
+                    if (error) {
+                        throw error;
+                    }
+
+                } else {
+
+                    const {
+                        error
+                    } = await sb
+                        .from("children")
+                        .update({
+                            name:
+                                currentName
+                        })
+                        .eq(
+                            "id",
+                            rows[i].id
+                        );
+
+                    if (error) {
+                        throw error;
+                    }
+                }
+
+            } else {
+
+                const {
+                    error
+                } = await sb
+                    .from("children")
+                    .insert({
+                        appointment_id:
+                            appointmentId,
+                        name:
+                            currentName
+                    });
+
+                if (error) {
+                    throw error;
+                }
+            }
+        }
+    }
+
     function childPhotosAllowed(item) {
 
         return getChildren(item)
@@ -3525,25 +3635,40 @@
             item.payment_status ||
             "pending";
 
+        const childrenNames =
+            getChildrenNames(item);
+
+        const fallbackNames = [
+            item.child1,
+            item.child2,
+            item.child3,
+            item.child4
+        ].filter(Boolean);
+
+        const editorChildNames =
+            childrenNames.length
+                ? childrenNames
+                : fallbackNames;
+
         document.getElementById(
             "editChild1"
         ).value =
-            item.child1 || "";
+            editorChildNames[0] || "";
 
         document.getElementById(
             "editChild2"
         ).value =
-            item.child2 || "";
+            editorChildNames[1] || "";
 
         document.getElementById(
             "editChild3"
         ).value =
-            item.child3 || "";
+            editorChildNames[2] || "";
 
         document.getElementById(
             "editChild4"
         ).value =
-            item.child4 || "";
+            editorChildNames[3] || "";
 
         document.getElementById(
             "deleteButton"
@@ -3715,30 +3840,6 @@
             children_count:
                 childrenCount,
 
-            child1:
-                document.getElementById(
-                    "editChild1"
-                ).value.trim() ||
-                null,
-
-            child2:
-                document.getElementById(
-                    "editChild2"
-                ).value.trim() ||
-                null,
-
-            child3:
-                document.getElementById(
-                    "editChild3"
-                ).value.trim() ||
-                null,
-
-            child4:
-                document.getElementById(
-                    "editChild4"
-                ).value.trim() ||
-                null,
-
             amount,
 
             payment_method:
@@ -3769,6 +3870,42 @@
             );
 
             return;
+        }
+
+        try {
+
+            await replaceChildrenRows(
+                editId,
+                [
+                    document.getElementById(
+                        "editChild1"
+                    ).value,
+
+                    document.getElementById(
+                        "editChild2"
+                    ).value,
+
+                    document.getElementById(
+                        "editChild3"
+                    ).value,
+
+                    document.getElementById(
+                        "editChild4"
+                    ).value
+                ]
+            );
+
+        } catch (childError) {
+
+            console.error(
+                "Children sync error:",
+                childError
+            );
+
+            showToast(
+                "⚠️ Inschrijving opgeslagen, maar de kindernamen konden niet worden bijgewerkt.",
+                true
+            );
         }
 
         closeEditModal();
@@ -7767,18 +7904,6 @@ ${item.published
                 children_count:
                     count,
 
-                child1:
-                    children[0] || null,
-
-                child2:
-                    children[1] || null,
-
-                child3:
-                    children[2] || null,
-
-                child4:
-                    children[3] || null,
-
                 amount:
                     calculateAmount(count),
 
@@ -7808,6 +7933,21 @@ ${item.published
 
                 continue;
 
+            }
+
+            try {
+
+                await replaceChildrenRows(
+                    inserted.id,
+                    children
+                );
+
+            } catch (childError) {
+
+                console.error(
+                    "Auto-fill children error:",
+                    childError
+                );
             }
 
             const {
@@ -8262,30 +8402,6 @@ ${item.published
             children_count:
                 childrenCount,
 
-            child1:
-                document.getElementById(
-                    "editChild1"
-                ).value.trim() ||
-                null,
-
-            child2:
-                document.getElementById(
-                    "editChild2"
-                ).value.trim() ||
-                null,
-
-            child3:
-                document.getElementById(
-                    "editChild3"
-                ).value.trim() ||
-                null,
-
-            child4:
-                document.getElementById(
-                    "editChild4"
-                ).value.trim() ||
-                null,
-
             amount,
 
             payment_method:
@@ -8321,10 +8437,13 @@ ${item.published
         }
 
         const {
+            data: insertedAppointment,
             error
         } = await sb
             .from("appointments")
-            .insert(payload);
+            .insert(payload)
+            .select("id")
+            .single();
 
         if (error) {
 
@@ -8337,6 +8456,37 @@ ${item.published
             );
 
             return;
+        }
+
+        try {
+
+            await replaceChildrenRows(
+                insertedAppointment.id,
+                [
+                    document.getElementById(
+                        "editChild1"
+                    ).value,
+
+                    document.getElementById(
+                        "editChild2"
+                    ).value,
+
+                    document.getElementById(
+                        "editChild3"
+                    ).value,
+
+                    document.getElementById(
+                        "editChild4"
+                    ).value
+                ]
+            );
+
+        } catch (childError) {
+
+            console.error(
+                "Children insert error:",
+                childError
+            );
         }
 
         const {
