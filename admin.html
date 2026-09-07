@@ -152,6 +152,11 @@
             background: #e5e7eb;
         }
 
+        .btn-purple {
+            color: white;
+            background: linear-gradient(135deg,#7c3aed,#a78bfa);
+        }
+
         .btn-dark {
             color: white;
             background: #1f2937;
@@ -803,6 +808,23 @@
             background: #fee2e2;
         }
 
+        .payment-pill.pass {
+            color: #6d28d9;
+            background: #ede9fe;
+        }
+
+        .pass-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: .68rem;
+            font-weight: 800;
+            color: #6d28d9;
+            background: #ede9fe;
+            vertical-align: middle;
+        }
+
         .payment-pill.other {
             color: #374151;
             background: #e5e7eb;
@@ -1314,6 +1336,49 @@
 
     </section>
 
+    <!-- BEURTENKAARTEN -->
+    <section class="admin-card">
+
+        <div class="dashboard-card-header">
+
+            <div>
+                <h3 style="margin-bottom:3px;">
+                    🎟️ Beurtenkaarten
+                </h3>
+
+                <div
+                        style="color:#6b7280;font-size:.78rem;">
+                    5- en 10-beurtenkaarten per gezin (gekoppeld aan e-mail)
+                </div>
+            </div>
+
+            <button
+                    class="btn btn-primary"
+                    onclick="openBeurtenkaartEditor()"
+                    title="Nieuwe beurtenkaart aanmaken">
+                ➕ Nieuwe kaart
+            </button>
+
+        </div>
+
+        <div
+                id="beurtenkaartCount"
+                class="result-count">
+            0 beurtenkaarten
+        </div>
+
+        <details class="admin-collapse">
+            <summary>
+                🎟️ Beurtenkaarten tonen
+            </summary>
+            <div
+                    id="beurtenkaartList"
+                    class="booking-list">
+            </div>
+        </details>
+
+    </section>
+
     <!-- GEEN FOTO-TOESTEMMING -->
     <section class="admin-card">
 
@@ -1780,8 +1845,73 @@
 <!-- APPOINTMENT/THEME MODAL -->
 
 <!-- ZATERDAGLIJST PRINT MODAL -->
-<div class="modal" id="printListModal">
+<!-- BEURTENKAART EDITOR MODAL -->
+<div class="modal" id="beurtenkaartModal">
 
+    <div class="modal-box" style="max-width:520px;">
+
+        <h3 style="margin:0 0 16px;">
+            🎟️ Beurtenkaart
+        </h3>
+
+        <div class="form-field" style="margin-bottom:10px;">
+            <label for="bkEmail">
+                E-mail van het gezin
+            </label>
+
+            <input
+                    id="bkEmail"
+                    type="email"
+                    placeholder="bv. familie@voorbeeld.be">
+        </div>
+
+        <div class="form-field" style="margin-bottom:10px;">
+            <label for="bkType">
+                Type kaart
+            </label>
+
+            <select id="bkType">
+                <option value="10">10-beurtenkaart (€150)</option>
+                <option value="5">5-beurtenkaart</option>
+            </select>
+        </div>
+
+        <div class="form-field" style="margin-bottom:10px;">
+            <label for="bkStarts">
+                Aantal beurten (resterend)
+            </label>
+
+            <input
+                    id="bkStarts"
+                    type="number"
+                    min="0"
+                    value="10"
+                    placeholder="bv. 10">
+        </div>
+
+        <div class="modal-actions">
+            <div></div>
+
+            <div class="modal-actions-right">
+                <button
+                        class="btn btn-gray"
+                        onclick="closeBeurtenkaartModal()">
+                    Annuleren
+                </button>
+
+                <button
+                        class="btn btn-green"
+                        onclick="saveBeurtenkaart()">
+                    💾 Opslaan
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal" id="printListModal">
     <div class="modal-box" style="max-width: 820px;">
 
         <h3 style="margin: 0 0 16px;">
@@ -2003,6 +2133,10 @@
                             Online – Mollie
                         </option>
 
+                        <option value="pass">
+                            🎟️ Beurtenkaart
+                        </option>
+
                     </select>
                 </div>
 
@@ -2221,6 +2355,7 @@
     let blockedDates = [];
     let waitlist = [];
     let testimonials = [];
+    let beurtenkaarten = [];
     let calendar = null;
     let monthlyChart = null;
     let paymentStatusChart = null;
@@ -2563,6 +2698,13 @@
         );
     }
 
+    function isBeurtenkaartBooking(item) {
+
+        return String(
+            item.payment_method || ""
+        ).toLowerCase() === "pass";
+    }
+
     function isOpenPayment(item) {
 
         return (
@@ -2744,7 +2886,8 @@
                 blockedResult,
                 waitlistResult,
                 testimonialResult,
-                galleryResult
+                galleryResult,
+                beurtenkaartResult
             ] = await Promise.all([
 
                 sb
@@ -2811,6 +2954,16 @@
                         {
                             ascending: false
                         }
+                    ),
+
+                sb
+                    .from("beurtenkaarten")
+                    .select("*")
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
                     )
             ]);
 
@@ -2853,6 +3006,26 @@
                     galleryResult.data || [];
             }
 
+            /*
+             * Beurtenkaarten zijn eveneens optioneel (vereist
+             * beurtenkaarten.sql); de admin-pagina blijft zonder
+             * die tabel gewoon werken.
+             */
+            if (beurtenkaartResult.error) {
+
+                console.warn(
+                    "Beurtenkaarten niet beschikbaar:",
+                    beurtenkaartResult.error
+                );
+
+                beurtenkaarten = [];
+
+            } else {
+
+                beurtenkaarten =
+                    beurtenkaartResult.data || [];
+            }
+
             allData =
                 appointmentsResult.data || [];
 
@@ -2879,6 +3052,8 @@
             renderTestimonials();
 
             renderGallery();
+
+            renderBeurtenkaarten();
 
         } catch (error) {
 
@@ -5275,6 +5450,425 @@
     }
 
     /* =========================================================
+       BEURTENKAARTEN
+    ========================================================= */
+
+    function getCardForEmail(email) {
+
+        return beurtenkaarten.find(
+            kaart =>
+                String(
+                    (kaart.email || "").toLowerCase()
+                ) ===
+                String((email || "").toLowerCase().trim())
+        ) || null;
+
+    }
+
+    function renderBeurtenkaarten() {
+
+        const container =
+            document.getElementById(
+                "beurtenkaartList"
+            );
+
+        if (!container) {
+
+            return;
+
+        }
+
+        const count =
+            document.getElementById(
+                "beurtenkaartCount"
+            );
+
+        count.textContent =
+            beurtenkaarten.length +
+            (
+                beurtenkaarten.length === 1
+                    ? " beurtenkaart"
+                    : " beurtenkaarten"
+            );
+
+        if (!beurtenkaarten.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    Nog geen beurtenkaarten.
+                </div>`;
+
+            return;
+
+        }
+
+        container.innerHTML =
+            beurtenkaarten
+                .map(kaart => {
+
+                    const email =
+                        escapeHtml(kaart.email);
+
+                    const type =
+                        kaart.type || "-";
+
+                    const stamps =
+                        Number(kaart.aantal_starts);
+
+                    const low =
+                        Number.isFinite(stamps) &&
+                        stamps <= 2;
+
+                    return `
+                        <div class="booking-item">
+
+                            <div class="booking-main">
+
+                                <div class="booking-name">
+                                    🎟️ ${escapeHtml(
+                                        type + "-beurtenkaart"
+                                    )}
+                                </div>
+
+                                <div class="booking-meta">
+                                    ✉️ ${email}
+                                </div>
+
+                            </div>
+
+                            <div class="booking-side">
+
+                                <div style="
+                                    font-size:1.05rem;
+                                    font-weight:800;
+                                    ${low ? "color:#dc2626;" : ""}">
+                                    ${stamps} ${stamps === 1
+                                        ? "beurt"
+                                        : "beurten"}
+                                </div>
+
+                                <div style="
+                                    display:flex;
+                                    gap:6px;
+                                    margin-top:8px;
+                                    justify-content:flex-end;">
+
+                                    <button
+                                            class="btn btn-gray"
+                                            onclick="editBeurtenkaart('${String(kaart.id).replace(
+                                                /'/g,
+                                                "%27"
+                                            )}')"
+                                            title="Kaart aanpassen">
+                                        ✏️
+                                    </button>
+
+                                    <button
+                                            class="btn btn-red"
+                                            onclick="deleteBeurtenkaart('${String(kaart.id).replace(
+                                                /'/g,
+                                                "%27"
+                                            )}')"
+                                            title="Kaart verwijderen">
+                                        🗑️
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+
+    }
+
+    function openBeurtenkaartEditor() {
+
+        document.getElementById(
+            "bkEmail"
+        ).value = "";
+
+        document.getElementById(
+            "bkType"
+        ).value = "10";
+
+        document.getElementById(
+            "bkStarts"
+        ).value = "10";
+
+        document.getElementById(
+            "beurtenkaartModal"
+        ).style.display =
+            "flex";
+
+    }
+
+    function editBeurtenkaart(id) {
+
+        const kaart =
+            beurtenkaarten.find(
+                item =>
+                    String(item.id) ===
+                    String(id)
+            );
+
+        if (!kaart) {
+
+            showToast(
+                "Kaart niet gevonden.",
+                true
+            );
+
+            return;
+
+        }
+
+        document.getElementById(
+            "bkEmail"
+        ).value =
+            kaart.email || "";
+
+        document.getElementById(
+            "bkType"
+        ).value =
+            String(kaart.type || "10");
+
+        document.getElementById(
+            "bkStarts"
+        ).value =
+            String(kaart.aantal_starts);
+
+        document.getElementById(
+            "beurtenkaartModal"
+        ).style.display =
+            "flex";
+
+    }
+
+    function closeBeurtenkaartModal() {
+
+        document.getElementById(
+            "beurtenkaartModal"
+        ).style.display =
+            "none";
+
+    }
+
+    async function saveBeurtenkaart() {
+
+        const email =
+            document.getElementById(
+                "bkEmail"
+            ).value.trim();
+
+        const type =
+            Number(
+                document.getElementById(
+                    "bkType"
+                ).value
+            );
+
+        const stamps =
+            Number(
+                document.getElementById(
+                    "bkStarts"
+                ).value
+            );
+
+        if (
+            !email ||
+            !email.includes("@") ||
+            !Number.isInteger(type) ||
+            !Number.isInteger(stamps) ||
+            stamps < 0
+        ) {
+
+            showToast(
+                "Vul een geldig e-mailadres, type en aantal beurten in.",
+                true
+            );
+
+            return;
+
+        }
+
+        const {
+            error
+        } = await sb.rpc(
+            "admin_set_beurtenkaart",
+            {
+                p_email: email,
+                p_type: type,
+                p_aantal_starts: stamps
+            }
+        );
+
+        if (error) {
+
+            console.error(error);
+
+            showToast(
+                "Beurtenkaart opslaan mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+
+        }
+
+        showToast(
+            "🎟️ Beurtenkaart opgeslagen."
+        );
+
+        closeBeurtenkaartModal();
+
+        await loadData();
+
+    }
+
+    async function deleteBeurtenkaart(id) {
+
+        if (
+            !confirm(
+                "Deze beurtenkaart verwijderen?",
+            )
+        ) {
+
+            return;
+
+        }
+
+        const {
+            error
+        } = await sb
+            .from("beurtenkaarten")
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+
+            console.error(error);
+
+            showToast(
+                "Beurtenkaart verwijderen mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+
+        }
+
+        showToast(
+            "🗑️ Beurtenkaart verwijderd."
+        );
+
+        await loadData();
+
+    }
+
+    async function payWithBeurtenkaart(id) {
+
+        const item =
+            allData.find(
+                appointment =>
+                    String(appointment.id) ===
+                    String(id)
+            );
+
+        if (!item) {
+
+            showToast(
+                "Inschrijving niet gevonden.",
+                true
+            );
+
+            return;
+
+        }
+
+        const kaart =
+            getCardForEmail(item.email);
+
+        if (!kaart) {
+
+            showToast(
+                "Geen beurtenkaart gevonden voor " +
+                (item.email || "dit e-mailadres"),
+                true
+            );
+
+            return;
+
+        }
+
+        const count =
+            getAppointmentChildrenCount(item);
+
+        const stamps =
+            Number(
+                kaart.aantal_starts
+            );
+
+        if (stamps < count) {
+
+            showToast(
+                `Onvoldoende beurten op de kaart (resterend ${stamps}, nodig ${count}).`,
+                true
+            );
+
+            return;
+
+        }
+
+        if (
+            !confirm(
+                `Betaal deze inschrijving met de beurtenkaart? ` +
+                `${count} beurt(en) worden afgetrokken ` +
+                `(resterend: ${stamps - count}).`
+            )
+        ) {
+
+            return;
+
+        }
+
+        const {
+            error
+        } = await sb
+            .from("appointments")
+            .update({
+                payment_method: "pass"
+            })
+            .eq("id", id);
+
+        if (error) {
+
+            console.error(error);
+
+            showToast(
+                "Betalen met beurtenkaart mislukt: " +
+                error.message,
+                true
+            );
+
+            return;
+
+        }
+
+        showToast(
+            "🎟️ Betaald met beurtenkaart."
+        );
+
+        await loadData();
+
+    }
+
+    /* =========================================================
        SESSIEBEZETTING
     ========================================================= */
 
@@ -5978,6 +6572,18 @@
             "other";
 
         if (
+            String(
+                item.payment_method || ""
+            ).toLowerCase() === "pass"
+        ) {
+
+            statusText =
+                "🎟️ Beurtenkaart";
+
+            pillClass =
+                "pass";
+
+        } else if (
             status ===
             "paid" ||
             status ===
@@ -6077,6 +6683,11 @@
                             item.name ||
                             "Onbekend"
                         )}
+                        ${
+                            isBeurtenkaartBooking(item)
+                                ? `<span class="pass-badge">🎟️ Beurtenkaart</span>`
+                                : ""
+                        }
                     </div>
 
                     <div class="booking-meta">
@@ -6136,6 +6747,13 @@
                                     onclick="event.stopPropagation();copyReminder('${safeId}')"
                                     title="Betaalherinnering kopiëren">
                                 📋
+                            </button>
+
+                            <button
+                                    class="btn btn-purple"
+                                    onclick="event.stopPropagation();payWithBeurtenkaart('${safeId}')"
+                                    title="Betaal met beurtenkaart">
+                                🎟️
                             </button>
 
                             <button
@@ -7726,17 +8344,21 @@ ${item.published
                             );
 
                     const statusText =
-                        isPaidBooking(item)
-                            ? "✅ Betaald"
-                            : "⏳ Open";
+                        isBeurtenkaartBooking(item)
+                            ? "🎟️ Beurtenkaart"
+                            : isPaidBooking(item)
+                                ? "✅ Betaald"
+                                : "⏳ Open";
 
                     const method =
-                        (
-                            item.payment_method ||
-                            "onsite"
-                        ) === "onsite"
-                            ? "Ter plaatse"
-                            : "Online";
+                        isBeurtenkaartBooking(item)
+                            ? "Beurtenkaart"
+                            : (
+                                item.payment_method ||
+                                "onsite"
+                            ) === "onsite"
+                                ? "Ter plaatse"
+                                : "Online";
 
                     return `
 
@@ -8913,6 +9535,21 @@ ${item.published
         }
     );
 
+    document.getElementById(
+        "beurtenkaartModal"
+    ).addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                this
+            ) {
+                closeBeurtenkaartModal();
+            }
+        }
+    );
+
     document.addEventListener(
         "keydown",
         function(event) {
@@ -8922,6 +9559,20 @@ ${item.published
                 "Escape"
             ) {
                 closeEditModal();
+
+                const bkModal =
+                    document.getElementById(
+                        "beurtenkaartModal"
+                    );
+
+                if (
+                    bkModal &&
+                    bkModal.style.display ===
+                    "flex"
+                ) {
+                    closeBeurtenkaartModal();
+                }
+
                 return;
             }
 

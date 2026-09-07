@@ -51,6 +51,29 @@ BEGIN
     END IF;
 
     -- ----------------------------------------------------------------------
+    -- Beurtenkaart-betalingen (payment_method = 'pass') mogen enkel door een
+    -- beheerder worden ingevoerd. Het bedrag en de status worden door
+    -- trg_apply_beurtenkaart_payment beheerd (bedrag = 0, status = paid).
+    -- ----------------------------------------------------------------------
+    IF COALESCE(NEW.payment_method, 'onsite') = 'pass'
+       AND NOT EXISTS (
+           SELECT 1 FROM public.admin_users
+           WHERE email = LOWER(COALESCE(
+                    NULLIF(current_setting('request.jwt.claims', true), '')
+                         ::json ->> 'email',
+                    ''
+                ))
+             AND COALESCE(
+                     current_setting('request.jwt.claims', true)::json
+                         ->> 'role',
+                     ''
+                 ) = 'authenticated'
+       ) THEN
+        RAISE EXCEPTION 'Beurtenkaart-betalingen zijn enkel voorbehouden aan beheerders'
+            USING ERRCODE = '42501';
+    END IF;
+
+    -- ----------------------------------------------------------------------
     -- Alleen bij een NIEUWE inschrijving
     -- ----------------------------------------------------------------------
     IF TG_OP = 'INSERT' THEN
@@ -71,15 +94,19 @@ BEGIN
 
         -- 2.5  Bedrag server-side herberekenen (clientwaarde wordt genegeerd)
         --      Prijzen: 1e kind €18, elk extra kind €15.
-        NEW.amount := 18 + GREATEST(0, NEW.children_count - 1) * 15;
+        --      Beurtenkaart-betalingen overslaan: die worden op 0 gezet
+        --      door trg_apply_beurtenkaart_payment.
+        IF COALESCE(NEW.payment_method, 'onsite') <> 'pass' THEN
+            NEW.amount := 18 + GREATEST(0, NEW.children_count - 1) * 15;
 
-        -- 2.6  Transactiekost van €0,40 bij online betaling
-        IF COALESCE(NEW.payment_method, 'onsite') = 'online' THEN
-            NEW.amount := NEW.amount + 0.40;
+            -- 2.6  Transactiekost van €0,40 bij online betaling
+            IF COALESCE(NEW.payment_method, 'onsite') = 'online' THEN
+                NEW.amount := NEW.amount + 0.40;
+            END IF;
+
+            -- 2.7  Nieuwe inschrijvingen beginnen altijd als 'pending'
+            NEW.payment_status := 'pending';
         END IF;
-
-        -- 2.7  Nieuwe inschrijvingen beginnen altijd als 'pending'
-        NEW.payment_status := 'pending';
 
         -- 2.8  Capaciteit: maximaal 12 kinderen per sessie.
         --      Uitzondering: een ingelogde beheerder (admin_users) mag
@@ -118,9 +145,11 @@ BEGIN
 
     -- ----------------------------------------------------------------------
     -- Bij UPDATE: bedrag herberekenen, TENZIJ de beheerder bewust een
-    -- afwijkend bedrag heeft ingevoerd (bv. korting).
+    -- afwijkend bedrag heeft ingevoerd (bv. korting). Beurtenkaart-betalingen
+    -- blijven 0.
     -- ----------------------------------------------------------------------
-    IF TG_OP = 'UPDATE' AND NEW.amount IS NULL THEN
+    IF TG_OP = 'UPDATE' AND NEW.amount IS NULL
+       AND COALESCE(NEW.payment_method, 'onsite') <> 'pass' THEN
         NEW.amount := 18 + GREATEST(0, NEW.children_count - 1) * 15;
         IF COALESCE(NEW.payment_method, 'onsite') = 'online' THEN
             NEW.amount := NEW.amount + 0.40;
