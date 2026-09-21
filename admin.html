@@ -539,6 +539,146 @@
             color: #b45309;
         }
 
+        /* omzet per betaalwijze */
+        .pay-split-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .pay-split-box {
+            padding: 15px;
+            border: 1px solid #ececec;
+            border-radius: 17px;
+            background: #fafafa;
+        }
+
+        .pay-split-box.onsite { background: var(--green-light); }
+        .pay-split-box.online { background: var(--blue-light); }
+        .pay-split-box.pass   { background: #f3effc; }
+
+        .pay-split-label { font-size: .78rem; color: var(--muted); }
+        .pay-split-value { margin-top: 5px; font-size: 1.15rem; font-weight: 900; }
+        .pay-split-sub   { margin-top: 4px; font-size: .74rem; color: var(--muted); min-height: 1rem; }
+        .pay-split-bar   { margin-top: 10px; height: 7px; border-radius: 999px; background: #eef0f4; overflow: hidden; }
+        .pay-split-fill  { height: 100%; border-radius: 999px; }
+        .pay-split-fill.onsite { background: #22a06b; }
+        .pay-split-fill.online { background: #4f7cff; }
+        .pay-split-fill.pass   { background: #8b5cf6; }
+
+        /* bezetting per thema */
+        .theme-stats-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .theme-stats-item {
+            border: 1px solid #ececec;
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #fafafa;
+        }
+
+        .theme-stats-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .theme-stats-name { font-weight: 800; font-size: .9rem; }
+        .theme-stats-count { font-size: .78rem; color: #6b7280; white-space: nowrap; }
+        .theme-stats-bar { height: 8px; border-radius: 999px; background: #eef0f4; overflow: hidden; }
+        .theme-stats-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), #ffb3c0); }
+
+        /* actiefste gezinnen */
+        .family-stats-list { display: grid; gap: 8px; }
+        .family-stats-head { font-size: .78rem; color: var(--muted); margin-bottom: 4px; }
+        .family-stats-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid #ececec;
+            border-radius: 13px;
+            background: #fafafa;
+            font-size: .8rem;
+        }
+        .family-stats-name {
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .family-stats-count { color: var(--muted); white-space: nowrap; }
+
+        /* batch-acties */
+        .batch-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border: 1px dashed #d9dde4;
+            border-radius: 13px;
+            background: #fbfbfd;
+        }
+
+        .batch-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .batch-selectall {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: .82rem;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .batch-selectall input,
+        .booking-checkbox {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .booking-checkbox {
+            flex-shrink: 0;
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 2;
+        }
+
+        .booking-item-selected {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 2px rgba(255,111,134,.18);
+        }
+
+        /* beurtenkaart-geschiedenis */
+        .history-list { display: grid; gap: 8px; margin-top: 12px; }
+        .history-meta { font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+        .history-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 11px 13px;
+            border: 1px solid #ececec;
+            border-radius: 13px;
+            background: #fafafa;
+        }
+        .history-row b { font-weight: 800; }
+        .history-sub { font-size: .74rem; color: var(--muted); }
+
         /* opvolging */
         .followup-overdue {
             border-color: rgba(239,68,68,.45) !important;
@@ -742,6 +882,7 @@
         }
 
         .booking-item {
+            position: relative;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -760,6 +901,7 @@
 
         .booking-main {
             min-width: 0;
+            padding-left: 26px;
         }
 
         .booking-name {
@@ -1189,6 +1331,15 @@
 
         :root.dark .booking-item:hover {
             background: #1d2431;
+        }
+
+        :root.dark .pay-split-box,
+        :root.dark .theme-stats-item,
+        :root.dark .family-stats-item,
+        :root.dark .history-row,
+        :root.dark .batch-bar {
+            background: #171d29;
+            border-color: var(--border);
         }
 
         :root.dark .modal-box {
@@ -1734,6 +1885,39 @@
 
         </div>
 
+        <!-- OMZET PER BETAALWIJZE + ACTIEFSTE GEZINNEN -->
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card">
+
+                <h3>💳 Omzet per betaalwijze</h3>
+
+                <div id="paySplitGrid"
+                     class="pay-split-grid"></div>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <h3>👨‍👩‍👧 Actiefste gezinnen</h3>
+
+                <div id="familyStatsList"
+                     class="family-stats-list"></div>
+
+            </div>
+
+        </div>
+
+        <!-- BEZETTINGSGRAAD PER THEMA -->
+        <div class="dashboard-card" style="margin-bottom:20px;">
+
+            <h3>🎨 Bezettingsgraad per thema</h3>
+
+            <div id="themeStatsList"
+                 class="theme-stats-list"></div>
+
+        </div>
+
         <!-- ALLE INSCHRIJVINGEN / ZOEKEN -->
         <div class="dashboard-card">
 
@@ -1842,6 +2026,58 @@
             </div>
 
             <div
+                    id="batchBar"
+                    class="batch-bar"
+                    style="display:none;">
+
+                <label class="batch-selectall">
+                    <input
+                            type="checkbox"
+                            id="selectAllBookings"
+                            onchange="toggleSelectAllBookings()">
+                    Selecteer alles
+                </label>
+
+                <div class="batch-actions">
+
+                    <span
+                            id="batchSelectedCount"
+                            style="align-self:center;font-size:.8rem;color:var(--muted);">
+                        0 geselecteerd
+                    </span>
+
+                    <button
+                            class="btn btn-red"
+                            onclick="batchCancel()"
+                            title="Geselecteerde inschrijvingen annuleren">
+                        ❌ Annuleren
+                    </button>
+
+                    <button
+                            class="btn btn-blue"
+                            onclick="openBatchMove()"
+                            title="Verplaatsen naar een andere datum">
+                        📅 Verplaatsen
+                    </button>
+
+                    <button
+                            class="btn btn-red"
+                            onclick="batchDelete()"
+                            title="Geselecteerde inschrijvingen definitief verwijderen">
+                        🗑️ Verwijderen
+                    </button>
+
+                    <button
+                            class="btn btn-gray"
+                            onclick="clearBatchSelection()">
+                        Annuleren selectie
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div
                     id="bookingList"
                     class="booking-list">
             </div>
@@ -1914,6 +2150,82 @@
                         class="btn btn-green"
                         onclick="saveBeurtenkaart()">
                     💾 Opslaan
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- BEURTENKAART GESCHIEDENIS MODAL -->
+<div class="modal" id="beurtenkaartHistorModal">
+
+    <div class="modal-box" style="max-width:540px;">
+
+        <h3 style="margin:0 0 16px;">
+            📜 Beurtenkaart-geschiedenis
+        </h3>
+
+        <div id="bkHistorSummary"
+             style="font-size:.9rem;margin-bottom:6px;"></div>
+
+        <div id="bkHistorList"
+             class="history-list"></div>
+
+        <div class="modal-actions">
+            <div></div>
+
+            <div class="modal-actions-right">
+                <button
+                        class="btn btn-gray"
+                        onclick="closeBeurtenkaartHistorModal()">
+                    Sluiten
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- BATCH VERPLAATSEN MODAL -->
+<div class="modal" id="batchMoveModal">
+
+    <div class="modal-box" style="max-width:420px;">
+
+        <h3 style="margin:0 0 16px;">
+            📅 Verplaatsen naar…
+        </h3>
+
+        <div class="form-field" style="margin-bottom:10px;">
+            <label for="batchMoveDate">
+                Nieuwe datum
+            </label>
+
+            <input
+                    id="batchMoveDate"
+                    type="date"
+                    min="2024-01-01">
+        </div>
+
+        <div id="batchMoveInfo"
+             style="font-size:.84rem;color:var(--muted);margin-bottom:6px;"></div>
+
+        <div class="modal-actions">
+            <div></div>
+
+            <div class="modal-actions-right">
+                <button
+                        class="btn btn-gray"
+                        onclick="closeBatchMove()">
+                    Annuleren
+                </button>
+
+                <button
+                        class="btn btn-blue"
+                        onclick="batchMove()">
+                    📅 Verplaatsen
                 </button>
             </div>
         </div>
@@ -2373,6 +2685,8 @@
     let bookingToggle = null;
     let galleryItems = [];
     let showAllBookings = false;
+
+    let selectedBookingIds = new Set();
 
     let editMode = "appointment";
     let editId = null;
@@ -5040,6 +5354,12 @@
 
         renderOccupancy();
 
+        renderPaySplit();
+
+        renderThemeStats();
+
+        renderTopFamilies();
+
         renderPaymentStatusChart();
     }
 
@@ -5765,6 +6085,16 @@
                                     justify-content:flex-end;">
 
                                     <button
+                                            class="btn btn-blue"
+                                            onclick="openBeurtenkaartHistor('${String(kaart.id).replace(
+                                                /'/g,
+                                                "%27"
+                                            )}')"
+                                            title="Geschiedenis bekijken">
+                                        📜
+                                    </button>
+
+                                    <button
                                             class="btn btn-gray"
                                             onclick="editBeurtenkaart('${String(kaart.id).replace(
                                                 /'/g,
@@ -5863,6 +6193,160 @@
 
         document.getElementById(
             "beurtenkaartModal"
+        ).style.display =
+            "none";
+
+    }
+
+    /* =========================================================
+       BEURTENKAART GESCHIEDENIS
+    ========================================================= */
+
+    function getCardById(id) {
+
+        return beurtenkaarten.find(
+            kaart =>
+                String(kaart.id) ===
+                String(id)
+        ) || null;
+
+    }
+
+    function openBeurtenkaartHistor(id) {
+
+        const kaart =
+            getCardById(id);
+
+        if (!kaart) {
+
+            showToast(
+                "Kaart niet gevonden.",
+                true
+            );
+
+            return;
+        }
+
+        const email =
+            String(kaart.email || "")
+                .trim()
+                .toLowerCase();
+
+        const bookings =
+            allData
+                .filter(item =>
+                    String(
+                        item.payment_method || ""
+                    )
+                        .toLowerCase() ===
+                        "pass" &&
+                    String(
+                        item.email || ""
+                    )
+                        .trim()
+                        .toLowerCase() ===
+                        email
+                )
+                .sort((a, b) =>
+                    (
+                        getAppointmentDate(b) ||
+                        0
+                    ) -
+                    (
+                        getAppointmentDate(a) ||
+                        0
+                    )
+                );
+
+        const type =
+            kaart.type || "-";
+
+        document.getElementById(
+            "bkHistorSummary"
+        ).innerHTML =
+            `🎟️ ${escapeHtml(
+                type + "-beurtenkaart"
+            )}
+            <b>${escapeHtml(kaart.email)}</b>
+            · nog <b>${kaart.aantal_starts}</b>
+            ${kaart.aantal_starts === 1
+                ? "beurt"
+                : "beurten"}`;
+
+        const list =
+            document.getElementById(
+                "bkHistorList"
+            );
+
+        if (!bookings.length) {
+
+            list.innerHTML =
+                `<div class="empty-state">
+                    Nog geen beurten gebruikt met deze kaart.
+                </div>`;
+
+        } else {
+
+            const usedBeurten =
+                bookings.reduce(
+                    (total, item) =>
+                        total +
+                        getAppointmentChildrenCount(item),
+                    0
+                );
+
+            list.innerHTML =
+                `
+                <div class="history-meta">
+                    ${bookings.length} ${
+                        bookings.length === 1
+                            ? "betaling"
+                            : "betalingen"
+                    }
+                    · ${usedBeurten} ${
+                        usedBeurten === 1
+                            ? "beurt verbruikt"
+                            : "beurten verbruikt"
+                    }
+                </div>
+                ` +
+                bookings.map(item =>
+
+                    `
+                    <div class="history-row">
+
+                        <div>
+                            <b>📅 ${escapeHtml(
+                                formatDate(item.appointment_date)
+                            )}</b>
+                        </div>
+
+                        <div class="history-sub">
+                            👶 ${getAppointmentChildrenCount(item)} ${
+                                getAppointmentChildrenCount(item) === 1
+                                    ? "kind"
+                                    : "kinderen"
+                            }
+                            · geboekt ${escapeHtml(
+                                formatTimestamp(item.created_at)
+                            )}
+                        </div>
+
+                    </div>`
+
+                ).join("");
+        }
+
+        document.getElementById(
+            "beurtenkaartHistorModal"
+        ).style.display =
+            "flex";
+    }
+
+    function closeBeurtenkaartHistorModal() {
+
+        document.getElementById(
+            "beurtenkaartHistorModal"
         ).style.display =
             "none";
 
@@ -6254,6 +6738,442 @@
                         ${entry.waitlist
                             ? `<div class="occupancy-waitlist">⏳ +${entry.waitlist} op de wachtlijst</div>`
                             : ""}
+
+                    </div>`;
+
+            }).join("");
+    }
+
+    /* =========================================================
+       OMZET PER BETAALWIJZE
+    ========================================================= */
+
+    function renderPaySplit() {
+
+        const container =
+            document.getElementById(
+                "paySplitGrid"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        const paid =
+            allData.filter(item =>
+                isPaidBooking(item)
+            );
+
+        const byMethod = {};
+
+        paid.forEach(item => {
+
+            const method =
+                String(
+                    item.payment_method ||
+                    "onsite"
+                )
+                    .trim()
+                    .toLowerCase();
+
+            if (!byMethod[method]) {
+
+                byMethod[method] = {
+                    count: 0,
+                    total: 0
+                };
+            }
+
+            byMethod[method].count++;
+
+            byMethod[method].total +=
+                getStoredAmount(item);
+        });
+
+        const labels = {
+            onsite: "💵 Ter plaatse",
+            online: "💳 Online (Mollie)",
+            pass: "🎟️ Beurtenkaart"
+        };
+
+        const order = [
+            "onsite",
+            "online",
+            "pass"
+        ];
+
+        const grandTotal =
+            paid.reduce(
+                (total, item) =>
+                    total +
+                    getStoredAmount(item),
+                0
+            );
+
+        container.innerHTML =
+            order.map(method => {
+
+                const box =
+                    byMethod[method] ||
+                    { count: 0, total: 0 };
+
+                const pct =
+                    grandTotal > 0
+                        ? Math.round(
+                            (
+                                box.total /
+                                grandTotal
+                            ) * 100
+                        )
+                        : 0;
+
+                return `
+                    <div class="pay-split-box ${method}">
+
+                        <div class="pay-split-label">
+                            ${labels[method] || method}
+                        </div>
+
+                        <div class="pay-split-value">
+                            ${formatEuro(box.total)}
+                        </div>
+
+                        <div class="pay-split-sub">
+                            ${box.count} ${
+                                box.count === 1
+                                    ? "inschrijving"
+                                    : "inschrijvingen"
+                            } · ${pct}%
+                        </div>
+
+                        <div class="pay-split-bar">
+
+                            <div class="pay-split-fill ${method}"
+                                 style="width:${pct}%;"></div>
+
+                        </div>
+
+                    </div>`;
+
+            }).join("");
+    }
+
+    /* =========================================================
+       BEZETTINGSGRAAD PER THEMA
+    ========================================================= */
+
+    function renderThemeStats() {
+
+        const container =
+            document.getElementById(
+                "themeStatsList"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        const today =
+            new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+        const themeByDate = {};
+
+        themes.forEach(theme => {
+
+            if (theme.date) {
+
+                themeByDate[theme.date] =
+                    theme.theme ||
+                    "Zonder thema";
+            }
+        });
+
+        const perTheme = {};
+
+        allData
+            .filter(item =>
+                isActiveBooking(item)
+            )
+            .forEach(item => {
+
+                if (!item.appointment_date) {
+                    return;
+                }
+
+                const theme =
+                    themeByDate[item.appointment_date] ||
+                    "Zonder thema";
+
+                if (!perTheme[theme]) {
+
+                    perTheme[theme] = {
+                        sessions: new Set(),
+                        pastSessions: new Set(),
+                        children: 0,
+                        pastChildren: 0
+                    };
+                }
+
+                const rec =
+                    perTheme[theme];
+
+                rec.sessions.add(
+                    item.appointment_date
+                );
+
+                rec.children +=
+                    getAppointmentChildrenCount(item);
+
+                const date =
+                    getAppointmentDate(item);
+
+                if (
+                    date &&
+                    date < today
+                ) {
+
+                    rec.pastSessions.add(
+                        item.appointment_date
+                    );
+
+                    rec.pastChildren +=
+                        getAppointmentChildrenCount(item);
+                }
+            });
+
+        const entries =
+            Object.entries(perTheme)
+                .map(([theme, rec]) => {
+
+                    const pastCount =
+                        rec.pastSessions.size;
+
+                    const avg =
+                        pastCount > 0
+                            ? Math.round(
+                                (
+                                    rec.pastChildren /
+                                    pastCount
+                                ) * 10
+                            ) / 10
+                            : 0;
+
+                    return {
+                        theme,
+                        sessions: rec.sessions.size,
+                        pastSessions: pastCount,
+                        children: rec.children,
+                        avg
+                    };
+                })
+                .sort((a, b) =>
+                    b.children - a.children
+                );
+
+        if (!entries.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    Nog geen inschrijvingen met thema.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML =
+            entries.map(entry => {
+
+                const fill = Math.min(
+                    100,
+                    Math.round(
+                        (
+                            entry.avg /
+                            MAX_CHILDREN
+                        ) * 100
+                    )
+                );
+
+                const avgText =
+                    entry.avg > 0
+                        ? `gem. ${entry.avg
+                            .toLocaleString("nl-BE")}/12`
+                        : "nog niet gestart";
+
+                return `
+                    <div class="theme-stats-item">
+
+                        <div class="theme-stats-head">
+
+                            <span class="theme-stats-name">
+                                🎨 ${escapeHtml(entry.theme)}
+                            </span>
+
+                            <span class="theme-stats-count">
+                                ${entry.children} kindjes
+                                · ${entry.sessions} ${
+                                    entry.sessions === 1
+                                        ? "sessie"
+                                        : "sessies"
+                                }
+                                · ${avgText}
+                            </span>
+
+                        </div>
+
+                        <div class="theme-stats-bar">
+
+                            <div class="theme-stats-fill"
+                                 style="width:${fill}%;"></div>
+
+                        </div>
+
+                    </div>`;
+
+            }).join("");
+    }
+
+    /* =========================================================
+       ACTIEFSTE GEZINNEN
+    ========================================================= */
+
+    function renderTopFamilies() {
+
+        const container =
+            document.getElementById(
+                "familyStatsList"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        const byEmail = {};
+
+        allData.forEach(item => {
+
+            const email =
+                String(item.email || "")
+                    .trim()
+                    .toLowerCase();
+
+            if (!email) {
+                return;
+            }
+
+            if (!byEmail[email]) {
+
+                byEmail[email] = {
+                    email,
+                    name: "",
+                    bookings: 0,
+                    sessions: new Set(),
+                    children: 0
+                };
+            }
+
+            const rec =
+                byEmail[email];
+
+            rec.bookings++;
+
+            rec.children +=
+                getAppointmentChildrenCount(item);
+
+            if (item.appointment_date) {
+
+                rec.sessions.add(
+                    item.appointment_date
+                );
+            }
+
+            if (item.name) {
+
+                rec.name =
+                    item.name;
+            }
+        });
+
+        const totalFamilies =
+            Object.keys(byEmail).length;
+
+        const returners =
+            Object.values(byEmail)
+                .filter(rec =>
+                    rec.bookings >= 2
+                ).length;
+
+        const returnPct =
+            totalFamilies > 0
+                ? Math.round(
+                    (
+                        returners /
+                        totalFamilies
+                    ) * 100
+                )
+                : 0;
+
+        const top =
+            Object.values(byEmail)
+                .sort((a, b) =>
+                    (
+                        b.bookings - a.bookings
+                    ) ||
+                    (
+                        b.children - a.children
+                    )
+                )
+                .slice(0, 10);
+
+        if (!top.length) {
+
+            container.innerHTML =
+                `<div class="empty-state">
+                    Nog geen gezinnen.
+                </div>`;
+
+            return;
+        }
+
+        container.innerHTML =
+            `
+            <div class="family-stats-head">
+                ${totalFamilies} gezinnen
+                · ${returners} ${
+                    returners === 1
+                        ? "gezin komt terug"
+                        : "gezinnen komen terug"
+                }
+                (${returnPct}%)
+            </div>
+            ` +
+            top.map(rec => {
+
+                const displayName =
+                    rec.name ||
+                    rec.email;
+
+                return `
+                    <div class="family-stats-item">
+
+                        <span class="family-stats-name"
+                              title="${escapeHtml(rec.email)}">
+                            👤 ${escapeHtml(displayName)}
+                        </span>
+
+                        <span class="family-stats-count">
+                            ${rec.bookings} ${
+                                rec.bookings === 1
+                                    ? "inschrijving"
+                                    : "inschrijvingen"
+                            }
+                            · ${rec.sessions.size} ${
+                                rec.sessions.size === 1
+                                    ? "sessie"
+                                    : "sessies"
+                            }
+                        </span>
 
                     </div>`;
 
@@ -6703,6 +7623,8 @@
                     }
                 </div>`;
 
+            updateBatchToolbar();
+
             return;
         }
 
@@ -6714,6 +7636,8 @@
                         true
                     )
             ).join("");
+
+        updateBatchToolbar();
     }
 
     function toggleBookingView() {
@@ -6750,6 +7674,536 @@
             behavior:
                 "smooth"
         });
+    }
+
+    /* =========================================================
+       BATCH-ACTIES
+    ========================================================= */
+
+    function onBookingCheckboxChange(checkbox) {
+
+        const id =
+            checkbox.dataset.batchId;
+
+        if (checkbox.checked) {
+
+            selectedBookingIds.add(id);
+
+        } else {
+
+            selectedBookingIds.delete(id);
+        }
+
+        checkbox.closest(".booking-item")?.classList.toggle(
+            "booking-item-selected",
+            checkbox.checked
+        );
+
+        updateBatchToolbar();
+    }
+
+    function updateBatchToolbar() {
+
+        const bar =
+            document.getElementById(
+                "batchBar"
+            );
+
+        if (!bar) {
+            return;
+        }
+
+        const count =
+            selectedBookingIds.size;
+
+        bar.style.display =
+            count > 0
+                ? "flex"
+                : "none";
+
+        const counter =
+            document.getElementById(
+                "batchSelectedCount"
+            );
+
+        if (counter) {
+
+            counter.textContent =
+                count +
+                (
+                    count === 1
+                        ? " geselecteerd"
+                        : " geselecteerd"
+                );
+        }
+
+        const selectAll =
+            document.getElementById(
+                "selectAllBookings"
+            );
+
+        const checkboxes = [
+            ...document.querySelectorAll(
+                ".booking-checkbox"
+            )
+        ];
+
+        if (!checkboxes.length) {
+
+            if (selectAll) {
+
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+            }
+
+            return;
+        }
+
+        if (selectAll) {
+
+            const checkedCount =
+                checkboxes.filter(
+                    cb => cb.checked
+                ).length;
+
+            selectAll.checked =
+                checkedCount ===
+                checkboxes.length;
+
+            selectAll.indeterminate =
+                checkedCount > 0 &&
+                checkedCount <
+                    checkboxes.length;
+        }
+    }
+
+    function toggleSelectAllBookings() {
+
+        const selectAll =
+            document.getElementById(
+                "selectAllBookings"
+            );
+
+        const target =
+            Boolean(
+                selectAll?.checked
+            );
+
+        document.querySelectorAll(
+            ".booking-checkbox"
+        ).forEach(cb => {
+
+            cb.checked = target;
+
+            if (target) {
+
+                selectedBookingIds.add(
+                    cb.dataset.batchId
+                );
+
+            } else {
+
+                selectedBookingIds.delete(
+                    cb.dataset.batchId
+                );
+            }
+
+            cb.closest(".booking-item")?.classList.toggle(
+                "booking-item-selected",
+                target
+            );
+        });
+
+        updateBatchToolbar();
+    }
+
+    function clearBatchSelection() {
+
+        selectedBookingIds.clear();
+
+        renderBookingList();
+    }
+
+    function getSelectedAppointments() {
+
+        return getSelectedIds()
+            .map(id =>
+                allData.find(item =>
+                    String(item.id) ===
+                    String(id)
+                )
+            )
+            .filter(Boolean);
+    }
+
+    function getSelectedIds() {
+
+        return [...selectedBookingIds];
+    }
+
+    async function batchCancel() {
+
+        const rows =
+            getSelectedAppointments()
+                .filter(item =>
+                    isActiveBooking(item)
+                );
+
+        if (!rows.length) {
+
+            showToast(
+                "Geen actieve inschrijvingen geselecteerd.",
+                true
+            );
+
+            return;
+        }
+
+        if (!confirm(
+                `${rows.length} ${
+                    rows.length === 1
+                        ? "inschrijving annuleren"
+                        : "inschrijvingen annuleren"
+                }?`
+            )
+        ) {
+            return;
+        }
+
+        const results =
+            await Promise.all(
+                rows.map(item =>
+                    sb
+                        .from("appointments")
+                        .update({
+                            payment_status:
+                                "cancelled"
+                        })
+                        .eq("id", item.id)
+                )
+            );
+
+        const failed =
+            results.find(res =>
+                res.error
+            );
+
+        if (failed) {
+
+            console.error(
+                failed.error
+            );
+
+            showToast(
+                "Annuleren mislukt: " +
+                failed.error.message,
+                true
+            );
+
+            await loadData();
+
+            return;
+        }
+
+        showToast(
+            `❌ ${rows.length} ${
+                rows.length === 1
+                    ? "inschrijving"
+                    : "inschrijvingen"
+            } geannuleerd.`
+        );
+
+        clearBatchSelection();
+
+        await loadData();
+    }
+
+    async function batchDelete() {
+
+        const rows =
+            getSelectedAppointments();
+
+        if (!rows.length) {
+
+            showToast(
+                "Geen inschrijvingen geselecteerd.",
+                true
+            );
+
+            return;
+        }
+
+        if (!confirm(
+                `${rows.length} ${
+                    rows.length === 1
+                        ? "inschrijving definitief verwijderen"
+                        : "inschrijvingen definitief verwijderen"
+                }?`
+            )
+        ) {
+            return;
+        }
+
+        rows.forEach(item =>
+            pushUndo("appointment", item)
+        );
+
+        const results =
+            await Promise.all(
+                rows.map(item =>
+                    sb
+                        .from("appointments")
+                        .delete()
+                        .eq("id", item.id)
+                )
+            );
+
+        const failed =
+            results.find(res =>
+                res.error
+            );
+
+        if (failed) {
+
+            console.error(
+                failed.error
+            );
+
+            showToast(
+                "Verwijderen mislukt: " +
+                failed.error.message,
+                true
+            );
+
+            await loadData();
+
+            return;
+        }
+
+        showToast(
+            `🗑️ ${rows.length} ${
+                rows.length === 1
+                    ? "inschrijving"
+                    : "inschrijvingen"
+            } verwijderd.`
+        );
+
+        clearBatchSelection();
+
+        await loadData();
+    }
+
+    const activeBatchMoveIds =
+        new Set();
+
+    let batchMoveOverbookConfirmed =
+        false;
+
+    function openBatchMove() {
+
+        const rows =
+            getSelectedAppointments()
+                .filter(item =>
+                    isActiveBooking(item)
+                );
+
+        if (!rows.length) {
+
+            showToast(
+                "Selecteer eerst één of meer actieve inschrijvingen.",
+                true
+            );
+
+            return;
+        }
+
+        activeBatchMoveIds.clear();
+
+        rows.forEach(item =>
+            activeBatchMoveIds.add(
+                String(item.id)
+            )
+        );
+
+        const totalKids =
+            rows.reduce(
+                (total, item) =>
+                    total +
+                    getAppointmentChildrenCount(item),
+                0
+            );
+
+        batchMoveOverbookConfirmed =
+            false;
+
+        document.getElementById(
+            "batchMoveDate"
+        ).value = "";
+
+        document.getElementById(
+            "batchMoveInfo"
+        ).textContent =
+            `${rows.length} ${
+                rows.length === 1
+                    ? "inschrijving"
+                    : "inschrijvingen"
+            } (${totalKids} ${
+                totalKids === 1
+                    ? "kindje"
+                    : "kindjes"
+            }) worden verplaatst.`;
+
+        document.getElementById(
+            "batchMoveModal"
+        ).style.display =
+            "flex";
+    }
+
+    function closeBatchMove() {
+
+        document.getElementById(
+            "batchMoveModal"
+        ).style.display =
+            "none";
+    }
+
+    async function batchMove() {
+
+        const target =
+            document.getElementById(
+                "batchMoveDate"
+            ).value;
+
+        if (!target) {
+
+            showToast(
+                "Kies eerst een nieuwe datum.",
+                true
+            );
+
+            return;
+        }
+
+        const rows =
+            getSelectedAppointments()
+                .filter(item =>
+                    isActiveBooking(item) &&
+                    activeBatchMoveIds.has(
+                        String(item.id)
+                    )
+                );
+
+        if (!rows.length) {
+
+            showToast(
+                "Geen actieve inschrijvingen om te verplaatsen.",
+                true
+            );
+
+            closeBatchMove();
+
+            return;
+        }
+
+        const kids =
+            rows.reduce(
+                (total, item) =>
+                    total +
+                    getAppointmentChildrenCount(item),
+                0
+            );
+
+        const bookedOnTarget =
+            allData
+                .filter(item =>
+                    isActiveBooking(item) &&
+                    String(
+                        item.appointment_date
+                    ) === target &&
+                    !activeBatchMoveIds.has(
+                        String(item.id)
+                    )
+                )
+                .reduce(
+                    (total, item) =>
+                        total +
+                        getAppointmentChildrenCount(item),
+                    0
+                );
+
+        if (
+            bookedOnTarget +
+                kids >
+                MAX_CHILDREN &&
+            !batchMoveOverbookConfirmed
+        ) {
+
+            batchMoveOverbookConfirmed =
+                true;
+
+            if (!confirm(
+                    `Er zijn al ${bookedOnTarget} kindjes ingeschreven op ${formatDate(target)}. ` +
+                    `Samen met de ${kids} geselecteerde kindjes is dit ${bookedOnTarget + kids} (boven de limiet van ${MAX_CHILDREN}). Toch verplaatsen?`
+                )
+            ) {
+
+                batchMoveOverbookConfirmed =
+                    false;
+
+                return;
+            }
+        }
+
+        const results =
+            await Promise.all(
+                rows.map(item =>
+                    sb
+                        .from("appointments")
+                        .update({
+                            appointment_date:
+                                target
+                        })
+                        .eq("id", item.id)
+                )
+            );
+
+        const failed =
+            results.find(res =>
+                res.error
+            );
+
+        if (failed) {
+
+            console.error(
+                failed.error
+            );
+
+            showToast(
+                "Verplaatsen mislukt: " +
+                failed.error.message,
+                true
+            );
+
+            closeBatchMove();
+
+            await loadData();
+
+            return;
+        }
+
+        showToast(
+            `📅 ${rows.length} ${
+                rows.length === 1
+                    ? "inschrijving"
+                    : "inschrijvingen"
+            } verplaatst naar ${formatDate(target)}.`
+        );
+
+        closeBatchMove();
+
+        clearBatchSelection();
+
+        await loadData();
     }
 
     function createBookingHtml(
@@ -6872,9 +8326,14 @@
         const openPayment =
             isOpenPayment(item);
 
+        const selected =
+            selectedBookingIds.has(
+                String(item.id)
+            );
+
         return `
             <div
-                class="booking-item"
+                class="booking-item${selected ? " booking-item-selected" : ""}"
                 ${
                     clickable
                         ? `onclick="openBookingFromList('${safeId}')"`
@@ -6885,6 +8344,15 @@
                         ? "cursor:pointer;"
                         : ""
                 }">
+
+                <input
+                        type="checkbox"
+                        class="booking-checkbox"
+                        data-batch-id="${safeId}"
+                        ${selected ? "checked" : ""}
+                        aria-label="Selecteer inschrijving"
+                        title="Selecteren voor batch-actie"
+                        onclick="event.stopPropagation();onBookingCheckboxChange(this)">
 
                 <div class="booking-main">
 
@@ -9761,6 +11229,36 @@ ${item.published
         }
     );
 
+    document.getElementById(
+        "beurtenkaartHistorModal"
+    ).addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                this
+            ) {
+                closeBeurtenkaartHistorModal();
+            }
+        }
+    );
+
+    document.getElementById(
+        "batchMoveModal"
+    ).addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                this
+            ) {
+                closeBatchMove();
+            }
+        }
+    );
+
     document.addEventListener(
         "keydown",
         function(event) {
@@ -9782,6 +11280,32 @@ ${item.published
                     "flex"
                 ) {
                     closeBeurtenkaartModal();
+                }
+
+                const historModal =
+                    document.getElementById(
+                        "beurtenkaartHistorModal"
+                    );
+
+                if (
+                    historModal &&
+                    historModal.style.display ===
+                    "flex"
+                ) {
+                    closeBeurtenkaartHistorModal();
+                }
+
+                const batchModal =
+                    document.getElementById(
+                        "batchMoveModal"
+                    );
+
+                if (
+                    batchModal &&
+                    batchModal.style.display ===
+                    "flex"
+                ) {
+                    closeBatchMove();
                 }
 
                 return;
