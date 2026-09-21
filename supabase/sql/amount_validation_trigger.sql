@@ -31,8 +31,27 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-    v_booked integer := 0;
+    v_booked  integer := 0;
+    v_is_admin boolean := false;
 BEGIN
+
+    -- Beheerder? Een rij in admin_users + rol 'authenticated' in de JWT.
+    -- Beheerders mogen bewust afwijken: overboeken op een volzette sessie,
+    -- beurtenkaart-betalingen invoeren en achteraf inschrijven op een
+    -- reeds gepasseerde sessie (administratie achteraf).
+    v_is_admin := EXISTS (
+        SELECT 1 FROM public.admin_users
+        WHERE email = LOWER(COALESCE(
+                 NULLIF(current_setting('request.jwt.claims', true), '')
+                      ::json ->> 'email',
+                 ''
+             ))
+          AND COALESCE(
+                  current_setting('request.jwt.claims', true)::json
+                      ->> 'role',
+                  ''
+              ) = 'authenticated'
+    );
 
     -- 2.1  children_count geldig (1..4)
     IF NEW.children_count IS NULL
@@ -51,36 +70,31 @@ BEGIN
     END IF;
 
     -- ----------------------------------------------------------------------
-    -- Beurtenkaart-betalingen (payment_method = 'pass') mogen enkel door een
-    -- beheerder worden ingevoerd. Het bedrag en de status worden door
-    -- trg_apply_beurtenkaart_payment beheerd (bedrag = 0, status = paid).
+    -- Beurtenkaart-betalingen (payment_method = 'pass') mogen door IEDEREEN
+    -- worden aangeduid bij het publieke inschrijvingsformulier ("Ik heb een
+    -- beurtenkaart"). De trg_apply_beurtenkaart_payment-trigger controleert
+    -- dan server-side of de kaart bestaat en voldoende beurten heeft, trekt
+    -- 1 beurt per kind af en zet het bedrag op 0 met status 'paid'. Bestaat
+    -- er geen (toereikende) kaart voor het e-mailadres, dan mislukt de
+    -- inschrijving met een duidelijke foutmelding.
     -- ----------------------------------------------------------------------
-    IF COALESCE(NEW.payment_method, 'onsite') = 'pass'
-       AND NOT EXISTS (
-           SELECT 1 FROM public.admin_users
-           WHERE email = LOWER(COALESCE(
-                    NULLIF(current_setting('request.jwt.claims', true), '')
-                         ::json ->> 'email',
-                    ''
-                ))
-             AND COALESCE(
-                     current_setting('request.jwt.claims', true)::json
-                         ->> 'role',
-                     ''
-                 ) = 'authenticated'
-       ) THEN
-        RAISE EXCEPTION 'Beurtenkaart-betalingen zijn enkel voorbehouden aan beheerders'
-            USING ERRCODE = '42501';
-    END IF;
 
     -- ----------------------------------------------------------------------
     -- Alleen bij een NIEUWE inschrijving
     -- ----------------------------------------------------------------------
     IF TG_OP = 'INSERT' THEN
 
-        -- 2.3  Datum mag niet in het verleden liggen
-        IF NEW.appointment_date IS NULL
-           OR NEW.appointment_date < CURRENT_DATE THEN
+        -- 2.3  Datum mag niet in het verleden liggen,
+        --      TENZIJ een beheerder achteraf inschrijft (bv. administratie
+        --      van een reeds gepasseerde sessie). De zaterdag-check blijft
+        --      voor iedereen gelden.
+        IF NEW.appointment_date IS NULL THEN
+            RAISE EXCEPTION 'appointment_date is verplicht'
+                USING ERRCODE = '23514';
+        END IF;
+
+        IF NEW.appointment_date < CURRENT_DATE
+           AND NOT v_is_admin THEN
             RAISE EXCEPTION 'appointment_date mag niet in het verleden liggen'
                 USING ERRCODE = '23514';
         END IF;
@@ -113,19 +127,7 @@ BEGIN
         --      overboeken, bv. om een wachtlijstgezin toch toe te voegen aan
         --      een volzette sessie. Bezoekers (anon / geen admin) blijven
         --      strikt aan de limiet van 12 gebonden.
-        IF NOT EXISTS (
-            SELECT 1 FROM public.admin_users
-            WHERE email = LOWER(COALESCE(
-                     NULLIF(current_setting('request.jwt.claims', true), '')
-                          ::json ->> 'email',
-                     ''
-                 ))
-              AND COALESCE(
-                      current_setting('request.jwt.claims', true)::json
-                          ->> 'role',
-                      ''
-                  ) = 'authenticated'
-        ) THEN
+        IF NOT v_is_admin THEN
 
             SELECT COALESCE(SUM(children_count), 0)::integer
             INTO   v_booked

@@ -1750,12 +1750,23 @@
                     </div>
                 </div>
 
-                <button
-                        class="btn btn-gray"
-                        id="bookingViewToggle"
-                        onclick="toggleBookingView()">
-                    Alles tonen
-                </button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+                    <button
+                            class="btn btn-primary"
+                            onclick="openNewAppointment()"
+                            title="Nieuw gezin inschrijven, ook op al gepasseerde datums">
+                        ➕ Nieuwe inschrijving
+                    </button>
+
+                    <button
+                            class="btn btn-gray"
+                            id="bookingViewToggle"
+                            onclick="toggleBookingView()">
+                        Alles tonen
+                    </button>
+
+                </div>
 
             </div>
 
@@ -1872,7 +1883,7 @@
 
             <select id="bkType">
                 <option value="10">10-beurtenkaart (€150)</option>
-                <option value="5">5-beurtenkaart</option>
+                <option value="5">5-beurtenkaart (€80)</option>
             </select>
         </div>
 
@@ -3901,10 +3912,119 @@
             "flex";
     }
 
+    function openNewAppointment() {
+
+        editMode =
+            "create";
+
+        editId =
+            null;
+
+        editWaitlistId =
+            null;
+
+        document.getElementById(
+            "modalTitle"
+        ).textContent =
+            "➕ Nieuwe inschrijving";
+
+        document.getElementById(
+            "appointmentEditor"
+        ).style.display =
+            "block";
+
+        document.getElementById(
+            "themeEditor"
+        ).style.display =
+            "none";
+
+        document.getElementById(
+            "editName"
+        ).value =
+            "";
+
+        document.getElementById(
+            "editEmail"
+        ).value =
+            "";
+
+        document.getElementById(
+            "editDate"
+        ).value =
+            "";
+
+        document.getElementById(
+            "editChildrenCount"
+        ).value =
+            "1";
+
+        document.getElementById(
+            "editAmount"
+        ).value =
+            calculateAmount(
+                1
+            ).toFixed(2);
+
+        document.getElementById(
+            "editPaymentMethod"
+        ).value =
+            "onsite";
+
+        document.getElementById(
+            "editPaymentStatus"
+        ).value =
+            "pending";
+
+        document.getElementById(
+            "editChild1"
+        ).value =
+            "";
+
+        document.getElementById(
+            "editChild2"
+        ).value =
+            "";
+
+        document.getElementById(
+            "editChild3"
+        ).value =
+            "";
+
+        document.getElementById(
+            "editChild4"
+        ).value =
+            "";
+
+        document.getElementById(
+            "deleteButton"
+        ).style.display =
+            "none";
+
+        document.getElementById(
+            "resendMailBtn"
+        ).style.display =
+            "none";
+
+        document.getElementById(
+            "editModal"
+        ).style.display =
+            "flex";
+    }
+
     function closeEditModal() {
 
         document.getElementById(
             "editModal"
+        ).style.display =
+            "none";
+
+        document.getElementById(
+            "deleteButton"
+        ).style.display =
+            "";
+
+        document.getElementById(
+            "resendMailBtn"
         ).style.display =
             "none";
 
@@ -3919,8 +4039,8 @@
     async function saveCurrentItem() {
 
         if (
-            editMode ===
-            "appointment"
+            editMode === "appointment" ||
+            editMode === "create"
         ) {
 
             await saveAppointment();
@@ -4064,15 +4184,91 @@
                 paymentStatus
         };
 
-        const {
-            error
-        } = await sb
-            .from("appointments")
-            .update(payload)
-            .eq(
-                "id",
-                editId
+        const isCreate =
+            editMode ===
+            "create";
+
+        if (isCreate) {
+
+            const today =
+                new Date();
+
+            today.setHours(
+                0,
+                0,
+                0,
+                0
             );
+
+            const todayStr =
+                [
+                    today.getFullYear(),
+                    String(
+                        today.getMonth() +
+                        1
+                    ).padStart(
+                        2,
+                        "0"
+                    ),
+                    String(
+                        today.getDate()
+                    ).padStart(
+                        2,
+                        "0"
+                    )
+                ].join("-");
+
+            if (date >= todayStr) {
+
+                const bookedForDate =
+                    getBookedCountForDate(
+                        date
+                    );
+
+                if (
+                    Number(
+                        childrenCount || 1
+                    ) >
+                    MAX_CHILDREN -
+                    bookedForDate
+                ) {
+
+                    const overbook =
+                        confirm(
+                            `⚠️ Deze sessie heeft nog maar ${MAX_CHILDREN - bookedForDate} van de ${MAX_CHILDREN} plaatsen vrij (${bookedForDate} bezet).\n` +
+                            `Dit gezin telt ${childrenCount} kind(eren), dus je boekt OVER de capaciteit.\n\n` +
+                            "Toch toevoegen als overboeking?"
+                        );
+
+                    if (!overbook) {
+
+                        return;
+
+                    }
+                }
+            }
+        }
+
+        let targetId =
+            editId;
+
+        let {
+            error,
+            data: inserted
+        } =
+            isCreate
+                ? await sb
+                    .from("appointments")
+                    .insert(payload)
+                    .select("id")
+                    .single()
+                : await sb
+                    .from("appointments")
+                    .update(payload)
+                    .eq(
+                        "id",
+                        editId
+                    );
 
         if (error) {
 
@@ -4087,10 +4283,16 @@
             return;
         }
 
+        if (isCreate) {
+
+            targetId =
+                inserted?.id;
+        }
+
         try {
 
             await replaceChildrenRows(
-                editId,
+                targetId,
                 [
                     document.getElementById(
                         "editChild1"
@@ -4126,7 +4328,9 @@
         closeEditModal();
 
         showToast(
-            "✅ Inschrijving opgeslagen."
+            isCreate
+                ? "✅ Nieuwe inschrijving toegevoegd."
+                : "✅ Inschrijving opgeslagen."
         );
 
         await loadData();
@@ -5512,6 +5716,13 @@
                     const type =
                         kaart.type || "-";
 
+                    const priceLabel =
+                        type === "5"
+                            ? " (€80)"
+                            : type === "10"
+                                ? " (€150)"
+                                : "";
+
                     const stamps =
                         Number(kaart.aantal_starts);
 
@@ -5527,7 +5738,7 @@
                                 <div class="booking-name">
                                     🎟️ ${escapeHtml(
                                         type + "-beurtenkaart"
-                                    )}
+                                    )}${priceLabel}
                                 </div>
 
                                 <div class="booking-meta">

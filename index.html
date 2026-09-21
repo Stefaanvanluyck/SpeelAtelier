@@ -3567,6 +3567,27 @@ margin-left:0;
 
             </label>
 
+            <label class="payment-method-option"
+                   id="paymentPassOption">
+
+                <input type="radio"
+                       name="paymentMethod"
+                       value="pass">
+
+                <span class="payment-method-text">
+
+            <span class="payment-method-title">
+                🎟️ Ik heb een beurtenkaart
+            </span>
+
+            <span class="payment-method-description">
+                1 beurt per kind wordt automatisch afgetrokken
+            </span>
+
+        </span>
+
+            </label>
+
         </div>
 
 
@@ -4433,16 +4454,27 @@ margin-left:0;
         const amount =
             calculateAmount(count);
 
+        const selectedPayment =
+            document.querySelector(
+                'input[name="paymentMethod"]:checked'
+            )?.value;
+
         document.getElementById(
             "paymentSummary"
         ).innerText =
-            `Te betalen: €${amount
-                .toFixed(2)
-                .replace(".", ",")} (${count} ${
-                count === 1
-                    ? "kind"
-                    : "kinderen"
-            })`;
+            selectedPayment === "pass"
+                ? `Beurtenkaart: 1 beurt per kind afgetrokken (${count} ${
+                    count === 1
+                        ? "kind"
+                        : "kinderen"
+                })`
+                : `Te betalen: €${amount
+                    .toFixed(2)
+                    .replace(".", ",")} (${count} ${
+                    count === 1
+                        ? "kind"
+                        : "kinderen"
+                })`;
 
     }
 
@@ -4463,47 +4495,41 @@ margin-left:0;
                 "submitBtn"
             );
 
-        const onlineOption =
-            document.getElementById(
-                "paymentOnlineOption"
-            );
-
-        const onsiteOption =
-            document.getElementById(
-                "paymentOnsiteOption"
-            );
-
         if (!submitBtn) {
             return;
         }
 
+        document
+            .querySelectorAll(
+                ".payment-method-option"
+            )
+            .forEach(option => {
+
+                const radio =
+                    option.querySelector(
+                        'input[name="paymentMethod"]'
+                    );
+
+                option.classList.toggle(
+                    "selected",
+                    !!radio &&
+                    radio.checked
+                );
+
+            });
+
         if (
-            selectedPayment === "onsite"
+            selectedPayment === "onsite" ||
+            selectedPayment === "pass"
         ) {
 
             submitBtn.innerHTML =
                 "💛 Inschrijving bevestigen";
 
-            onlineOption?.classList.remove(
-                "selected"
-            );
-
-            onsiteOption?.classList.add(
-                "selected"
-            );
-
         } else {
 
             submitBtn.innerHTML =
                 "Verder naar betalen";
-
-            onlineOption?.classList.add(
-                "selected"
-            );
-
-            onsiteOption?.classList.remove(
-                "selected"
-            );
 
         }
 
@@ -4667,7 +4693,9 @@ margin-left:0;
         const paymentText =
             paymentMethod === "onsite"
                 ? "Ter plaatse betalen (cash of Payconiq)"
-                : "Online betaling via Mollie";
+                : paymentMethod === "pass"
+                    ? "Beurtenkaart (1 beurt per kind afgetrokken)"
+                    : "Online betaling via Mollie";
 
 
         const childNamesText =
@@ -5107,7 +5135,8 @@ margin-left:0;
             ================================================= */
 
             if (
-                paymentMethod === "onsite"
+                paymentMethod === "onsite" ||
+                paymentMethod === "pass"
             ) {
 
                 const booked =
@@ -5163,7 +5192,7 @@ margin-left:0;
                                 amount,
 
                             payment_method:
-                                "onsite",
+                                paymentMethod,
 
                             payment_status:
                                 "pending"
@@ -5261,7 +5290,7 @@ margin-left:0;
                         amount,
 
                     paymentMethod:
-                        "onsite"
+                        paymentMethod
 
                 });
 
@@ -5285,6 +5314,27 @@ margin-left:0;
                         )
                         .join("<br>");
 
+
+                const isPassBooking =
+                    paymentMethod === "pass";
+
+                const paymentInfo =
+                    isPassBooking
+                        ? `De beurtenkaart werd gebruikt:
+                            <strong>
+                                1 beurt per kind afgetrokken
+                            </strong>`
+                        : `Te betalen bij aankomst:
+                            <strong>
+                                €${amount
+                                    .toFixed(2)
+                                    .replace(".", ",")}
+                            </strong>
+
+                            <br><br>
+
+                            Betalen kan via
+                            💵 cash of 📱 Payconiq.`;
 
                 confirmMsg.innerHTML = `
                     <div style="
@@ -5318,17 +5368,7 @@ margin-left:0;
 
                         <br><br>
 
-                        Te betalen bij aankomst:
-                        <strong>
-                            €${amount
-                                .toFixed(2)
-                                .replace(".", ",")}
-                        </strong>
-
-                        <br><br>
-
-                        Betalen kan via
-                        💵 cash of 📱 Payconiq.
+                        ${paymentInfo}
 
                         <br><br>
 
@@ -6579,7 +6619,13 @@ margin-left:0;
 
                         radio.addEventListener(
                             "change",
-                            updatePaymentButton
+                            function() {
+
+                                updatePaymentButton();
+
+                                updatePaymentSummary();
+
+                            }
                         );
 
                     }
