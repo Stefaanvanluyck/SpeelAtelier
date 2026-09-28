@@ -6924,12 +6924,11 @@ margin-left:0;
 
 
             /*
-             * Hero badge + volgend thema
+             * Hero badge + teller + volgend
+             * thema (wacht op de thema's)
              */
 
             await loadNextTheme();
-
-            loadNextSessionCapacity();
 
 
             /*
@@ -7411,23 +7410,142 @@ margin-left:0;
 
     }
 
+    /*
+     * Een sessie bestaat enkel wanneer er een
+     * thema ingevuld is voor die datum én de
+     * datum niet geblokkeerd is (zie de
+     * planning).
+     *
+     * Geeft de datum van de eerstvolgende
+     * sessie terug, of null wanneer er nog
+     * geen sessie gepland staat (of de thema's
+     * nog niet geladen zijn).
+     */
+
+    function getNextSessionTarget() {
+
+        if (!themesLoaded) {
+            return null;
+        }
+
+        const now =
+            new Date();
+
+        const nextKey =
+            (themeRowsCache || [])
+                .filter(
+                    row => {
+
+                        const key =
+                            String(
+                                row.date || ""
+                            );
+
+                        if (
+                            !key ||
+                            !row.theme ||
+                            String(
+                                row.theme
+                            ).trim() === "" ||
+                            blockedSetCache.has(key)
+                        ) {
+
+                            return false;
+
+                        }
+
+                        const start =
+                            new Date(
+                                key + "T10:00:00"
+                            );
+
+                        return (
+                            start > now
+                        );
+
+                    }
+                )
+                .map(
+                    row =>
+                        String(
+                            row.date
+                        )
+                )
+                .sort()
+                .shift();
+
+        if (!nextKey) {
+            return null;
+        }
+
+        return new Date(
+            nextKey + "T10:00:00"
+        );
+
+    }
+
     function updateCountdown() {
 
+        const countdownEl =
+            document.getElementById(
+                "nextSessionCountdown"
+            );
+
         const target =
-            getNextSaturday();
+            getNextSessionTarget();
+
+        /*
+         * Lege string = er is momenteel geen
+         * sessie met thema gepland.
+         */
 
         const targetKey =
-            toDateKey(target);
+            target
+                ? toDateKey(target)
+                : "";
 
         if (
-            themeRowsCache.length > 0 &&
+            themesLoaded &&
             targetKey !==
                 renderedTargetKey
         ) {
-            renderNextTheme(targetKey);
+
+            renderedTargetKey =
+                targetKey;
+
+            renderNextTheme(
+                target
+            );
+
         }
 
-        loadNextSessionCapacity();
+
+        /*
+         * Zonder thema is er geen sessie:
+         * dan telt de teller niet.
+         */
+
+        if (!target) {
+
+            if (countdownEl) {
+                countdownEl.style.display =
+                    "none";
+            }
+
+            hideCapacityBadge();
+
+            return;
+
+        }
+
+        if (countdownEl) {
+            countdownEl.style.display =
+                "flex";
+        }
+
+        loadNextSessionCapacity(
+            targetKey
+        );
 
         const now =
             new Date();
@@ -7484,25 +7602,20 @@ margin-left:0;
 
     function initCountdown() {
 
-        const countdownEl =
-            document.getElementById(
-                "nextSessionCountdown"
-            );
-
         if (
-            !countdownEl ||
-            countdownEl.style.display === "none"
+            !document.getElementById(
+                "nextSessionCountdown"
+            )
         ) {
-
-            /*
-             * Alleen tonen als er een hero is.
-             */
-
-            if (countdownEl) {
-                countdownEl.style.display = "flex";
-            }
-
+            return;
         }
+
+        /*
+         * De teller verschijnt pas vanzelf
+         * zodra het eerstvolgende thema gekend
+         * is, en verdwijnt weer wanneer er
+         * geen enkele sessie gepland staat.
+         */
 
         updateCountdown();
 
@@ -7534,6 +7647,7 @@ margin-left:0;
     let themeRowsCache = [];
     let blockedSetCache = new Set();
     let renderedTargetKey = null;
+    let themesLoaded = false;
 
     function toDateKey(date) {
 
@@ -7546,7 +7660,7 @@ margin-left:0;
         );
     }
 
-    function renderNextTheme(targetKey) {
+    function renderNextTheme(target) {
 
         const themeEl =
             document.getElementById(
@@ -7557,23 +7671,21 @@ margin-left:0;
             return;
         }
 
-        renderedTargetKey =
-            targetKey;
-
         const upcoming =
-            (themeRowsCache || [])
-                .find(
-                    row =>
-                        row.date ===
-                            targetKey &&
-                        row.theme &&
-                        String(
-                            row.theme
-                        ).trim() !== "" &&
-                        !blockedSetCache.has(
-                            row.date
-                        )
-                );
+            target
+                ? (themeRowsCache || [])
+                    .find(
+                        row =>
+                            row.date ===
+                                toDateKey(
+                                    target
+                                ) &&
+                            row.theme &&
+                            String(
+                                row.theme
+                            ).trim() !== ""
+                    )
+                : null;
 
         if (upcoming) {
 
@@ -7583,7 +7695,7 @@ margin-left:0;
                 " — " +
                 formatLongDate(
                     new Date(
-                        upcoming.date +
+                        String(upcoming.date) +
                             "T10:00:00"
                     )
                 );
@@ -7730,7 +7842,37 @@ margin-left:0;
     let capacityLoadedForKey =
         null;
 
-    async function loadNextSessionCapacity() {
+    /*
+     * "deze zaterdag" wanneer het om de
+     * eerstvolgende zaterdag gaat, anders de
+     * datum zelf. Zo blijft de badge kloppen
+     * met de teller.
+     */
+
+    function describeSessionDate(
+        targetKey
+    ) {
+
+        if (
+            targetKey ===
+            toDateKey(
+                getNextSaturday()
+            )
+        ) {
+            return "deze zaterdag";
+        }
+
+        return "op " +
+            formatLongDate(
+                new Date(
+                    targetKey +
+                        "T10:00:00"
+                )
+            );
+
+    }
+
+    function hideCapacityBadge() {
 
         const badge =
             document.getElementById(
@@ -7741,10 +7883,47 @@ margin-left:0;
             return;
         }
 
-        const targetKey =
-            toDateKey(
-                getNextSaturday()
+        badge.style.display =
+            "none";
+
+        badge.textContent =
+            "";
+
+        /*
+         * Zonder sessie moet een volgende
+         * sessie opnieuw opgevraagd kunnen
+         * worden.
+         */
+
+        capacityLoadedForKey =
+            null;
+
+    }
+
+    async function loadNextSessionCapacity(
+        targetKey
+    ) {
+
+        const badge =
+            document.getElementById(
+                "capacityBadge"
             );
+
+        if (!badge) {
+            return;
+        }
+
+        /*
+         * Geen sessie met thema: geen badge.
+         */
+
+        if (!targetKey) {
+
+            hideCapacityBadge();
+
+            return;
+
+        }
 
         if (
             capacityLoadedForKey ===
@@ -7841,7 +8020,11 @@ margin-left:0;
         if (free <= 0) {
 
             badge.textContent =
-                "Volzet deze zaterdag 😢 — op de wachtlijst";
+                "Volzet " +
+                describeSessionDate(
+                    targetKey
+                ) +
+                " 😢 — op de wachtlijst";
             badge.classList.add(
                 "full"
             );
@@ -7873,7 +8056,10 @@ margin-left:0;
                 free +
                 " plek" +
                 (free === 1 ? "je" : "jes") +
-                " deze zaterdag";
+                " " +
+                describeSessionDate(
+                    targetKey
+                );
             badge.classList.remove(
                 "full"
             );
@@ -7896,8 +8082,10 @@ margin-left:0;
         try {
 
             /*
-             * Vindt het thema van de eerstvolgende
-             * zaterdag waarnaar de countdown telt.
+             * Thema's vanaf de eerstvolgende
+             * zaterdag: de teller stopt bij de
+             * eerste datum mét thema, dus een
+             * ruime marge is handig.
              */
 
             const target =
@@ -7921,7 +8109,7 @@ margin-left:0;
                         "date",
                         { ascending: true }
                     )
-                    .limit(12);
+                    .limit(26);
 
             if (themeError) {
                 console.warn(
@@ -7958,7 +8146,15 @@ margin-left:0;
                         )
                 );
 
-            renderNextTheme(targetKey);
+            themesLoaded =
+                true;
+
+            /*
+             * Zet de teller en het thema op
+             * de eerste sessie mét thema.
+             */
+
+            updateCountdown();
 
         } catch (err) {
 
