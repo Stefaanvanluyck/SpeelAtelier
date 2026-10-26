@@ -22,16 +22,36 @@
     <link rel="icon" sizes="32x32" href="favicon.png">
     <link rel="icon" sizes="192x192" href="favicon.png">
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        /* Geen console.log met klantgegevens; debuggen kan met ?debug=1. */
+        if (!/[?&]debug=1\b/.test(location.search)) {
+            console.log = function () {};
+            console.debug = function () {};
+            console.info = function () {};
+        }
+    </script>
 
-    <link
-            href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
-            rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+    <!-- Vaste versies + Subresource Integrity: een gecompromitteerde CDN
+         kan geen andere code meer injecteren. Bij een update: nieuwe
+         sha384-hash berekenen (zie README). -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+            integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"
+            integrity="sha384-SALc35EccAf6RzGw4iNsyj7kTPr33K7RoGzYu+7heZhT8s0GZouafRiCg1qy44AS"
+            crossorigin="anonymous"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FullCalendar v6 injecteert zijn CSS zelf (geen aparte .css). -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"
+            integrity="sha384-B1OFx8Gy9GjPu8UbUyXbGQpzll9ubAUQ9agInFJ8NnD7nYG1u/CLR+Sqr5yifl4q"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales-all.global.min.js"
+            integrity="sha384-hPdl4OSy73g1XGQaIGe0XKUQyXagcNhzsZbkKn8LDtWWiDfEzxK3LhU+VoQLsPnS"
+            crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js"
+            integrity="sha384-Emf5ZVIUiarAdhkgtqK+5/Z5qIvM6QoVrS+qAVtfyZVuD5lIHrac0me485+Antp0"
+            crossorigin="anonymous"></script>
 
     <style>
         * {
@@ -8247,6 +8267,22 @@
 
             pillClass =
                 "pass";
+
+        } else if (
+            String(
+                item.payment_method || ""
+            ).toLowerCase() === "pass_requested"
+        ) {
+
+            /*
+             * Bezoeker koos "Ik heb een beurtenkaart". Nog niet
+             * afgeboekt: klik op 🎟️ om te bevestigen en af te boeken.
+             */
+            statusText =
+                "🎟️ Kaart – te bevestigen";
+
+            pillClass =
+                "other";
 
         } else if (
             status ===

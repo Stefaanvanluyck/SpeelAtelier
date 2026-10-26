@@ -141,16 +141,32 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B"
+          crossorigin="anonymous">
 
-    <!-- EmailJS -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        /*
+         * Geen console.log in productie: de logs bevatten persoons-
+         * gegevens (e-mail, namen, boekingen). Debuggen kan met ?debug=1.
+         */
+        if (!/[?&]debug=1\b/.test(location.search)) {
+            console.log = function () {};
+            console.debug = function () {};
+            console.info = function () {};
+        }
+    </script>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- EmailJS (vaste versie + SRI) -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"
+            integrity="sha384-SALc35EccAf6RzGw4iNsyj7kTPr33K7RoGzYu+7heZhT8s0GZouafRiCg1qy44AS"
+            crossorigin="anonymous"></script>
 
-    <!-- FullCalendar -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <!-- Supabase (vaste versie + SRI) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+            integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+            crossorigin="anonymous"></script>
+
 
     <script defer src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 
@@ -3102,8 +3118,36 @@ margin-left:0;
          data-embed-id="25687504">
     </div>
 
-    <script src="https://widgets.sociablekit.com/instagram-feed/widget.js"
-            defer>
+    <script>
+        /*
+         * Instagram-widget (SociableKit) pas laden wanneer de feed in
+         * beeld komt, en altijd async. Zo kan een trage of plat liggende
+         * SociableKit-server nooit de rest van de site blokkeren.
+         */
+        (function () {
+            var feed = document.querySelector(".sk-instagram-feed");
+            if (!feed) return;
+            var loaded = false;
+            function loadWidget() {
+                if (loaded) return;
+                loaded = true;
+                var s = document.createElement("script");
+                s.src = "https://widgets.sociablekit.com/instagram-feed/widget.js";
+                s.async = true;
+                document.body.appendChild(s);
+            }
+            if ("IntersectionObserver" in window) {
+                var io = new IntersectionObserver(function (entries) {
+                    if (entries.some(function (e) { return e.isIntersecting; })) {
+                        io.disconnect();
+                        loadWidget();
+                    }
+                }, { rootMargin: "400px" });
+                io.observe(feed);
+            } else {
+                window.addEventListener("load", loadWidget);
+            }
+        })();
     </script>
 
 
@@ -3581,7 +3625,7 @@ margin-left:0;
             </span>
 
             <span class="payment-method-description">
-                1 beurt per kind wordt automatisch afgetrokken
+                1 beurt per kind wordt afgetrokken na controle
             </span>
 
         </span>
@@ -4694,7 +4738,7 @@ margin-left:0;
             paymentMethod === "onsite"
                 ? "Ter plaatse betalen (cash of Payconiq)"
                 : paymentMethod === "pass"
-                    ? "Beurtenkaart (1 beurt per kind afgetrokken)"
+                    ? "Beurtenkaart (1 beurt per kind, wordt afgetrokken na controle door juf Valerie)"
                     : "Online betaling via Mollie";
 
 
@@ -5209,9 +5253,19 @@ margin-left:0;
                         bookingError
                     );
 
+                    /*
+                     * Enkel onze eigen (Nederlandstalige) validatie-
+                     * meldingen uit de trigger tonen; andere database-
+                     * fouten blijven intern.
+                     */
+                    const safeCodes = [
+                        "23514", "23505", "54000", "P0001"
+                    ];
+
                     throw new Error(
-                        bookingError.message ||
-                        "De inschrijving kon niet worden opgeslagen."
+                        safeCodes.includes(bookingError.code)
+                            ? bookingError.message
+                            : "De inschrijving kon niet worden opgeslagen."
                     );
 
                 }
@@ -5320,9 +5374,10 @@ margin-left:0;
 
                 const paymentInfo =
                     isPassBooking
-                        ? `De beurtenkaart werd gebruikt:
+                        ? `Je betaalt met je beurtenkaart:
                             <strong>
-                                1 beurt per kind afgetrokken
+                                1 beurt per kind wordt afgetrokken
+                                na controle door juf Valerie
                             </strong>`
                         : `Te betalen bij aankomst:
                             <strong>
@@ -8376,8 +8431,16 @@ margin-left:0;
                         const theme =
                             themesMap[date];
 
+                        /*
+                         * Veilig in een onclick-attribuut: eerst als JS-
+                         * string coderen (JSON), daarna HTML-escapen.
+                         * Alleen HTML-escapen is NIET genoeg: de browser
+                         * decodeert &#039; terug naar ' vóór de JS draait.
+                         */
                         const themeAttr =
-                            escapeHtml(theme);
+                            escapeHtml(
+                                JSON.stringify(String(theme ?? ""))
+                            );
 
                         const booked =
                             counts[date] ||
@@ -8431,13 +8494,13 @@ margin-left:0;
                             isFull
                                 ? `
                                     <button class="btn session-btn waitlist"
-                                            onclick="openWaitlist('${date}', '${themeAttr}')">
+                                            onclick="openWaitlist(${escapeHtml(JSON.stringify(String(date)))}, ${themeAttr})">
                                         ⏳ Op wachtlijst
                                     </button>
                                 `
                                 : `
                                     <button class="btn session-btn"
-                                            onclick="openForm('${date}')">
+                                            onclick="openForm(${escapeHtml(JSON.stringify(String(date)))})">
                                         Inschrijven
                                     </button>
                                 `;
@@ -9198,10 +9261,10 @@ margin-left:0;
         }
 
         if (
-            !document.dataset.lightboxKeys
+            !document.documentElement.dataset.lightboxKeys
         ) {
 
-            document.dataset.lightboxKeys = "1";
+            document.documentElement.dataset.lightboxKeys = "1";
 
             document.addEventListener(
                 "keydown",
@@ -10656,50 +10719,24 @@ margin-left:0;
         try {
 
             /*
-             * Probeer eerst de beveiligde RPC-functie:
-             * alleen e-mail met een echte inschrijving raakt door.
-             * Bestaat de functie (nog) niet, of wordt de RPC geweigerd,
-             * dan vallen we terug op een gewone insert — de review komt dan
-             * als concept binnen en wordt door Valerie goedgekeurd.
+             * Enkel via de beveiligde RPC-functie: alleen een e-mail met
+             * een echte inschrijving raakt door. (Geen directe insert als
+             * fallback meer — die omzeilde de controle.)
              */
 
-            let error = null;
-
-            const rpcResult =
-                await sb.rpc(
-                    "submit_testimonial",
-                    {
-                        p_name: name,
-                        p_text: text,
-                        p_rating: rating,
-                        p_email: email
-                    }
-                );
-
-            if (rpcResult.error) {
-
-                const {
-                    error: insertError
-                } = await sb
-                    .from("testimonials")
-                    .insert({
-                        name,
-                        text,
-                        rating,
-                        email
-                    })
-                    .select("id");
-
-                error = insertError;
-
-            }
+            const {
+                error
+            } = await sb.rpc(
+                "submit_testimonial",
+                {
+                    p_name: name,
+                    p_text: text,
+                    p_rating: rating,
+                    p_email: email
+                }
+            );
 
             if (error) {
-
-                console.error(
-                    "Review submit error:",
-                    error
-                );
 
                 errorBox.innerText =
                     "We konden je review niet opslaan. " +

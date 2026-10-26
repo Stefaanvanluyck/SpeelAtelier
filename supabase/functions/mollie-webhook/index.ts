@@ -168,7 +168,6 @@ Deno.serve(async (req: Request) => {
 
     const payment = await mollieResponse.json();
     const mollieStatus = String(payment.status ?? "");
-    const dbStatus = STATUS_MAP[mollieStatus] ?? "pending";
 
     const metadata = payment.metadata ?? {};
     const bookingId = metadata.booking_id ?? payment.booking_id ?? "";
@@ -213,6 +212,16 @@ Deno.serve(async (req: Request) => {
         return new Response("nok", { status: 404 });
     }
 
+    // Betaling hoort bij een andere inschrijving dan gekoppeld? Weigeren.
+    if (booking.mollie_payment_id && booking.mollie_payment_id !== paymentId) {
+        console.error("Payment-ID komt niet overeen met inschrijving:", {
+            paymentId,
+            linked: booking.mollie_payment_id,
+            bookingId: booking.id,
+        });
+        return new Response("ok", { status: 200 });
+    }
+
     // ------------------------------------------------------------------
     // 3b. Bedrag van Mollie controleren t.o.v. de inschrijving.
     //     Niet blokkerend, maar wél loggen als deze niet overeenkomt
@@ -220,8 +229,11 @@ Deno.serve(async (req: Request) => {
     // ------------------------------------------------------------------
     const mollieAmount = Number(payment.amount?.value);
     const bookingAmount = Number(booking.amount || 0);
-    if (mollieAmount && Math.abs(mollieAmount - bookingAmount) > 0.01) {
-        console.warn("Bedrag komt niet overeen met de inschrijving:", {
+    const amountMismatch =
+        !Number.isFinite(mollieAmount) ||
+        Math.abs(mollieAmount - bookingAmount) > 0.01;
+    if (amountMismatch) {
+        console.error("Bedrag komt niet overeen met de inschrijving:", {
             mollie: payment.amount?.value,
             booking: booking.amount,
             paymentId,
@@ -230,8 +242,21 @@ Deno.serve(async (req: Request) => {
     }
 
     // ------------------------------------------------------------------
-    // 4. Status bijwerken + Mollie-payment-ID verzekeren
+    // 4. Status bepalen
+    //    * Onbekende Mollie-status -> huidige status behouden.
+    //    * Een betaalde inschrijving nooit terugzetten.
+    //    * 'paid' met verkeerd bedrag -> NIET als betaald markeren
+    //      (beheerder controleert manueel).
     // ------------------------------------------------------------------
+    let newStatus: string = STATUS_MAP[mollieStatus] ?? booking.payment_status;
+    if (booking.payment_status === "paid" && newStatus !== "paid") {
+        newStatus = "paid";
+    }
+    if (newStatus === "paid" && booking.payment_status !== "paid" && amountMismatch) {
+        newStatus = "pending";
+    }
+    const dbStatus = newStatus;
+
     const payload: Record<string, unknown> = {
         payment_status: dbStatus,
     };
@@ -269,6 +294,9 @@ Deno.serve(async (req: Request) => {
                 .order("created_at", { ascending: true });
 
             const childNamesList = childrenError ? [] : (children ?? []).map((c: { name: string }) => c.name);
+            if (childrenError) {
+                console.error("Kinderen ophalen mislukt:", childrenError);
+            }
 
             const childNamesText = childNamesList
                 .map((c, i) => `Kind ${i + 1}: ${c}`)

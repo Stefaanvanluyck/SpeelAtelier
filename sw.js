@@ -1,4 +1,4 @@
-const CACHE_NAME = "kleine-wonderwereld-v2";
+const CACHE_NAME = "kleine-wonderwereld-v3";
 const ASSETS = [
     "./",
     "./index.html",
@@ -48,6 +48,11 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(request.url);
 
     if (url.origin !== location.origin) {
+        return;
+    }
+
+    // Admin-pagina nooit cachen (gevoelige gegevens, altijd vers).
+    if (/\/admin(\.html)?$/i.test(url.pathname)) {
         return;
     }
 

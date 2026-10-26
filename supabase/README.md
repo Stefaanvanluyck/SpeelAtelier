@@ -143,3 +143,15 @@ RLS-schema compatibel is):
   1. `index.html` (`calculateAmount`)
   2. `sql/amount_validation_trigger.sql`
   3. `functions/create-mollie-payment/index.ts`
+## Security hardening (2026)
+
+Draai `sql/security_hardening_2026.sql` als LAATSTE script in de SQL Editor (na alle andere scripts) en deploy daarna beide edge functions opnieuw:
+
+```n supabase functions deploy create-mollie-payment
+ supabase functions deploy mollie-webhook --no-verify-jwt
+```
+
+Beurtenkaart via de website wordt nu `pass_requested` (te bevestigen). In admin.html bevestig je met de ???-knop; pas dan worden beurten afgetrokken.
+
+CDN-scripts zijn vastgezet met SRI. Nieuwe hash berekenen: `curl -s URL | openssl dgst -sha384 -binary | openssl base64 -A`.
+

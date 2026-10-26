@@ -47,10 +47,19 @@ const TRANSACTION_FEE_ONLINE = 0.40;
 const EMAIL_REGEX =
     /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
+const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ??
+    `${BASE_URL},https://www.jufvalerie.be,https://jufvalerie.be`)
+    .split(",")
+    .map((o) => o.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+
 function corsHeaders(req: Request) {
-    const origin = req.headers.get("origin") ?? "*";
+    const origin = req.headers.get("origin") ?? "";
+    const allowed = ALLOWED_ORIGINS.includes(origin)
+        ? origin
+        : ALLOWED_ORIGINS[0];
     return {
-        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Origin": allowed,
         "Access-Control-Allow-Headers":
             "authorization, x-client-info, apikey, content-type",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -75,30 +84,35 @@ function calculateAmount(childrenCount: number, isOnline: boolean): number {
     return Math.round(amount * 100) / 100;
 }
 
+// Bij een databasefout gooien we een exception (fail closed): een mislukte
+// controle mag nooit tot een geldige boeking leiden.
 async function isDateBlocked(date: string): Promise<boolean> {
-    const { data } = await sb
+    const { data, error } = await sb
         .from("blocked_dates")
         .select("date")
         .eq("date", date)
         .maybeSingle();
+    if (error) throw error;
     return Boolean(data?.date);
 }
 
 async function themeExists(date: string): Promise<boolean> {
-    const { data } = await sb
+    const { data, error } = await sb
         .from("themes")
         .select("theme")
         .eq("date", date)
         .maybeSingle();
+    if (error) throw error;
     return Boolean(data?.theme);
 }
 
 async function getBookedChildren(date: string): Promise<number> {
-    const { data } = await sb
+    const { data, error } = await sb
         .from("appointments")
         .select("children_count")
         .eq("appointment_date", date)
         .not("payment_status", "in", "(\"cancelled\",\"failed\",\"expired\")");
+    if (error) throw error;
     return (data ?? []).reduce(
         (sum, row) => sum + Number(row.children_count || 0),
         0,
@@ -106,6 +120,19 @@ async function getBookedChildren(date: string): Promise<number> {
 }
 
 Deno.serve(async (req: Request) => {
+    try {
+        return await handle(req);
+    } catch (err) {
+        console.error("Onverwachte fout:", err);
+        return json(
+            { error: "Er ging iets mis. Probeer later opnieuw." },
+            500,
+            corsHeaders(req),
+        );
+    }
+});
+
+async function handle(req: Request): Promise<Response> {
     if (req.method === "OPTIONS") {
         return new Response("ok", { headers: corsHeaders(req) });
     }
@@ -129,13 +156,25 @@ Deno.serve(async (req: Request) => {
     const name = String(body.name ?? "").trim();
     const email = String(body.email ?? "").trim();
     const childrenCount = Number(body.children_count);
-    const paymentMethod = String(body.payment_method ?? "onsite");
+    const paymentMethod = String(body.payment_method ?? "online");
     const children = Array.isArray(body.children)
-        ? body.children.map((c: Record<string, unknown>) => ({
+        ? body.children.slice(0, 4).map((c: Record<string, unknown>) => ({
             name: String(c?.name ?? "").trim(),
             photo_allowed: Boolean(c?.photo_allowed),
         }))
         : [];
+
+    // Deze functie is uitsluitend voor online (Mollie) betalingen.
+    // Beurtenkaart/ter plaatse lopen NIET via de service role.
+    if (paymentMethod !== "online") {
+        return json({ error: "Ongeldige betaalwijze." }, 400, headers);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(appointmentDate)) {
+        return json({ error: "Ongeldige datum." }, 400, headers);
+    }
+    if (children.some((c) => c.name.length > 100)) {
+        return json({ error: "Naam van een kind is te lang." }, 400, headers);
+    }
 
     if (!appointmentDate) {
         return json({ error: "Datum ontbreekt." }, 400, headers);
@@ -221,11 +260,12 @@ Deno.serve(async (req: Request) => {
 
     if (insertError || !booking) {
         console.error("Booking insert error:", insertError);
-        return json(
-            { error: insertError?.message ?? "De inschrijving kon niet worden opgeslagen." },
-            500,
-            headers,
-        );
+        // Enkel onze eigen validatiemeldingen uit de trigger doorgeven.
+        const safeCodes = ["23514", "23505", "54000", "P0001"];
+        const msg = insertError && safeCodes.includes(String(insertError.code))
+            ? insertError.message
+            : "De inschrijving kon niet worden opgeslagen.";
+        return json({ error: msg }, 400, headers);
     }
     const bookingId = booking.id;
 
@@ -324,4 +364,4 @@ Deno.serve(async (req: Request) => {
         bookingId,
         amount,
     }, 200, headers);
-});
+}
