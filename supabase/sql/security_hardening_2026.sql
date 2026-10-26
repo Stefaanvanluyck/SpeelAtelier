@@ -365,7 +365,10 @@ GRANT INSERT (appointment_date, name, email, children_count,
 -- ---------------------------------------------------------------------------
 -- 6. children: enkel toevoegen aan een VERSE eigen boeking
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.can_add_child(p_appointment_id uuid)
+-- appointments.id is in productie een bigint.
+DROP FUNCTION IF EXISTS public.can_add_child(uuid);
+
+CREATE OR REPLACE FUNCTION public.can_add_child(p_appointment_id bigint)
 RETURNS boolean
 LANGUAGE sql
 STABLE
@@ -382,8 +385,8 @@ AS $$
     );
 $$;
 
-REVOKE ALL ON FUNCTION public.can_add_child(uuid) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.can_add_child(uuid) TO anon;
+REVOKE ALL ON FUNCTION public.can_add_child(bigint) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.can_add_child(bigint) TO anon;
 
 REVOKE INSERT ON public.children FROM anon;
 GRANT INSERT (appointment_id, name, photo_allowed) ON public.children TO anon;
