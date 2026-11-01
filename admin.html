@@ -1400,6 +1400,29 @@
             background: #0d1117;
         }
 
+        .special-session-fields {
+            margin: 10px 0;
+            padding: 10px 14px;
+            border: 1px dashed #d4af37;
+            border-radius: 12px;
+            background: rgba(212, 175, 55, 0.06);
+        }
+        .special-session-fields summary {
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .special-session-fields .special-hint {
+            font-size: .85rem;
+            opacity: .75;
+            margin: 6px 0 10px;
+        }
+        .special-session-fields label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: .85rem;
+        }
+
     </style>
 
 
@@ -1678,6 +1701,31 @@
                 🎨 Thema opslaan
             </button>
         </div>
+
+        <details class="special-session-fields" id="newSpecialDetails">
+            <summary>✨ Speciale sessie (optioneel, bv. Kerstspecial)</summary>
+            <p class="special-hint">Laat leeg voor een gewone sessie (€18/€15, 10u–11u, 12 plaatsen, beurtenkaart toegestaan). Je kan dit later ook aanpassen door op het thema in de kalender te klikken.</p>
+            <div class="admin-actions" style="flex-wrap:wrap;">
+                <label>Prijs per kind (€)
+                    <input id="newSpecialPrice" type="number" min="0" step="0.5" placeholder="standaard"></label>
+                <label>Max. kinderen
+                    <input id="newSpecialMax" type="number" min="1" max="100" placeholder="12"></label>
+                <label>Startuur
+                    <input id="newSpecialStart" type="time"></label>
+                <label>Einduur
+                    <input id="newSpecialEnd" type="time"></label>
+                <label>Uitzicht
+                    <select id="newSpecialVisual">
+                        <option value="">Normaal</option>
+                        <option value="kerst">🎄 Kerst</option>
+                    </select></label>
+                <label>
+                    <input id="newSpecialAllowPass" type="checkbox" checked style="width:auto;">
+                    Beurtenkaart toegestaan</label>
+            </div>
+            <label for="newSpecialAnnouncement">Aankondigingstekst (homepage)</label>
+            <textarea id="newSpecialAnnouncement" rows="2" maxlength="600" style="width:100%;"></textarea>
+        </details>
 
         <div class="admin-actions">
             <input type="date" id="blockDate">
@@ -2599,6 +2647,46 @@
 
             </div>
 
+            <details class="special-session-fields" id="editSpecialDetails">
+                <summary>✨ Speciale sessie (optioneel)</summary>
+                <p class="special-hint">Laat leeg voor een gewone sessie (€18/€15, 10u–11u, 12 plaatsen, beurtenkaart toegestaan).</p>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="editSpecialPrice">Prijs per kind (€)</label>
+                        <input id="editSpecialPrice" type="number" min="0" step="0.5" placeholder="standaard">
+                    </div>
+                    <div class="form-field">
+                        <label for="editSpecialMax">Max. kinderen</label>
+                        <input id="editSpecialMax" type="number" min="1" max="100" placeholder="12">
+                    </div>
+                    <div class="form-field">
+                        <label for="editSpecialStart">Startuur</label>
+                        <input id="editSpecialStart" type="time" placeholder="10:00">
+                    </div>
+                    <div class="form-field">
+                        <label for="editSpecialEnd">Einduur</label>
+                        <input id="editSpecialEnd" type="time" placeholder="11:00">
+                    </div>
+                    <div class="form-field">
+                        <label for="editSpecialVisual">Uitzicht</label>
+                        <select id="editSpecialVisual">
+                            <option value="">Normaal</option>
+                            <option value="kerst">🎄 Kerst</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>
+                            <input id="editSpecialAllowPass" type="checkbox" checked style="width:auto;">
+                            Beurtenkaart toegestaan
+                        </label>
+                    </div>
+                    <div class="form-field full">
+                        <label for="editSpecialAnnouncement">Aankondigingstekst (homepage)</label>
+                        <textarea id="editSpecialAnnouncement" rows="3" maxlength="600"></textarea>
+                    </div>
+                </div>
+            </details>
+
         </div>
 
         <div class="modal-actions">
@@ -2810,7 +2898,20 @@
         )?.theme || "";
     }
 
-    function calculateAmount(childrenCount) {
+    function getThemeRow(dateString) {
+        return themes.find(theme =>
+            String(theme.date).slice(0, 10) ===
+            String(dateString || "").slice(0, 10)
+        ) || null;
+    }
+
+    /* Max. kinderen voor een datum (speciale sessie of standaard) */
+    function getMaxChildren(dateString) {
+        const max = Number(getThemeRow(dateString)?.max_children);
+        return Number.isFinite(max) && max > 0 ? max : MAX_CHILDREN;
+    }
+
+    function calculateAmount(childrenCount, dateString = null) {
 
         const count =
             Number(childrenCount || 1);
@@ -2819,10 +2920,71 @@
             return 0;
         }
 
+        const special =
+            getThemeRow(dateString)?.price_per_child;
+
+        if (special !== null && special !== undefined && special !== "") {
+            return Number(special) * count;
+        }
+
         return (
             18 +
             Math.max(0, count - 1) * 15
         );
+    }
+
+    /* Velden "speciale sessie" uitlezen (prefix: "new" of "edit") */
+    function readSpecialFields(prefix) {
+
+        const val = id =>
+            (document.getElementById(prefix + id)?.value || "").trim();
+
+        const price = val("SpecialPrice");
+        const max = val("SpecialMax");
+
+        return {
+            price_per_child: price === "" ? null : Number(price),
+            max_children: max === "" ? null : Number(max),
+            start_time: val("SpecialStart") || null,
+            end_time: val("SpecialEnd") || null,
+            visual_theme: val("SpecialVisual") || null,
+            allow_pass: document.getElementById(prefix + "SpecialAllowPass")?.checked !== false,
+            announcement: val("SpecialAnnouncement") || null
+        };
+    }
+
+    function fillSpecialFields(prefix, row) {
+
+        const set = (id, v) => {
+            const el = document.getElementById(prefix + id);
+            if (el) el.value = v ?? "";
+        };
+
+        set("SpecialPrice", row?.price_per_child);
+        set("SpecialMax", row?.max_children);
+        set("SpecialStart", row?.start_time ? String(row.start_time).slice(0, 5) : "");
+        set("SpecialEnd", row?.end_time ? String(row.end_time).slice(0, 5) : "");
+        set("SpecialVisual", row?.visual_theme || "");
+        set("SpecialAnnouncement", row?.announcement || "");
+
+        const pass = document.getElementById(prefix + "SpecialAllowPass");
+        if (pass) pass.checked = row ? row.allow_pass !== false : true;
+
+        const details = document.getElementById(prefix + "SpecialDetails");
+        if (details) {
+            details.open = !!row && (
+                row.price_per_child != null || row.max_children != null ||
+                row.start_time || row.end_time || row.visual_theme ||
+                row.announcement || row.allow_pass === false
+            );
+        }
+    }
+
+    function validateSpecialFields(s) {
+        if (s.price_per_child !== null && !(s.price_per_child >= 0)) return "Ongeldige prijs.";
+        if (s.max_children !== null && !(Number.isInteger(s.max_children) && s.max_children >= 1)) return "Ongeldig maximum aantal kinderen.";
+        if (s.start_time && s.end_time && s.end_time <= s.start_time) return "Het einduur moet na het startuur liggen.";
+        return "";
     }
 
     function getChildren(item) {
@@ -3083,7 +3245,8 @@
         }
 
         return calculateAmount(
-            getAppointmentChildrenCount(item)
+            getAppointmentChildrenCount(item),
+            item.appointment_date
         );
     }
 
@@ -3903,6 +4066,17 @@
             return;
         }
 
+        const special =
+            readSpecialFields("new");
+
+        const specialError =
+            validateSpecialFields(special);
+
+        if (specialError) {
+            showToast(specialError, true);
+            return;
+        }
+
         const {
             error
         } = await sb
@@ -3910,7 +4084,8 @@
             .upsert(
                 {
                     date,
-                    theme
+                    theme,
+                    ...special
                 },
                 {
                     onConflict:
@@ -3938,6 +4113,8 @@
         document.getElementById(
             "themeName"
         ).value = "";
+
+        fillSpecialFields("new", null);
 
         showToast(
             "✅ Thema opgeslagen."
@@ -3983,6 +4160,11 @@
             "editThemeDate"
         ).dataset.oldDate =
             theme.date || "";
+
+        fillSpecialFields(
+            "edit",
+            getThemeRow(theme.date)
+        );
 
         document.getElementById(
             "deleteButton"
@@ -4563,13 +4745,13 @@
                     Number(
                         childrenCount || 1
                     ) >
-                    MAX_CHILDREN -
+                    getMaxChildren(date) -
                     bookedForDate
                 ) {
 
                     const overbook =
                         confirm(
-                            `⚠️ Deze sessie heeft nog maar ${MAX_CHILDREN - bookedForDate} van de ${MAX_CHILDREN} plaatsen vrij (${bookedForDate} bezet).\n` +
+                            `⚠️ Deze sessie heeft nog maar ${getMaxChildren(date) - bookedForDate} van de ${getMaxChildren(date)} plaatsen vrij (${bookedForDate} bezet).\n` +
                             `Dit gezin telt ${childrenCount} kind(eren), dus je boekt OVER de capaciteit.\n\n` +
                             "Toch toevoegen als overboeking?"
                         );
@@ -4703,6 +4885,17 @@
 
         let query;
 
+        const special =
+            readSpecialFields("edit");
+
+        const specialError =
+            validateSpecialFields(special);
+
+        if (specialError) {
+            showToast(specialError, true);
+            return;
+        }
+
         if (oldDate) {
 
             query =
@@ -4710,7 +4903,8 @@
                     .from("themes")
                     .update({
                         date,
-                        theme: name
+                        theme: name,
+                        ...special
                     })
                     .eq(
                         "date",
@@ -4724,7 +4918,8 @@
                     .from("themes")
                     .update({
                         date,
-                        theme: name
+                        theme: name,
+                        ...special
                     })
                     .eq(
                         "date",
@@ -6719,14 +6914,14 @@
                         Math.round(
                             (
                                 entry.count /
-                                MAX_CHILDREN
+                                getMaxChildren(entry.key)
                             ) * 100
                         )
                     );
 
                 const full =
                     entry.count >=
-                    MAX_CHILDREN;
+                    getMaxChildren(entry.key);
 
                 const theme =
                     getThemeForDate(
@@ -6743,7 +6938,7 @@
                             </span>
 
                             <span class="occupancy-count">
-                                📅 ${formatDateDutch(entry.date)} · ${entry.count}/${MAX_CHILDREN}
+                                📅 ${formatDateDutch(entry.date)} · ${entry.count}/${getMaxChildren(entry.key)}
                             </span>
 
                         </div>
@@ -7018,7 +7213,7 @@
                 const avgText =
                     entry.avg > 0
                         ? `gem. ${entry.avg
-                            .toLocaleString("nl-BE")}/12`
+                            .toLocaleString("nl-BE")}/${MAX_CHILDREN}`
                         : "nog niet gestart";
 
                 return `
@@ -8154,7 +8349,7 @@
         if (
             bookedOnTarget +
                 kids >
-                MAX_CHILDREN &&
+                getMaxChildren(target) &&
             !batchMoveOverbookConfirmed
         ) {
 
@@ -8163,7 +8358,7 @@
 
             if (!confirm(
                     `Er zijn al ${bookedOnTarget} kindjes ingeschreven op ${formatDate(target)}. ` +
-                    `Samen met de ${kids} geselecteerde kindjes is dit ${bookedOnTarget + kids} (boven de limiet van ${MAX_CHILDREN}). Toch verplaatsen?`
+                    `Samen met de ${kids} geselecteerde kindjes is dit ${bookedOnTarget + kids} (boven de limiet van ${getMaxChildren(target)}). Toch verplaatsen?`
                 )
             ) {
 
@@ -8651,9 +8846,9 @@
                                                 );
                                             return (
                                                 booked + need >
-                                                MAX_CHILDREN
+                                                getMaxChildren(item.appointment_date)
                                             )
-                                                ? `<div style="margin-top:6px;color:#d97706;font-weight:600;">⚠️ Sessie vol (${booked}/${MAX_CHILDREN} bezet) — je boekt over de capaciteit.</div>`
+                                                ? `<div style="margin-top:6px;color:#d97706;font-weight:600;">⚠️ Sessie vol (${booked}/${getMaxChildren(item.appointment_date)} bezet) — je boekt over de capaciteit.</div>`
                                                 : "";
                                         })()
                                     }
@@ -9805,7 +10000,8 @@ ${item.published
             "editAmount"
         ).value =
             calculateAmount(
-                childrenCount
+                childrenCount,
+                item.appointment_date
             ).toFixed(2);
 
         document.getElementById(
@@ -10283,7 +10479,7 @@ ${item.published
                 ) || 1;
 
             const available =
-                MAX_CHILDREN -
+                getMaxChildren(date) -
                 (
                     bookedByDate[date] || 0
                 );
@@ -10322,7 +10518,7 @@ ${item.published
                     count,
 
                 amount:
-                    calculateAmount(count),
+                    calculateAmount(count, date),
 
                 payment_method:
                     "onsite",
@@ -10411,7 +10607,7 @@ ${item.published
                 children,
 
                 amount:
-                    calculateAmount(count),
+                    calculateAmount(count, date),
 
                 paymentMethod:
                     "onsite"
@@ -10663,6 +10859,15 @@ ${item.published
             date:
                 formattedDate,
 
+            time: (() => {
+                const row = getThemeRow(date);
+                const fmt = t => {
+                    const [h, m] = String(t).split(":");
+                    return `${Number(h)}u${m && m !== "00" ? m : ""}`;
+                };
+                return `${fmt(row?.start_time || "10:00")} – ${fmt(row?.end_time || "11:00")}`;
+            })(),
+
             children_count:
                 childrenCount,
 
@@ -10836,12 +11041,12 @@ ${item.published
 
         if (
             Number(childrenCount || 1) >
-            MAX_CHILDREN - bookedForDate
+            getMaxChildren(date) - bookedForDate
         ) {
 
             const overbook =
                 confirm(
-                    `⚠️ Deze sessie heeft nog maar ${MAX_CHILDREN - bookedForDate} van de ${MAX_CHILDREN} plaatsen vrij (${bookedForDate} bezet).\n` +
+                    `⚠️ Deze sessie heeft nog maar ${getMaxChildren(date) - bookedForDate} van de ${getMaxChildren(date)} plaatsen vrij (${bookedForDate} bezet).\n` +
                     `Dit gezin telt ${childrenCount} kind(eren), dus je boekt OVER de capaciteit.\n\n` +
                     "Toch toevoegen als overboeking?"
                 );
@@ -11405,22 +11610,27 @@ ${item.published
                     ).value
                 );
 
+            const editDateValue =
+                document.getElementById("editDate")?.value || null;
+
             const calculated =
                 calculateAmount(
-                    this.value
+                    this.value,
+                    editDateValue
                 );
+
+            const standardAmounts =
+                [1, 2, 3, 4].flatMap(n => [
+                    calculateAmount(n),
+                    calculateAmount(n, editDateValue)
+                ]);
 
             if (
                 !Number.isFinite(
                     current
                 ) ||
                 current === 0 ||
-                [
-                    18,
-                    33,
-                    48,
-                    63
-                ].includes(current)
+                standardAmounts.includes(current)
             ) {
 
                 document.getElementById(

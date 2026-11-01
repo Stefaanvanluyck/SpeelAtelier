@@ -104,6 +104,16 @@ function formatDate(dateString: string): string {
     return `${d}/${m}/${y}`;
 }
 
+// "10:00:00" -> "10u", "11:30:00" -> "11u30"
+function formatHour(time: string): string {
+    const [h, m] = String(time).split(":");
+    return `${Number(h)}u${m && m !== "00" ? m : ""}`;
+}
+
+function formatTimeRange(start: string | null, end: string | null): string {
+    return `${formatHour(start ?? "10:00")} – ${formatHour(end ?? "11:00")}`;
+}
+
 Deno.serve(async (req: Request) => {
     if (req.method !== "POST") {
         return new Response("nok", { status: 405 });
@@ -302,11 +312,23 @@ Deno.serve(async (req: Request) => {
                 .map((c, i) => `Kind ${i + 1}: ${c}`)
                 .join("\n");
 
+            // Uren van de sessie (speciale sessies kunnen afwijken)
+            const { data: session } = await sb
+                .from("themes")
+                .select("start_time, end_time")
+                .eq("date", String(booking.appointment_date).slice(0, 10))
+                .maybeSingle();
+            const time = formatTimeRange(
+                session?.start_time ?? null,
+                session?.end_time ?? null,
+            );
+
             // Klant: bevestigingsmail
             await sendEmail(EMAILJS_CONFIRMATION_TEMPLATE, {
                 name: booking.name,
                 email: booking.email,
                 date: formatDate(booking.appointment_date),
+                time,
                 children_count: booking.children_count,
                 child_names: childNamesText,
                 child1: childNamesList[0] ?? "",
@@ -322,6 +344,7 @@ Deno.serve(async (req: Request) => {
                 name: booking.name,
                 email: booking.email,
                 date: formatDate(booking.appointment_date),
+                time,
                 children_count: booking.children_count,
                 child_names: childNamesText,
                 amount: Number(booking.amount || 0).toFixed(2).replace(".", ","),

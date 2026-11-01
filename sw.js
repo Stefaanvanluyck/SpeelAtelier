@@ -1,4 +1,4 @@
-const CACHE_NAME = "kleine-wonderwereld-v3";
+const CACHE_NAME = "kleine-wonderwereld-v6";
 const ASSETS = [
     "./",
     "./index.html",

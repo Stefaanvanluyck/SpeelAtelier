@@ -2468,9 +2468,195 @@
     </noscript>
 
 
+<style>
+.skip-link{position:absolute;left:-999px;top:0;background:#1f2a1f;color:#fff;padding:10px 16px;z-index:10000;border-radius:0 0 8px 0}
+.skip-link:focus{left:0}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #1f2a1f;outline-offset:3px}
+
+/* =========================================================
+   SPECIALE SESSIES — algemeen
+========================================================= */
+.session-info{
+    margin:6px 0 10px;
+    padding:10px 14px;
+    border-radius:12px;
+    background:#fff7e6;
+    border:1px dashed #e0a100;
+    font-size:.9rem;
+    line-height:1.5;
+}
+.session-time{font-weight:400;color:#6b7280;font-size:.9em;white-space:nowrap}
+.session-price{
+    display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;
+    background:#fde68a;color:#7c2d12;font-size:.78rem;font-weight:700;
+}
+
+/* =========================================================
+   SNEEUW
+========================================================= */
+.snow-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.snow-layer.fixed{position:fixed}
+.snow-layer span{
+    position:absolute;top:-10%;color:#fff;
+    text-shadow:0 0 4px rgba(255,255,255,.8);
+    animation:snowFall linear infinite;user-select:none;
+}
+@keyframes snowFall{
+    0%{transform:translateY(-10vh) translateX(0) rotate(0)}
+    50%{transform:translateY(50vh) translateX(18px) rotate(180deg)}
+    100%{transform:translateY(110vh) translateX(-12px) rotate(360deg)}
+}
+
+/* =========================================================
+   KERST — aankondiging op de homepage
+========================================================= */
+.special-announcement{
+    position:relative;overflow:hidden;
+    margin:30px auto;max-width:1100px;width:calc(100% - 32px);
+    padding:34px 28px;border-radius:28px;
+    background:
+        repeating-linear-gradient(135deg,#b91c1c 0 18px,#fff 18px 36px);
+    box-shadow:0 20px 60px rgba(185,28,28,.25);
+}
+.special-announcement .xmas-inner{
+    position:relative;z-index:1;
+    background:#fffdf7;border-radius:22px;padding:28px;
+    display:grid;grid-template-columns:1.1fr 1fr;gap:26px;align-items:center;
+}
+.special-announcement .xmas-text h2{
+    font-family:"Brush Script MT","Segoe Script",cursive;
+    color:#1e5b32;font-size:2.6rem;margin:0 0 6px;line-height:1.1;
+}
+.xmas-eyebrow{
+    display:inline-block;background:#1e7b3c;color:#fff;font-weight:700;
+    padding:4px 12px;border-radius:999px;font-size:.85rem;letter-spacing:.03em;
+}
+.xmas-facts{list-style:none;padding:0;margin:14px 0;display:grid;gap:6px;font-size:1.05rem}
+.xmas-facts li{display:flex;gap:8px;align-items:center}
+.xmas-program{margin:10px 0 18px;padding-left:20px;color:#7f1d1d;line-height:1.7}
+.xmas-cta{
+    background:linear-gradient(135deg,#c0392b,#e74c3c)!important;
+    box-shadow:0 8px 20px rgba(192,57,43,.35);
+}
+.xmas-cta.full{background:#9ca3af!important}
+.xmas-flyers{display:flex;gap:14px;justify-content:center}
+.xmas-flyers button{
+    border:0;padding:0;background:none;cursor:zoom-in;
+    border-radius:14px;overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    transition:transform .3s;
+}
+.xmas-flyers button:nth-child(1){transform:rotate(-3deg)}
+.xmas-flyers button:nth-child(2){transform:rotate(3deg)}
+.xmas-flyers button:hover{transform:rotate(0) scale(1.04)}
+.xmas-flyers img{display:block;width:100%;max-width:230px;height:auto}
+.xmas-deco{position:absolute;font-size:2.2rem;z-index:2;animation:xmasSwing 3s ease-in-out infinite}
+@keyframes xmasSwing{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+@media (max-width:760px){
+    .special-announcement .xmas-inner{grid-template-columns:1fr}
+    .special-announcement .xmas-text h2{font-size:2rem}
+    .xmas-flyers img{max-width:150px}
+}
+
+.flyer-lightbox{
+    position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.8);
+    display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;
+}
+.flyer-lightbox img{max-width:100%;max-height:92vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+
+/* =========================================================
+   KERST — inschrijvingsvenster
+========================================================= */
+#modal.theme-kerst{background:rgba(20,40,28,.78)}
+#modal.theme-kerst .modal-content{
+    position:relative;z-index:1;
+    background:#fffdf7;
+    border:6px solid transparent;
+    background-image:
+        linear-gradient(#fffdf7,#fffdf7),
+        repeating-linear-gradient(135deg,#c0392b 0 12px,#fff 12px 24px);
+    background-origin:border-box;
+    background-clip:padding-box,border-box;
+    box-shadow:0 0 0 3px #d4af37,0 30px 90px rgba(0,0,0,.45);
+}
+#modal.theme-kerst #bookingTitle{color:#1e5b32;text-align:center;font-size:1.45rem}
+#modal.theme-kerst .xmas-hat{display:inline-block;animation:xmasSwing 2.4s ease-in-out infinite}
+#modal.theme-kerst .session-info{background:#ecfdf3;border-color:#1e7b3c;color:#14532d}
+#modal.theme-kerst #submitBtn:not(:disabled){background:linear-gradient(135deg,#c0392b,#1e7b3c)}
+#modal.theme-kerst .payment-method-option.selected{border-color:#c0392b;background:#fff1f0}
+
+/* =========================================================
+   KERST — kerstman na inschrijving
+========================================================= */
+.santa-overlay{
+    position:fixed;inset:0;z-index:4000;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(20,40,28,.72);padding:20px;
+    animation:santaFade .3s ease-out;
+}
+@keyframes santaFade{from{opacity:0}to{opacity:1}}
+.santa-card{
+    position:relative;z-index:1;text-align:center;
+    max-height:92vh;overflow-y:auto;
+    background:#fffdf7;border-radius:28px;padding:30px 26px 24px;max-width:400px;width:100%;
+    box-shadow:0 0 0 4px #c0392b,0 0 0 8px #fff,0 0 0 11px #1e7b3c,0 30px 90px rgba(0,0,0,.5);
+}
+.santa-scene{position:relative;height:130px;margin-bottom:6px}
+.santa-emoji{
+    font-size:6rem;display:inline-block;line-height:1;
+    animation:santaPop .7s cubic-bezier(.2,1.6,.4,1) both,santaBounce 1s ease-in-out .7s 3;
+}
+.santa-tree{position:absolute;bottom:0;font-size:3.4rem;animation:santaPop .6s .2s both}
+.santa-tree.left{left:8%}
+.santa-tree.right{right:8%}
+@keyframes santaPop{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+@keyframes santaBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px) rotate(-4deg)}}
+.santa-bubble{
+    position:absolute;top:-6px;right:-4px;
+    background:#c0392b;color:#fff;font-weight:800;font-size:1.15rem;
+    padding:8px 14px;border-radius:18px 18px 18px 4px;
+    animation:santaPop .4s .5s both;box-shadow:0 6px 16px rgba(192,57,43,.4);
+}
+.santa-card h3{color:#1e5b32;margin:6px 0 8px;font-size:1.4rem}
+.santa-card p{margin:6px 0;color:#374151}
+.santa-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.santa-sound-btn{background:#1e7b3c!important}
+.santa-summary{
+    text-align:left;background:#ecfdf3;border:1px dashed #1e7b3c;
+    border-radius:14px;padding:10px 14px;margin:10px 0;font-size:.92rem;
+}
+.santa-summary p{margin:6px 0}
+#santaIcsSlot .btn{width:100%;margin-top:0!important;background:#c0392b}
+
+/* =========================================================
+   BEVESTIGINGSSCHERM (gewone sessies)
+========================================================= */
+.booking-success{text-align:center;animation:santaFade .3s ease-out}
+.booking-success-check{
+    width:64px;height:64px;margin:4px auto 8px;border-radius:50%;
+    background:#2ecc71;color:#fff;font-size:2.2rem;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px rgba(46,204,113,.35);
+    animation:santaPop .5s cubic-bezier(.2,1.6,.4,1) both;
+}
+.booking-success-title{font-size:1.35rem;margin:4px 0 12px;color:#2e7d32}
+.booking-success-title:focus{outline:none}
+#bookingSuccessContent{
+    text-align:left;background:#eefaf3;border-radius:14px;
+    padding:12px 16px;margin-bottom:6px;line-height:1.5;
+}
+#bookingSuccessContent p{margin:8px 0}
+.booking-success-mail{font-size:.9rem;color:#4b5563}
+.booking-success-actions .btn{width:100%}
+#bookingSuccessClose{width:100%;margin-top:8px;background:#6b7280}
+@media (prefers-reduced-motion:reduce){
+    .snow-layer,.xmas-deco,.santa-emoji,.santa-tree,.santa-bubble,#modal.theme-kerst .xmas-hat{animation:none!important}
+}
+</style>
 </head>
 
 <body>
+<a class="skip-link" href="#over">Naar de inhoud</a>
 
 <!-- =========================================================
      NAVIGATION
@@ -2706,6 +2892,19 @@ margin-left:0;
 </div>
 
 <!-- =========================================================
+     SPECIALE SESSIE — AANKONDIGING (bv. Kerstspecial)
+     Wordt automatisch gevuld en getoond door
+     renderSpecialAnnouncement() zolang er een speciale
+     sessie in de toekomst gepland staat.
+========================================================= -->
+
+<section id="specialAnnouncement"
+         class="special-announcement"
+         aria-labelledby="specialAnnouncementTitle"
+         style="display:none;">
+</section>
+
+<!-- =========================================================
      OVER
 ========================================================= -->
 
@@ -2713,7 +2912,7 @@ margin-left:0;
          class="over-section">
 
 
-    <h2>🌿 Over</h2>
+    <h2><span aria-hidden="true">🌿</span> Over</h2>
 
     <img src="logosite.webp"
          width="713"
@@ -2762,7 +2961,7 @@ margin-left:0;
 <section id="overmij">
 
 
-    <h2>👩‍🏫 Juf Valerie</h2>
+    <h2><span aria-hidden="true">👩‍🏫</span> Juf Valerie</h2>
 
     <div class="teacher">
 
@@ -2832,7 +3031,7 @@ margin-left:0;
 <section id="planning">
 
 
-    <h2>📅 Planning</h2>
+    <h2><span aria-hidden="true">📅</span> Planning</h2>
 
     <div class="calendar-wrapper">
 
@@ -2864,7 +3063,7 @@ margin-left:0;
 
 <section id="quiz">
 
-    <h2>🎨 Welk thema past bij jou?</h2>
+    <h2><span aria-hidden="true">🎨</span> Welk thema past bij jou?</h2>
 
     <div class="quiz-section" aria-live="polite">
 
@@ -2881,7 +3080,7 @@ margin-left:0;
 <section id="prijzen">
 
 
-    <h2>💛 Prijzen & Praktisch</h2>
+    <h2><span aria-hidden="true">💛</span> Prijzen & Praktisch</h2>
 
     <div class="pricing-info">
 
@@ -2973,6 +3172,15 @@ margin-left:0;
 
         </p>
 
+        <h3>✨ Speciale sessies</h3>
+
+        <p>
+            Af en toe organiseren we een speciale editie, zoals een
+            Kerstspecial. Daarvoor kunnen een afwijkende prijs, uren en
+            aantal plaatsen gelden, en zijn beurtenkaarten niet altijd
+            geldig. Je ziet dit telkens bij de sessie in de kalender.
+        </p>
+
         <h3>❌ Annulatie</h3>
 
         <p>
@@ -3012,7 +3220,7 @@ margin-left:0;
 <section id="galerij">
 
 
-    <h2>🖼️ Galerij</h2>
+    <h2><span aria-hidden="true">🖼️</span> Galerij</h2>
 
     <div class="gallery" id="galleryGrid">
 
@@ -3086,7 +3294,7 @@ margin-left:0;
         </button>
 
         <img id="lightboxImg"
-             alt="">
+             alt="Foto uit de galerij">
 
         <div class="lightbox-caption"
              id="lightboxCaption"></div>
@@ -3102,7 +3310,7 @@ margin-left:0;
 
 <section id="Instagram">
 
-    <h2>📸 Volg ons op Instagram</h2>
+    <h2><span aria-hidden="true">📸</span> Volg ons op Instagram</h2>
 
     <p class="instagram-intro">
         Sfeerbeelden, thema's en andere avonturen van de
@@ -3160,7 +3368,7 @@ margin-left:0;
 <section id="faq">
 
 
-    <h2>❓ FAQ</h2>
+    <h2><span aria-hidden="true">❓</span> FAQ</h2>
 
     <div class="faq-item">
 
@@ -3301,7 +3509,7 @@ margin-left:0;
 
 <section id="getuigenissen">
 
-    <h2>💬 Wat gezinnen zeggen</h2>
+    <h2><span aria-hidden="true">💬</span> Wat gezinnen zeggen</h2>
 
     <div class="testimonial-carousel"
          id="testimonialCarousel">
@@ -3457,6 +3665,8 @@ margin-left:0;
             Inschrijving
         </h3>
 
+        <div id="bookingFormView">
+
         <label for="datePicker"
                style="
            display:block;
@@ -3471,6 +3681,11 @@ margin-left:0;
 
         <input type="date"
                id="datePicker">
+
+        <div id="sessionInfo"
+             class="session-info"
+             style="display:none;">
+        </div>
 
         <div id="errorMsg"
              style="color:red; margin-top:5px;">
@@ -3662,6 +3877,32 @@ margin-left:0;
                target="_blank"
                rel="noopener">privacybeleid</a>.
         </p>
+
+        </div>
+
+        <!-- BEVESTIGINGSSCHERM (na geslaagde inschrijving) -->
+        <div id="bookingSuccessView"
+             class="booking-success"
+             style="display:none;"
+             aria-live="polite">
+
+            <div class="booking-success-check" aria-hidden="true">✓</div>
+
+            <h4 class="booking-success-title" tabindex="-1" id="bookingSuccessTitle">
+                Inschrijving bevestigd!
+            </h4>
+
+            <div id="bookingSuccessContent"></div>
+
+            <div id="bookingSuccessActions" class="booking-success-actions"></div>
+
+            <button class="btn"
+                    id="bookingSuccessClose"
+                    onclick="closeForm()">
+                Sluiten
+            </button>
+
+        </div>
 
     </div>
 
@@ -3875,6 +4116,13 @@ margin-left:0;
         Sensorisch speelatelier voor kleine ontdekkers.
     </p>
 
+    <address style="font-style:normal;margin:12px 0;line-height:1.6">
+        Braakstraat 7, 2960 Sint-Job<br>
+        Ondernemingsnummer: BE 1040.367.659<br>
+        <a href="mailto:kleinewonderwereld2920@gmail.com">kleinewonderwereld2920@gmail.com</a>
+        &middot; <a href="tel:+32471390682">+32 471 39 06 82</a>
+    </address>
+
     <div class="footer-social">
 
         <a href="https://www.instagram.com/juf__valerie"
@@ -3897,6 +4145,14 @@ margin-left:0;
            rel="noopener">
             Privacybeleid
         </a>
+    </p>
+
+    <p style="font-size:.72rem;opacity:.7;">
+        Geluid "ho, ho, ho" door Vealhurl (Lingua Libre),
+        <a href="https://commons.wikimedia.org/wiki/File:LL-Q1860_(eng)-Vealhurl-ho,_ho,_ho.wav"
+           target="_blank" rel="noopener">Wikimedia Commons</a>,
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/"
+           target="_blank" rel="noopener">CC BY-SA 4.0</a>.
     </p>
 
 
@@ -4003,6 +4259,113 @@ margin-left:0;
 
     const MAX_CHILDREN =
         12;
+
+    /* Standaardprijzen — houd gelijk met de SQL-trigger en de edge function */
+    const PRICE_FIRST = 18;
+    const PRICE_EXTRA = 15;
+    const DEFAULT_START_TIME = "10:00";
+    const DEFAULT_END_TIME = "11:00";
+
+
+    /* =========================================================
+       SESSIE-INSTELLINGEN PER DATUM (speciale sessies)
+       ---------------------------------------------------------
+       Kolommen in `themes` (zie supabase/sql/special_sessions.sql):
+       price_per_child, allow_pass, max_children, start_time,
+       end_time, visual_theme, announcement.
+       Lege waarden = standaard sessie.
+    ========================================================= */
+
+    const SESSION_SETTINGS = {};
+
+    let sessionSettingsPromise = null;
+
+    function loadSessionSettings(force = false) {
+
+        if (sessionSettingsPromise && !force) {
+            return sessionSettingsPromise;
+        }
+
+        sessionSettingsPromise = (async () => {
+
+            const { data, error } = await sb
+                .from("themes")
+                .select("date,theme,price_per_child,allow_pass,max_children,start_time,end_time,visual_theme,announcement");
+
+            if (error) {
+                /* Kolommen nog niet aangemaakt? Dan gewoon standaardwaarden. */
+                console.warn("Sessie-instellingen niet beschikbaar:", error.message);
+                return SESSION_SETTINGS;
+            }
+
+            (data || []).forEach(row => {
+                SESSION_SETTINGS[String(row.date).slice(0, 10)] = row;
+            });
+
+            return SESSION_SETTINGS;
+
+        })();
+
+        return sessionSettingsPromise;
+    }
+
+    function getSessionSettings(date) {
+        return (date && SESSION_SETTINGS[String(date).slice(0, 10)]) || {};
+    }
+
+    function getMaxChildren(date) {
+        const max = Number(getSessionSettings(date).max_children);
+        return Number.isFinite(max) && max > 0 ? max : MAX_CHILDREN;
+    }
+
+    function getPricePerChild(date) {
+        const p = getSessionSettings(date).price_per_child;
+        return p === null || p === undefined || p === "" ? null : Number(p);
+    }
+
+    function isPassAllowed(date) {
+        return getSessionSettings(date).allow_pass !== false;
+    }
+
+    function getVisualTheme(date) {
+        return getSessionSettings(date).visual_theme || "";
+    }
+
+    function isChristmasSession(date) {
+        return getVisualTheme(date) === "kerst";
+    }
+
+    function getSessionStartTime(date) {
+        return String(getSessionSettings(date).start_time || DEFAULT_START_TIME).slice(0, 5);
+    }
+
+    function getSessionEndTime(date) {
+        return String(getSessionSettings(date).end_time || DEFAULT_END_TIME).slice(0, 5);
+    }
+
+    /* "2026-12-12" -> "2026-12-12T10:00:00" */
+    function sessionStartIso(date) {
+        return `${date}T${getSessionStartTime(date)}:00`;
+    }
+
+    function sessionEndIso(date) {
+        return `${date}T${getSessionEndTime(date)}:00`;
+    }
+
+    /* "10:00" -> "10u", "11:30" -> "11u30" */
+    function formatHour(time) {
+        const [h, m] = String(time).split(":");
+        return `${Number(h)}u${m && m !== "00" ? m : ""}`;
+    }
+
+    function formatSessionTimeRange(date) {
+        return `${formatHour(getSessionStartTime(date))} – ${formatHour(getSessionEndTime(date))}`;
+    }
+
+    function formatEuro(value) {
+        const n = Number(value || 0);
+        return "€" + (Number.isInteger(n) ? String(n) : n.toFixed(2).replace(".", ","));
+    }
 
 
     /* =========================================================
@@ -4363,6 +4726,8 @@ margin-left:0;
         document.getElementById("modal")
             .style.display = "flex";
 
+        resetBookingView();
+
         lockBodyScroll();
 
         const datePicker =
@@ -4393,6 +4758,10 @@ margin-left:0;
         }
 
         datePicker.focus();
+
+        await loadSessionSettings();
+
+        applySessionToForm();
 
         /*
          * Submit-knop terug actief maken voor een
@@ -4453,8 +4822,146 @@ margin-left:0;
         document.getElementById("modal")
             .style.display = "none";
 
+        stopSnow("modalSnow");
+
+        resetBookingView();
+
         unlockBodyScroll();
 
+    }
+
+
+    /* =========================================================
+       BEVESTIGINGSSCHERM IN HET INSCHRIJVINGSVENSTER
+    ========================================================= */
+
+    function showBookingSuccess(summaryHtml, date, label) {
+
+        const formView = document.getElementById("bookingFormView");
+        const successView = document.getElementById("bookingSuccessView");
+        const content = document.getElementById("bookingSuccessContent");
+        const actions = document.getElementById("bookingSuccessActions");
+
+        if (!formView || !successView) {
+            return;
+        }
+
+        content.innerHTML = summaryHtml;
+        actions.innerHTML = "";
+        showICSButton(date, actions, label);
+
+        formView.style.display = "none";
+        successView.style.display = "block";
+
+        const modalContent =
+            document.querySelector("#modal .modal-content");
+        if (modalContent) modalContent.scrollTop = 0;
+
+        document.getElementById("bookingSuccessClose")?.focus();
+    }
+
+    function resetBookingView() {
+
+        const formView = document.getElementById("bookingFormView");
+        const successView = document.getElementById("bookingSuccessView");
+
+        if (formView) formView.style.display = "";
+        if (successView) successView.style.display = "none";
+
+        const content = document.getElementById("bookingSuccessContent");
+        const actions = document.getElementById("bookingSuccessActions");
+        if (content) content.innerHTML = "";
+        if (actions) actions.innerHTML = "";
+    }
+
+
+    /* =========================================================
+       FORMULIER AANPASSEN AAN DE GEKOZEN SESSIE
+       (prijs, beurtenkaart, kerstlook)
+    ========================================================= */
+
+    function getSelectedFormDate() {
+        return document.getElementById("datePicker")?.value || "";
+    }
+
+    function applySessionToForm() {
+
+        const date = getSelectedFormDate();
+
+        const modal = document.getElementById("modal");
+        const title = document.getElementById("bookingTitle");
+        const info = document.getElementById("sessionInfo");
+        const passOption = document.getElementById("paymentPassOption");
+        const passRadio = passOption?.querySelector("input");
+
+        /* Prijzen in de keuzelijst */
+        const select = document.getElementById("childrenCount");
+        if (select) {
+            Array.from(select.options).forEach(opt => {
+                const n = Number(opt.value);
+                opt.textContent =
+                    `${n} ${n === 1 ? "kind" : "kinderen"} — ${formatEuro(calculateAmount(n, date))}`;
+            });
+        }
+
+        /* Beurtenkaart toegestaan? */
+        const passAllowed = !date || isPassAllowed(date);
+        if (passOption) {
+            passOption.style.display = passAllowed ? "" : "none";
+        }
+        if (!passAllowed && passRadio?.checked) {
+            passRadio.checked = false;
+            const onsite = document.querySelector('input[name="paymentMethod"][value="onsite"]');
+            if (onsite) onsite.checked = true;
+        }
+
+        /* Kerstlook */
+        const christmas = !!date && isChristmasSession(date);
+        modal?.classList.toggle("theme-kerst", christmas);
+
+        if (title) {
+            title.innerHTML = christmas
+                ? '<span class="xmas-hat" aria-hidden="true">🎅</span> Inschrijven voor de Kerstspecial <span aria-hidden="true">🎄</span>'
+                : "Inschrijving";
+        }
+
+        if (christmas) {
+            startSnow("modalSnow", modal.querySelector(".modal-content"));
+        } else {
+            stopSnow("modalSnow");
+        }
+
+        /* Info over afwijkende sessie */
+        if (info) {
+            const s = getSessionSettings(date);
+            const special = date && (
+                getPricePerChild(date) !== null ||
+                !passAllowed ||
+                s.start_time || s.end_time ||
+                s.max_children
+            );
+
+            if (special) {
+                const lines = [
+                    `🕙 ${formatSessionTimeRange(date)}`,
+                    getPricePerChild(date) !== null
+                        ? `💶 ${formatEuro(getPricePerChild(date))} per kind`
+                        : "",
+                    !passAllowed
+                        ? "🎟️ Beurtenkaarten zijn niet geldig voor deze speciale sessie"
+                        : ""
+                ].filter(Boolean);
+
+                info.innerHTML = lines.map(l => `<div>${escapeHtml(l)}</div>`).join("");
+                info.style.display = "block";
+            } else {
+                info.innerHTML = "";
+                info.style.display = "none";
+            }
+        }
+
+        updatePaymentSummary();
+        updatePaymentButton();
     }
 
 
@@ -4462,7 +4969,7 @@ margin-left:0;
        CALCULATE PRICE
     ========================================================= */
 
-    function calculateAmount(childrenCount) {
+    function calculateAmount(childrenCount, date = getSelectedFormDate()) {
 
         const count =
             Number(childrenCount);
@@ -4471,8 +4978,15 @@ margin-left:0;
             return 0;
         }
 
-        return 18 +
-            Math.max(0, count - 1) * 15;
+        const pricePerChild =
+            getPricePerChild(date);
+
+        if (pricePerChild !== null) {
+            return pricePerChild * count;
+        }
+
+        return PRICE_FIRST +
+            Math.max(0, count - 1) * PRICE_EXTRA;
 
     }
 
@@ -4762,6 +5276,9 @@ margin-left:0;
             date:
                 formattedDate,
 
+            time:
+                formatSessionTimeRange(date),
+
             children_count:
                 childrenCount,
 
@@ -5045,9 +5562,11 @@ margin-left:0;
            SESSION ALREADY ENDED
         ===================================================== */
 
+        await loadSessionSettings();
+
         const bookingSessionEnd =
             new Date(
-                selectedDate + "T11:00:00"
+                sessionEndIso(selectedDate)
             );
 
         if (
@@ -5133,9 +5652,23 @@ margin-left:0;
            AMOUNT
         ===================================================== */
 
+        if (
+            paymentMethod === "pass" &&
+            !isPassAllowed(selectedDate)
+        ) {
+
+            showFormError(
+                "🎟️ Beurtenkaarten zijn niet geldig voor deze speciale sessie."
+            );
+
+            return;
+
+        }
+
         const amount =
             calculateAmount(
-                childrenCount
+                childrenCount,
+                selectedDate
             );
 
 
@@ -5191,13 +5724,13 @@ margin-left:0;
 
                 if (
                     booked + childrenCount >
-                    MAX_CHILDREN
+                    getMaxChildren(selectedDate)
                 ) {
 
                     throw new Error(
                         `Er zijn nog maar ${Math.max(
                             0,
-                            MAX_CHILDREN - booked
+                            getMaxChildren(selectedDate) - booked
                         )} plaats(en) beschikbaar voor deze sessie.`
                     );
 
@@ -5381,78 +5914,54 @@ margin-left:0;
                             </strong>`
                         : `Te betalen bij aankomst:
                             <strong>
-                                €${amount
-                                    .toFixed(2)
-                                    .replace(".", ",")}
+                                ${formatEuro(amount)}
                             </strong>
-
-                            <br><br>
-
+                            <br>
                             Betalen kan via
                             💵 cash of 📱 Payconiq.`;
 
-                confirmMsg.innerHTML = `
-                    <div style="
-                        margin-top:18px;
-                        padding:16px;
-                        background:#eefaf3;
-                        border-radius:14px;
-                    ">
-
-                        <strong>
-                            💛 Inschrijving bevestigd!
-                        </strong>
-
-                        <br><br>
-
+                const summaryHtml = `
+                    <p>
                         We verwachten jullie op
                         <strong>
-                            ${formatDateForEmail(selectedDate)}
+                            ${escapeHtml(formatLongDate(new Date(sessionStartIso(selectedDate))))}
+                            (${escapeHtml(formatSessionTimeRange(selectedDate))})
                         </strong>.
-
-                        <br><br>
-
-                        ${childNamesConfirmation}
-
-                        <br><br>
-
-                        Aantal kinderen:
-                        <strong>
-                            ${childrenCount}
-                        </strong>
-
-                        <br><br>
-
-                        ${paymentInfo}
-
-                        <br><br>
-
-                        Een bevestigingsmail werd
-                        naar <strong>${escapeHtml(email)}</strong>
-                        verzonden.
-
-                    </div>
+                    </p>
+                    <p>${childNamesConfirmation}</p>
+                    <p>${paymentInfo}</p>
+                    <p class="booking-success-mail">
+                        📧 Een bevestigingsmail werd verstuurd naar
+                        <strong>${escapeHtml(email)}</strong>.
+                    </p>
                 `;
 
+                const themeLabel =
+                    getSessionSettings(selectedDate).theme ||
+                    "Speelatelier";
 
-                submitBtn.innerHTML =
-                    "✓ Inschrijving bevestigd";
+                if (isChristmasSession(selectedDate)) {
 
+                    /* Optie 3: enkel het kerstvenster */
+                    closeForm();
 
-                /*
-                 * Agenda koppeling (ICS download)
-                 */
+                    showSantaCelebration(selectedDate, {
+                        userGesture: true,
+                        summaryHtml,
+                        icsLabel: themeLabel
+                    });
 
-                showICSButton(
-                    selectedDate
-                );
+                } else {
 
+                    /* Optie 2: apart bevestigingsscherm */
+                    showBookingSuccess(
+                        summaryHtml,
+                        selectedDate,
+                        themeLabel
+                    );
 
-                /*
-                 * Feestje!
-                 */
-
-                launchConfetti();
+                    launchConfetti();
+                }
 
 
                 /*
@@ -5489,10 +5998,10 @@ margin-left:0;
 
 
                 /*
-                 * Modal blijft openstaande zodat de ouder de
-                 * bevestiging rustig kan lezen en de datum kan
-                 * toevoegen aan de agenda. Het formulier wordt
-                 * bij de volgende opening via openForm() gereset.
+                 * Het formulier is verborgen achter het
+                 * bevestigingsscherm (of het venster is al
+                 * gesloten bij een kerstsessie). Bij de volgende
+                 * opening zet openForm() alles terug.
                  */
 
                 submitBtn.disabled =
@@ -5809,6 +6318,8 @@ margin-left:0;
                     .from("themes")
                     .select("date,theme");
 
+            await loadSessionSettings(true);
+
 
             if (themeError) {
 
@@ -6122,7 +6633,7 @@ margin-left:0;
                 events.push({
 
                     title:
-                        "🎨 " + theme,
+                        (isChristmasSession(dateStr) ? "🎄 " : "🎨 ") + theme,
 
                     start:
                         dateStr,
@@ -6131,10 +6642,10 @@ margin-left:0;
                         true,
 
                     backgroundColor:
-                        "#8b5cf6",
+                        isChristmasSession(dateStr) ? "#c0392b" : "#8b5cf6",
 
                     borderColor:
-                        "#6d28d9",
+                        isChristmasSession(dateStr) ? "#1e7b3c" : "#6d28d9",
 
                     textColor:
                         "#fff",
@@ -6161,7 +6672,7 @@ margin-left:0;
 
                 const sessionEnd =
                     new Date(
-                        dateStr + "T11:00:00"
+                        sessionEndIso(dateStr)
                     );
 
                 if (
@@ -6213,7 +6724,7 @@ margin-left:0;
                  */
 
                 if (
-                    booked >= MAX_CHILDREN
+                    booked >= getMaxChildren(dateStr)
                 ) {
 
                     events.push({
@@ -6259,7 +6770,7 @@ margin-left:0;
                     events.push({
 
                         title:
-                            `Beschikbaar (${MAX_CHILDREN - booked})`,
+                            `Beschikbaar (${getMaxChildren(dateStr) - booked})`,
 
                         start:
                             dateStr,
@@ -6459,7 +6970,7 @@ margin-left:0;
 
                                 if (
                                     booked >=
-                                    MAX_CHILDREN
+                                    getMaxChildren(clickedDate)
                                 ) {
 
                                     return;
@@ -6483,6 +6994,8 @@ margin-left:0;
             /*
              * "Wat komt eraan?"-lijst
              */
+
+            renderSpecialAnnouncement();
 
             buildUpcomingSessions(
                 themesMap,
@@ -6705,8 +7218,15 @@ margin-left:0;
             if (picker) {
 
                 picker.addEventListener(
+                    "change",
+                    applySessionToForm
+                );
+
+                picker.addEventListener(
                     "input",
                     function() {
+
+                        applySessionToForm();
 
                         errorMsg.textContent =
                             "";
@@ -7395,11 +7915,29 @@ margin-left:0;
          * Succesmelding
          */
 
-        alert(
-            "💛 Bedankt voor je inschrijving!\n\n" +
-            "Je betaling is goed ontvangen.\n" +
-            "Je reservatie is succesvol bevestigd."
-        );
+        await loadSessionSettings();
+
+        const bookedDate =
+            String(booking.appointment_date || "").slice(0, 10);
+
+        if (isChristmasSession(bookedDate)) {
+
+            /* Feestelijke kerstbevestiging i.p.v. een alert */
+            showSantaCelebration(bookedDate, {
+                userGesture: false,
+                message:
+                    "Je betaling is goed ontvangen en je reservatie is bevestigd."
+            });
+
+        } else {
+
+            alert(
+                "💛 Bedankt voor je inschrijving!\n\n" +
+                "Je betaling is goed ontvangen.\n" +
+                "Je reservatie is succesvol bevestigd."
+            );
+
+        }
 
 
         /*
@@ -7511,7 +8049,7 @@ margin-left:0;
 
                         const start =
                             new Date(
-                                key + "T10:00:00"
+                                sessionStartIso(key)
                             );
 
                         return (
@@ -7534,7 +8072,7 @@ margin-left:0;
         }
 
         return new Date(
-            nextKey + "T10:00:00"
+            sessionStartIso(nextKey)
         );
 
     }
@@ -7745,15 +8283,16 @@ margin-left:0;
         if (upcoming) {
 
             themeEl.textContent =
-                "🎨 Volgende sessie: " +
+                (isChristmasSession(upcoming.date) ? "🎄" : "🎨") +
+                " Volgende sessie: " +
                 String(upcoming.theme).trim() +
                 " — " +
                 formatLongDate(
                     new Date(
-                        String(upcoming.date) +
-                            "T10:00:00"
+                        sessionStartIso(String(upcoming.date))
                     )
-                );
+                ) +
+                " (" + formatSessionTimeRange(String(upcoming.date)) + ")";
 
         } else {
 
@@ -7920,8 +8459,7 @@ margin-left:0;
         return "op " +
             formatLongDate(
                 new Date(
-                    targetKey +
-                        "T10:00:00"
+                    sessionStartIso(targetKey)
                 )
             );
 
@@ -8040,10 +8578,12 @@ margin-left:0;
                         0
                     );
 
+            await loadSessionSettings();
+
             const free =
                 Math.max(
                     0,
-                    MAX_CHILDREN - used
+                    getMaxChildren(targetKey) - used
                 );
 
             renderCapacityBadge(
@@ -8204,6 +8744,10 @@ margin-left:0;
             themesLoaded =
                 true;
 
+            await loadSessionSettings();
+
+            renderSpecialAnnouncement();
+
             /*
              * Zet de teller en het thema op
              * de eerste sessie mét thema.
@@ -8247,7 +8791,7 @@ margin-left:0;
                             date >= today &&
                             !blockedSet.has(date) &&
                             new Date(
-                                date + "T11:00:00"
+                                sessionEndIso(date)
                             ) > new Date()
                     )
                     .sort()
@@ -8258,8 +8802,11 @@ margin-left:0;
                                 counts[date] || 0;
 
                             const available =
-                                MAX_CHILDREN -
+                                getMaxChildren(date) -
                                 booked;
+
+                            const special =
+                                getPricePerChild(date) !== null;
 
                             return {
                                 "@type": "Event",
@@ -8271,9 +8818,9 @@ margin-left:0;
                                     themesMap[date] +
                                     ". Ouder en kind spelen, voelen en ontdekken samen.",
                                 "startDate":
-                                    date + "T10:00:00",
+                                    sessionStartIso(date),
                                 "endDate":
-                                    date + "T11:00:00",
+                                    sessionEndIso(date),
                                 "eventStatus":
                                     "https://schema.org/EventScheduled",
                                 "eventAttendanceMode":
@@ -8308,9 +8855,9 @@ margin-left:0;
                                 "offers": {
                                     "@type": "Offer",
                                     "price":
-                                        available > 0
-                                            ? 18
-                                            : 0,
+                                        special
+                                            ? getPricePerChild(date)
+                                            : PRICE_FIRST,
                                     "priceCurrency":
                                         "EUR",
                                     "url":
@@ -8402,7 +8949,7 @@ margin-left:0;
                         date >= today &&
                         !blockedSet.has(date) &&
                         new Date(
-                            date + "T11:00:00"
+                            sessionEndIso(date)
                         ) > new Date()
                 )
                 .sort()
@@ -8447,7 +8994,7 @@ margin-left:0;
                             0;
 
                         const available =
-                            MAX_CHILDREN -
+                            getMaxChildren(date) -
                             booked;
 
                         const isFull =
@@ -8459,7 +9006,7 @@ margin-left:0;
 
                         const dateObj =
                             new Date(
-                                date + "T10:00:00"
+                                sessionStartIso(date)
                             );
 
                         let statusHtml = "";
@@ -8506,16 +9053,20 @@ margin-left:0;
                                 `;
 
                         return `
-                            <div class="session-card${isLow ? " low" : ""}">
+                            <div class="session-card${isLow ? " low" : ""}${isChristmasSession(date) ? " session-kerst" : ""}">
 
                                 <div class="session-main">
 
                                     <div class="session-date">
                                         ${formatLongDate(dateObj)}
+                                        <span class="session-time">· ${escapeHtml(formatSessionTimeRange(date))}</span>
                                     </div>
 
                                     <div class="session-theme">
-                                        🎨 ${escapeHtml(theme)}
+                                        ${isChristmasSession(date) ? "🎄" : "🎨"} ${escapeHtml(theme)}
+                                        ${getPricePerChild(date) !== null
+                                            ? `<span class="session-price">${escapeHtml(formatEuro(getPricePerChild(date)))} per kind</span>`
+                                            : ""}
                                     </div>
 
                                 </div>
@@ -8531,6 +9082,368 @@ margin-left:0;
                 )
                 .join("");
 
+    }
+
+
+    /* =========================================================
+       KERST — SNEEUW, AANKONDIGING, KERSTMAN
+    ========================================================= */
+
+    const prefersReducedMotion =
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function startSnow(id, container, { fixed = false, count = 28 } = {}) {
+
+        if (!container || prefersReducedMotion) {
+            return;
+        }
+
+        if (document.getElementById(id)) {
+            return;
+        }
+
+        const layer = document.createElement("div");
+        layer.id = id;
+        layer.className = "snow-layer" + (fixed ? " fixed" : "");
+        layer.setAttribute("aria-hidden", "true");
+
+        for (let i = 0; i < count; i++) {
+            const flake = document.createElement("span");
+            flake.textContent = Math.random() < 0.5 ? "❄" : "•";
+            flake.style.left = (Math.random() * 100) + "%";
+            flake.style.fontSize = (8 + Math.random() * 14) + "px";
+            flake.style.opacity = String(0.5 + Math.random() * 0.5);
+            flake.style.animationDuration = (7 + Math.random() * 8) + "s";
+            flake.style.animationDelay = (-Math.random() * 12) + "s";
+            layer.appendChild(flake);
+        }
+
+        container.appendChild(layer);
+    }
+
+    function stopSnow(id) {
+        document.getElementById(id)?.remove();
+    }
+
+
+    /* Flyers per visueel thema */
+    const SPECIAL_THEME_ASSETS = {
+        kerst: {
+            flyers: [
+                { src: "kerst1.jpeg", alt: "Flyer Kerstspecial Kleine Wonderwereld: 12 december van 10u tot 11u30" },
+                { src: "kerst2.jpeg", alt: "Programma Kerstspecial: magische opening met verhaal, sensorisch kerstspel, zoektocht, creatieve kerstactiviteit, warme dranken en koekjes, kleine kerstverrassing" }
+            ],
+            program: [
+                "Een magische opening met een verhaal",
+                "Sensorisch kerstspel",
+                "Een leuke zoektocht",
+                "Een creatieve kerstactiviteit",
+                "Warme dranken en lekkere koekjes",
+                "Een kleine kerstverrassing"
+            ]
+        }
+    };
+
+    async function renderSpecialAnnouncement() {
+
+        const section =
+            document.getElementById("specialAnnouncement");
+
+        if (!section) {
+            return;
+        }
+
+        await loadSessionSettings();
+
+        const now = new Date();
+
+        const nextChristmas =
+            Object.values(SESSION_SETTINGS)
+                .filter(s =>
+                    s.visual_theme === "kerst" &&
+                    s.theme &&
+                    new Date(sessionEndIso(String(s.date).slice(0, 10))) > now
+                )
+                .sort((a, b) => String(a.date).localeCompare(String(b.date)))[0];
+
+        if (!nextChristmas) {
+            section.style.display = "none";
+            section.innerHTML = "";
+            stopSnow("announcementSnow");
+            return;
+        }
+
+        const date = String(nextChristmas.date).slice(0, 10);
+        const assets = SPECIAL_THEME_ASSETS.kerst;
+        const price = getPricePerChild(date);
+
+        let free = null;
+        try {
+            free = Math.max(0, getMaxChildren(date) - await getBookedChildren(date));
+        } catch (e) {
+            free = null;
+        }
+
+        const isFull = free === 0;
+        const dateAttr = escapeHtml(JSON.stringify(date));
+
+        section.innerHTML = `
+            <span class="xmas-deco" style="top:10px;left:14px;" aria-hidden="true">🎄</span>
+            <span class="xmas-deco" style="top:10px;right:14px;animation-delay:.6s" aria-hidden="true">🔔</span>
+
+            <div class="xmas-inner">
+
+                <div class="xmas-text">
+
+                    <span class="xmas-eyebrow">✨ Speciale editie</span>
+
+                    <h2 id="specialAnnouncementTitle">${escapeHtml(nextChristmas.theme)}</h2>
+
+                    ${nextChristmas.announcement
+                        ? `<p>${escapeHtml(nextChristmas.announcement)}</p>`
+                        : ""}
+
+                    <ul class="xmas-facts">
+                        <li>📅 <strong>${escapeHtml(formatLongDate(new Date(sessionStartIso(date))))}</strong></li>
+                        <li>🕙 ${escapeHtml(formatSessionTimeRange(date))}</li>
+                        ${price !== null ? `<li>💶 ${escapeHtml(formatEuro(price))} per kind</li>` : ""}
+                        ${!isPassAllowed(date) ? `<li>🎟️ Beurtenkaarten niet geldig voor deze sessie</li>` : ""}
+                        ${free !== null
+                            ? `<li>👶 ${isFull ? "Volzet" : `Nog ${free} plek${free === 1 ? "" : "ken"} vrij`}</li>`
+                            : ""}
+                    </ul>
+
+                    <strong style="color:#7f1d1d;">Wat staat er op het programma?</strong>
+                    <ul class="xmas-program">
+                        ${assets.program.map(p => `<li>${escapeHtml(p)}</li>`).join("")}
+                    </ul>
+
+                    ${isFull
+                        ? `<button class="btn xmas-cta full"
+                                   onclick="openWaitlist(${dateAttr}, ${escapeHtml(JSON.stringify(String(nextChristmas.theme)))})">
+                               ⏳ Volzet — op de wachtlijst
+                           </button>`
+                        : `<button class="btn xmas-cta"
+                                   onclick="openForm(${dateAttr})">
+                               🎅 Schrijf je in voor de ${escapeHtml(nextChristmas.theme)}
+                           </button>`}
+
+                </div>
+
+                <div class="xmas-flyers">
+                    ${assets.flyers.map(f => `
+                        <button type="button"
+                                onclick="openFlyer(${escapeHtml(JSON.stringify(f.src))}, ${escapeHtml(JSON.stringify(f.alt))})"
+                                aria-label="Flyer vergroten">
+                            <img src="${escapeHtml(f.src)}"
+                                 alt="${escapeHtml(f.alt)}"
+                                 loading="lazy"
+                                 width="230" height="325">
+                        </button>
+                    `).join("")}
+                </div>
+
+            </div>
+        `;
+
+        section.style.display = "block";
+
+        startSnow("announcementSnow", section, { count: 22 });
+    }
+
+    function openFlyer(src, alt) {
+
+        const box = document.createElement("div");
+        box.className = "flyer-lightbox";
+        box.setAttribute("role", "dialog");
+        box.setAttribute("aria-label", "Flyer");
+
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = alt || "";
+        box.appendChild(img);
+
+        const close = () => {
+            box.remove();
+            document.removeEventListener("keydown", onKey);
+        };
+        const onKey = e => { if (e.key === "Escape") close(); };
+
+        box.addEventListener("click", close);
+        document.addEventListener("keydown", onKey);
+        document.body.appendChild(box);
+    }
+
+
+    /* ---------------------------------------------------------
+       "Ho ho ho!"
+       Geluid: assets/hohoho.wav — "ho, ho, ho" door Vealhurl
+       (Lingua Libre / Wikimedia Commons), CC BY-SA 4.0.
+       Wordt iets trager afgespeeld voor een diepere kerstmanstem.
+       Valt terug op de spraaksynthese van de browser.
+    --------------------------------------------------------- */
+
+    function speakHoHoHo() {
+
+        if (!("speechSynthesis" in window)) {
+            return false;
+        }
+
+        try {
+            const u = new SpeechSynthesisUtterance("Ho ho ho!");
+            u.lang = "en-GB";
+            u.pitch = 0.3;
+            u.rate = 0.75;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(u);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function playJingle() {
+
+        /* Klein belletjes-geluid via Web Audio */
+        try {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            const ctx = new Ctx();
+            const notes = [1318.5, 1568, 1760, 2093];
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.value = freq;
+                const t = ctx.currentTime + i * 0.12;
+                gain.gain.setValueAtTime(0.0001, t);
+                gain.gain.exponentialRampToValueAtTime(0.18, t + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+                osc.connect(gain).connect(ctx.destination);
+                osc.start(t);
+                osc.stop(t + 0.65);
+            });
+            setTimeout(() => ctx.close && ctx.close(), 1500);
+        } catch (e) {
+            /* geen geluid, geen probleem */
+        }
+    }
+
+    async function playHoHoHo() {
+
+        playJingle();
+
+        const audio = new Audio("assets/hohoho.wav");
+        audio.volume = 1;
+        audio.playbackRate = 0.8;
+        audio.preservesPitch = false;
+        audio.mozPreservesPitch = false;
+        audio.webkitPreservesPitch = false;
+
+        try {
+            await new Promise(r => setTimeout(r, 450));
+            await audio.play();
+            return true;
+        } catch (e) {
+            /* Autoplay geblokkeerd of bestand ontbreekt */
+            if (e && e.name === "NotAllowedError") {
+                return false;
+            }
+            return speakHoHoHo();
+        }
+    }
+
+    function showSantaCelebration(date, { userGesture = false, message = "", summaryHtml = "", icsLabel = "" } = {}) {
+
+        document.getElementById("santaOverlay")?.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "santaOverlay";
+        overlay.className = "santa-overlay";
+        overlay.setAttribute("role", "dialog");
+        overlay.setAttribute("aria-modal", "true");
+        overlay.setAttribute("aria-labelledby", "santaTitle");
+
+        overlay.innerHTML = `
+            <div class="santa-card">
+
+                <div class="santa-scene" aria-hidden="true">
+                    <span class="santa-tree left">🎄</span>
+                    <span class="santa-emoji">🎅</span>
+                    <span class="santa-tree right">🎁</span>
+                    <span class="santa-bubble">Ho ho ho!</span>
+                </div>
+
+                <h3 id="santaTitle">Ho ho ho! Je bent ingeschreven! 🎄</h3>
+
+                ${summaryHtml
+                    ? `<div class="santa-summary">${summaryHtml}</div>`
+                    : `<p>
+                        ${message ? escapeHtml(message) + "<br>" : ""}
+                        De kerstman kijkt al uit naar
+                        <strong>${escapeHtml(formatLongDate(new Date(sessionStartIso(date))))}</strong>
+                        (${escapeHtml(formatSessionTimeRange(date))}).
+                       </p>`}
+
+                <p>⭐ Tot dan! ⭐</p>
+
+                <div class="santa-actions">
+                    <div id="santaIcsSlot"></div>
+                    <button type="button" class="btn santa-sound-btn" id="santaSoundBtn" style="display:none;">
+                        🔊 Hoor de kerstman
+                    </button>
+                    <button type="button" class="btn" id="santaCloseBtn">
+                        Sluiten
+                    </button>
+                </div>
+
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        lockBodyScroll();
+
+        showICSButton(
+            date,
+            overlay.querySelector("#santaIcsSlot"),
+            icsLabel || getSessionSettings(date).theme || "Kerstspecial"
+        );
+
+        startSnow("santaSnow", overlay, { fixed: true, count: 40 });
+
+        const soundBtn = overlay.querySelector("#santaSoundBtn");
+        const closeBtn = overlay.querySelector("#santaCloseBtn");
+
+        const close = () => {
+            overlay.remove();
+            unlockBodyScroll();
+            document.removeEventListener("keydown", onKey);
+        };
+        const onKey = e => { if (e.key === "Escape") close(); };
+
+        closeBtn.addEventListener("click", close);
+        overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+        document.addEventListener("keydown", onKey);
+
+        soundBtn.addEventListener("click", () => playHoHoHo());
+
+        closeBtn.focus();
+
+        launchConfetti();
+
+        /*
+         * Na een klik (ter plaatse / beurtenkaart) mag de browser geluid
+         * afspelen. Na terugkeer van Mollie wordt autoplay vaak
+         * geblokkeerd; dan tonen we een knop.
+         */
+        playHoHoHo().then(played => {
+            if (!played || !userGesture) {
+                soundBtn.style.display = "";
+                if (!played) soundBtn.focus();
+            }
+        });
     }
 
 
@@ -8746,9 +9659,10 @@ margin-left:0;
             themeEl.textContent =
                 formatLongDate(
                     new Date(
-                        dateStr + "T10:00:00"
+                        sessionStartIso(dateStr)
                     )
                 ) +
+                " (" + formatSessionTimeRange(dateStr) + ")" +
                 (
                     waitlistTheme
                         ? " — " + waitlistTheme
@@ -8863,7 +9777,7 @@ margin-left:0;
 
         if (
             new Date(
-                waitlistDate + "T11:00:00"
+                sessionEndIso(waitlistDate)
             ) <= new Date()
         ) {
 
@@ -9368,7 +10282,7 @@ margin-left:0;
 
         const date =
             new Date(
-                dateStr + "T10:00:00"
+                sessionStartIso(dateStr)
             );
 
         const startLocal =
@@ -9377,10 +10291,15 @@ margin-left:0;
                 date.getTimezoneOffset() * 60000
             );
 
+        const endDate =
+            new Date(
+                sessionEndIso(dateStr)
+            );
+
         const endLocal =
             new Date(
-                startLocal.getTime() +
-                60 * 60000
+                endDate.getTime() -
+                endDate.getTimezoneOffset() * 60000
             );
 
         const formatICS =
@@ -9464,9 +10383,10 @@ margin-left:0;
 
     }
 
-    function showICSButton(dateStr) {
+    function showICSButton(dateStr, container = null, label = "Speelatelier") {
 
         const message =
+            container ||
             document.getElementById(
                 "confirm"
             );
@@ -9479,6 +10399,8 @@ margin-left:0;
             document.createElement(
                 "button"
             );
+
+        button.type = "button";
 
         button.className =
             "btn";
@@ -9494,7 +10416,7 @@ margin-left:0;
             () =>
                 downloadICS(
                     dateStr,
-                    "Speelatelier"
+                    label
                 )
         );
 

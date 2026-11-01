@@ -74,10 +74,20 @@ function json(data: unknown, status = 200, headers?: Record<string, string>) {
     });
 }
 
-function calculateAmount(childrenCount: number, isOnline: boolean): number {
-    let amount =
-        PRICE_FIRST +
-        Math.max(0, childrenCount - 1) * PRICE_EXTRA;
+type SessionSettings = {
+    theme: string;
+    price_per_child: number | null;
+    max_children: number | null;
+};
+
+function calculateAmount(
+    childrenCount: number,
+    isOnline: boolean,
+    pricePerChild: number | null = null,
+): number {
+    let amount = pricePerChild != null
+        ? Number(pricePerChild) * childrenCount
+        : PRICE_FIRST + Math.max(0, childrenCount - 1) * PRICE_EXTRA;
     if (isOnline) {
         amount += TRANSACTION_FEE_ONLINE;
     }
@@ -96,14 +106,14 @@ async function isDateBlocked(date: string): Promise<boolean> {
     return Boolean(data?.date);
 }
 
-async function themeExists(date: string): Promise<boolean> {
+async function getSession(date: string): Promise<SessionSettings | null> {
     const { data, error } = await sb
         .from("themes")
-        .select("theme")
+        .select("theme, price_per_child, max_children")
         .eq("date", date)
         .maybeSingle();
     if (error) throw error;
-    return Boolean(data?.theme);
+    return data?.theme ? (data as SessionSettings) : null;
 }
 
 async function getBookedChildren(date: string): Promise<number> {
@@ -217,16 +227,18 @@ async function handle(req: Request): Promise<Response> {
     if (await isDateBlocked(appointmentDate)) {
         return json({ error: "Deze datum is geblokkeerd." }, 400, headers);
     }
-    if (!(await themeExists(appointmentDate))) {
+    const session = await getSession(appointmentDate);
+    if (!session) {
         return json({ error: "Voor deze datum is geen sessie gepland." }, 400, headers);
     }
+    const maxChildren = Number(session.max_children ?? MAX_CHILDREN);
 
     // ------------------------------------------------------------------
-    // 4. Capaciteit (max. MAX_CHILDREN per sessie)
+    // 4. Capaciteit (max. per sessie, standaard MAX_CHILDREN)
     // ------------------------------------------------------------------
     const booked = await getBookedChildren(appointmentDate);
-    if (booked + childrenCount > MAX_CHILDREN) {
-        const free = Math.max(0, MAX_CHILDREN - booked);
+    if (booked + childrenCount > maxChildren) {
+        const free = Math.max(0, maxChildren - booked);
         return json(
             { error: `Nog ${free} plaats(en) beschikbaar voor deze sessie.` },
             409,
@@ -238,7 +250,11 @@ async function handle(req: Request): Promise<Response> {
     // 5. Bedrag server-side berekenen (clientwaarde wordt genegeerd)
     // ------------------------------------------------------------------
     const isOnline = paymentMethod === "online";
-    const amount = calculateAmount(childrenCount, isOnline);
+    const amount = calculateAmount(
+        childrenCount,
+        isOnline,
+        session.price_per_child != null ? Number(session.price_per_child) : null,
+    );
 
     // ------------------------------------------------------------------
     // 6. Inschrijving opslaan (service role → RLS wordt niet toegepast,
@@ -297,7 +313,7 @@ async function handle(req: Request): Promise<Response> {
     // ------------------------------------------------------------------
     const mollieBody = {
         amount: { currency: "EUR", value: amount.toFixed(2) },
-        description: `Speelatelier ${appointmentDate} – ${name}`,
+        description: `Speelatelier ${session.theme} ${appointmentDate} – ${name}`.slice(0, 255),
         redirectUrl: `${BASE_URL}/index.html?payment=return&booking=${bookingId}`,
         webhookUrl: `${SUPABASE_URL}/functions/v1/mollie-webhook`,
         metadata: {
