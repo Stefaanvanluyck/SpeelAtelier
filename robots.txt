@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /shop/admin.html
+Disallow: /shop/bedankt.html
 
 Sitemap: https://jufvalerie.be/sitemap.xml

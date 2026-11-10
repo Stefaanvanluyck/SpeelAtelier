@@ -2705,6 +2705,8 @@ margin-left:0;
 
         <a href="#faq">FAQ</a>
 
+        <a href="shop/" data-shop-link hidden>🛒 Webshop</a>
+
         <a onclick="openLogin()">Login</a>
 
         <a href="https://www.instagram.com/juf__valerie"
@@ -11732,6 +11734,41 @@ margin-left:0;
                     "Mollie return verwerking mislukt:",
                     error
                 );
+
+            }
+
+        }
+    );
+
+    /* =========================================================
+       WEBSHOP-LINK
+       Standaard verborgen; enkel tonen als in de webshop-admin
+       "Webshop tonen op de website" aanstaat.
+    ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        async function() {
+
+            try {
+
+                const { data } = await sb
+                    .from("shop_settings")
+                    .select("show_on_site")
+                    .eq("id", 1)
+                    .maybeSingle();
+
+                if (data && data.show_on_site === true) {
+                    document
+                        .querySelectorAll("[data-shop-link]")
+                        .forEach(function(el) {
+                            el.hidden = false;
+                        });
+                }
+
+            } catch (error) {
+
+                /* Webshop-link blijft verborgen. */
 
             }
 

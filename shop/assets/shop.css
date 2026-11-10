@@ -1,0 +1,193 @@
+/* =========================================================
+   Webshop – stijl (kleuren in lijn met de hoofdsite)
+========================================================= */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg: #f6f8f4;
+    --card: #ffffff;
+    --text: #1f2a1f;
+    --muted: #5b665b;
+    --accent: #ff6f86;
+    --accent-dark: #e4566e;
+    --accent2: #ffd6a5;
+    --green: #2f8f5b;
+    --line: #e7e9e4;
+    --shadow: 0 12px 34px rgba(0, 0, 0, 0.08);
+    --radius: 18px;
+}
+
+body {
+    font-family: "Poppins", Arial, sans-serif;
+    background:
+        radial-gradient(circle at top left, #ffeef1, transparent 35%),
+        radial-gradient(circle at bottom right, #e9f7e9, transparent 35%),
+        var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+a { color: var(--accent-dark); }
+
+img { max-width: 100%; display: block; }
+
+.container { width: min(1120px, 92%); margin: 0 auto; }
+
+/* ---------- header ---------- */
+.shop-header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+}
+.shop-header .container {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 14px 0;
+}
+.brand { font-weight: 700; font-size: 1.1rem; color: var(--text); text-decoration: none; }
+.brand small { color: var(--accent); font-weight: 600; margin-left: 6px; }
+.header-links { display: flex; align-items: center; gap: 14px; }
+.header-links a { color: var(--text); text-decoration: none; font-size: .95rem; }
+
+.cart-button {
+    position: relative; border: 0; cursor: pointer;
+    background: var(--accent); color: #fff; font: inherit; font-weight: 600;
+    padding: 9px 16px; border-radius: 999px;
+}
+.cart-badge {
+    position: absolute; top: -6px; right: -6px;
+    background: var(--text); color: #fff; font-size: .72rem;
+    min-width: 20px; height: 20px; border-radius: 10px;
+    display: grid; place-items: center; padding: 0 5px;
+}
+
+/* ---------- hero ---------- */
+.hero { padding: 48px 0 22px; text-align: center; }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.2; }
+.hero p { color: var(--muted); max-width: 640px; margin: 12px auto 0; }
+.notice {
+    background: #fff7e8; border: 1px solid var(--accent2); border-radius: 14px;
+    padding: 12px 16px; margin: 18px auto 0; max-width: 720px; font-size: .95rem;
+}
+.notice.closed { background: #ffeef1; border-color: #ffc2cd; }
+
+/* ---------- productgrid ---------- */
+.grid {
+    display: grid; gap: 22px; padding: 26px 0 60px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+.product {
+    background: var(--card); border-radius: var(--radius); overflow: hidden;
+    box-shadow: var(--shadow); display: flex; flex-direction: column;
+}
+.product img { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; cursor: pointer; background: #f1f1f1; }
+.product-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.product h3 { font-size: 1.05rem; }
+.product p { color: var(--muted); font-size: .92rem; flex: 1; }
+.product-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.price { font-weight: 700; font-size: 1.1rem; }
+
+.btn {
+    border: 0; cursor: pointer; font: inherit; font-weight: 600;
+    background: var(--accent); color: #fff; padding: 10px 16px; border-radius: 12px;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { background: var(--accent-dark); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn.secondary { background: #fff; color: var(--text); border: 1px solid var(--line); }
+.btn.secondary:hover { background: #f4f4f4; }
+.btn.small { padding: 6px 10px; font-size: .85rem; border-radius: 9px; }
+.btn.danger { background: #c94848; }
+.btn.green { background: var(--green); }
+
+/* ---------- panelen (mandje, productdetail) ---------- */
+.overlay {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, .35);
+    display: none; z-index: 100;
+}
+.overlay.open { display: block; }
+.drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(460px, 100%);
+    background: #fff; z-index: 101; transform: translateX(100%);
+    transition: transform .25s ease; display: flex; flex-direction: column;
+}
+.drawer.open { transform: translateX(0); }
+.drawer-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px; border-bottom: 1px solid var(--line);
+}
+.drawer-body { padding: 18px 20px; overflow-y: auto; flex: 1; }
+.drawer-foot { padding: 16px 20px; border-top: 1px solid var(--line); }
+.icon-btn { background: none; border: 0; font-size: 1.4rem; cursor: pointer; line-height: 1; }
+
+.cart-line {
+    display: grid; grid-template-columns: 56px 1fr auto; gap: 12px;
+    align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.cart-line img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; }
+.qty { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; }
+.qty button {
+    width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--line);
+    background: #fff; cursor: pointer; font-weight: 700;
+}
+.totals { display: grid; gap: 4px; margin: 10px 0 14px; }
+.totals div { display: flex; justify-content: space-between; }
+.totals .grand { font-weight: 700; font-size: 1.1rem; }
+
+.modal {
+    position: fixed; z-index: 101; left: 50%; top: 50%;
+    transform: translate(-50%, -50%); width: min(760px, 94%);
+    max-height: 90vh; overflow-y: auto; background: #fff; border-radius: var(--radius);
+    display: none; box-shadow: var(--shadow);
+}
+.modal.open { display: block; }
+.modal-content { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; padding: 22px; }
+.modal-content img { border-radius: 14px; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.thumbs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.thumbs img { width: 56px; height: 56px; border-radius: 8px; cursor: pointer; }
+.safety { font-size: .85rem; background: #fff7e8; padding: 8px 10px; border-radius: 10px; }
+@media (max-width: 640px) { .modal-content { grid-template-columns: 1fr; } }
+
+/* ---------- formulieren ---------- */
+.form-grid { display: grid; gap: 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+label { font-size: .88rem; font-weight: 600; display: grid; gap: 4px; }
+input, select, textarea {
+    font: inherit; padding: 10px 12px; border: 1px solid #d6dad3;
+    border-radius: 10px; background: #fff; width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; }
+.check input { width: auto; margin-top: 5px; }
+.choice { display: grid; gap: 8px; }
+.choice label {
+    display: flex; gap: 10px; align-items: flex-start; font-weight: 400;
+    border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer;
+}
+.choice input { width: auto; margin-top: 5px; }
+.error { color: #b3261e; font-size: .92rem; min-height: 1.2em; }
+.muted { color: var(--muted); font-size: .9rem; }
+.hidden { display: none !important; }
+
+/* ---------- eenvoudige pagina's ---------- */
+.card {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 28px; margin: 34px auto; max-width: 760px;
+}
+.card h1 { margin-bottom: 12px; }
+.card h2 { margin: 22px 0 8px; font-size: 1.15rem; }
+.card p, .card li { margin-bottom: 8px; }
+.card ul { padding-left: 20px; }
+
+footer.shop-footer { text-align: center; padding: 28px 0 40px; color: var(--muted); font-size: .88rem; }
+footer.shop-footer a { color: var(--muted); }
+
+.empty { text-align: center; color: var(--muted); padding: 40px 0; }
+.spinner {
+    width: 34px; height: 34px; border: 4px solid #ffd3db; border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

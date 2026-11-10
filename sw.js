@@ -1,4 +1,4 @@
-const CACHE_NAME = "kleine-wonderwereld-v6";
+const CACHE_NAME = "kleine-wonderwereld-v7";
 const ASSETS = [
     "./",
     "./index.html",
@@ -51,8 +51,13 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    // Admin-pagina nooit cachen (gevoelige gegevens, altijd vers).
+    // Admin-pagina's (inschrijvingen én webshop) nooit cachen.
     if (/\/admin(\.html)?$/i.test(url.pathname)) {
+        return;
+    }
+
+    // Webshop-afrekenen/bedankpagina altijd vers (betaalstatus).
+    if (/^\/shop\/bedankt(\.html)?$/i.test(url.pathname)) {
         return;
     }
 

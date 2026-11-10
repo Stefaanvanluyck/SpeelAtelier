@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self';
+                   script-src 'self' https://cdn.jsdelivr.net;
+                   style-src 'self' 'unsafe-inline';
+                   font-src 'self' data:;
+                   img-src 'self' data: https://nafajvywiknelkgufpac.supabase.co;
+                   connect-src 'self' https://nafajvywiknelkgufpac.supabase.co;
+                   object-src 'none';
+                   base-uri 'self';
+                   form-action 'self'">
+
+    <title>Webshop – Kleine Wonderwereld | Sensorisch speelmateriaal</title>
+    <meta name="description"
+          content="Gekleurde rijst, gekleurde pasta en ander sensorisch speelmateriaal, met liefde op bestelling gemaakt door Kleine Wonderwereld. Afhalen of laten leveren.">
+    <link rel="canonical" href="https://jufvalerie.be/shop/">
+    <link rel="icon" sizes="32x32" href="../favicon.png">
+
+    <meta property="og:title" content="Webshop – Kleine Wonderwereld">
+    <meta property="og:description" content="Sensorisch speelmateriaal op bestelling: gekleurde rijst, pasta en meer.">
+    <meta property="og:image" content="https://jufvalerie.be/gekleurderijst.jpeg">
+
+    <link rel="stylesheet" href="assets/shop.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+            integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+            crossorigin="anonymous"></script>
+    <script src="assets/shop-common.js" defer></script>
+    <script src="assets/shop.js" defer></script>
+</head>
+<body>
+
+<header class="shop-header">
+    <div class="container">
+        <a class="brand" href="./">🌿 Kleine Wonderwereld <small>Webshop</small></a>
+        <nav class="header-links">
+            <a href="../">← Naar het speelatelier</a>
+            <button class="cart-button" id="cartButton" type="button" aria-label="Winkelmandje openen">
+                🛒 Mandje <span class="cart-badge" id="cartBadge">0</span>
+            </button>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <h1>Sensorisch speelplezier voor thuis</h1>
+        <p>Gekleurde rijst, gekleurde pasta en andere leuke materialen om te voelen, scheppen en
+            ontdekken. Alles wordt met zorg <strong>op bestelling</strong> gemaakt.</p>
+        <div class="notice" id="leadTime"></div>
+        <div class="notice hidden" id="announcement"></div>
+        <div class="notice closed hidden" id="closedNotice">
+            De webshop is momenteel gesloten. Je kan de producten wel al bekijken.
+        </div>
+    </section>
+
+    <section class="grid" id="productGrid" aria-live="polite">
+        <div class="spinner" aria-label="Laden"></div>
+    </section>
+</main>
+
+<footer class="shop-footer">
+    <a href="voorwaarden.html">Algemene verkoopsvoorwaarden</a> ·
+    <a href="../privacy.html">Privacy</a> ·
+    <a href="../">Speelatelier</a>
+</footer>
+
+<!-- Productdetail -->
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div style="display:flex;justify-content:flex-end;padding:10px 14px 0">
+        <button class="icon-btn" type="button" data-close aria-label="Sluiten">×</button>
+    </div>
+    <div class="modal-content" id="modalContent"></div>
+</div>
+
+<!-- Winkelmandje + afrekenen -->
+<aside class="drawer" id="cartDrawer" aria-label="Winkelmandje">
+    <div class="drawer-head">
+        <h2 id="drawerTitle">Winkelmandje</h2>
+        <button class="icon-btn" type="button" data-close aria-label="Sluiten">×</button>
+    </div>
+
+    <div class="drawer-body" id="cartStep">
+        <div id="cartLines"></div>
+    </div>
+
+    <form class="drawer-body hidden" id="checkoutStep" novalidate>
+        <div class="form-grid">
+            <div class="choice" id="deliveryChoice"></div>
+
+            <label>Naam *
+                <input name="name" required maxlength="100" autocomplete="name">
+            </label>
+            <div class="form-row">
+                <label>E-mail *
+                    <input name="email" type="email" required maxlength="254" autocomplete="email">
+                </label>
+                <label>Telefoon
+                    <input name="phone" type="tel" maxlength="30" autocomplete="tel">
+                </label>
+            </div>
+
+            <div id="addressFields" class="form-grid hidden">
+                <label>Straat en huisnummer *
+                    <input name="street" maxlength="150" autocomplete="street-address">
+                </label>
+                <div class="form-row">
+                    <label>Postcode *
+                        <input name="postal_code" maxlength="12" autocomplete="postal-code">
+                    </label>
+                    <label>Gemeente *
+                        <input name="city" maxlength="80" autocomplete="address-level2">
+                    </label>
+                </div>
+                <label>Land
+                    <select name="country">
+                        <option value="BE">België</option>
+                        <option value="NL">Nederland</option>
+                    </select>
+                </label>
+            </div>
+
+            <label class="check">
+                <input type="checkbox" id="isCompany"> Factuur op naam van een bedrijf/organisatie
+            </label>
+            <div id="companyFields" class="form-row hidden">
+                <label>Naam bedrijf
+                    <input name="company_name" maxlength="120" autocomplete="organization">
+                </label>
+                <label>Ondernemingsnummer
+                    <input name="company_vat" maxlength="30" placeholder="BE0123.456.789">
+                </label>
+            </div>
+
+            <label>Opmerking (bv. kleurvoorkeur)
+                <textarea name="note" rows="3" maxlength="1000"></textarea>
+            </label>
+
+            <label class="check">
+                <input type="checkbox" name="terms" required>
+                <span>Ik ga akkoord met de <a href="voorwaarden.html" target="_blank" rel="noopener">algemene
+                    verkoopsvoorwaarden</a> en heb de <a href="../privacy.html" target="_blank" rel="noopener">privacyverklaring</a> gelezen. *</span>
+            </label>
+        </div>
+    </form>
+
+    <div class="drawer-foot">
+        <div class="totals" id="totals"></div>
+        <div class="error" id="checkoutError" role="alert"></div>
+        <div style="display:flex;gap:10px;justify-content:space-between">
+            <button class="btn secondary hidden" type="button" id="backButton">← Terug</button>
+            <button class="btn" type="button" id="nextButton" style="margin-left:auto">Afrekenen</button>
+        </div>
+    </div>
+</aside>
+
+</body>
+</html>

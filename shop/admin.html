@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self';
+                   script-src 'self' https://cdn.jsdelivr.net;
+                   style-src 'self' 'unsafe-inline';
+                   font-src 'self' data:;
+                   img-src 'self' data: blob: https://nafajvywiknelkgufpac.supabase.co;
+                   connect-src 'self' https://nafajvywiknelkgufpac.supabase.co;
+                   object-src 'none';
+                   base-uri 'self';
+                   form-action 'self'">
+    <title>Admin – Webshop | Kleine Wonderwereld</title>
+    <link rel="icon" sizes="32x32" href="../favicon.png">
+    <link rel="stylesheet" href="assets/shop.css">
+    <link rel="stylesheet" href="assets/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+            integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+            crossorigin="anonymous"></script>
+    <script src="assets/shop-common.js" defer></script>
+    <script src="assets/admin.js" defer></script>
+</head>
+<body class="admin">
+
+<header class="admin-header">
+    <div class="container">
+        <div>
+            <div class="admin-title">🛒 Admin – Webshop</div>
+            <div class="admin-sub">Producten · bestellingen · facturen</div>
+        </div>
+        <nav class="header-links">
+            <a class="switch-link" href="../admin.html">📅 Naar admin inschrijvingen</a>
+            <a href="./" target="_blank" rel="noopener">Webshop bekijken ↗</a>
+            <button class="btn small secondary hidden" type="button" id="logoutButton">Afmelden</button>
+        </nav>
+    </div>
+</header>
+
+<!-- Login -->
+<main class="container" id="loginView">
+    <form class="card" id="loginForm" style="max-width:420px">
+        <h1>Aanmelden</h1>
+        <p class="muted">Gebruik hetzelfde beheerdersaccount als voor de inschrijvingen.</p>
+        <div class="form-grid" style="margin-top:14px">
+            <label>E-mail <input name="email" type="email" required autocomplete="username"></label>
+            <label>Wachtwoord <input name="password" type="password" required autocomplete="current-password"></label>
+            <div class="error" id="loginError"></div>
+            <button class="btn" type="submit">Aanmelden</button>
+        </div>
+    </form>
+</main>
+
+<!-- App -->
+<main class="container hidden" id="appView">
+    <nav class="tabs" role="tablist">
+        <button type="button" class="tab active" data-tab="orders">📦 Bestellingen <span class="pill" id="openCount"></span></button>
+        <button type="button" class="tab" data-tab="products">🧺 Producten</button>
+        <button type="button" class="tab" data-tab="invoices">🧾 Facturen</button>
+        <button type="button" class="tab" data-tab="overview">📊 Overzicht</button>
+        <button type="button" class="tab" data-tab="settings">⚙️ Instellingen</button>
+    </nav>
+
+    <!-- BESTELLINGEN -->
+    <section class="panel" id="tab-orders">
+        <div class="toolbar">
+            <select id="orderFilter">
+                <option value="todo">Te behandelen (betaald, niet afgerond)</option>
+                <option value="paid">Alle betaalde</option>
+                <option value="unpaid">Niet betaald / geannuleerd</option>
+                <option value="all">Alle</option>
+            </select>
+            <input id="orderSearch" type="search" placeholder="Zoek op nummer, naam of e-mail">
+            <button class="btn small secondary" type="button" id="reloadOrders">↻ Vernieuwen</button>
+        </div>
+        <div class="table-wrap">
+            <table class="data">
+                <thead><tr>
+                    <th>Nr.</th><th>Datum</th><th>Klant</th><th>Levering</th>
+                    <th class="num">Totaal</th><th>Betaling</th><th>Status</th><th>Factuur</th>
+                </tr></thead>
+                <tbody id="orderRows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- PRODUCTEN -->
+    <section class="panel hidden" id="tab-products">
+        <div class="toolbar">
+            <button class="btn" type="button" id="newProduct">+ Nieuw product</button>
+        </div>
+        <div class="table-wrap">
+            <table class="data">
+                <thead><tr>
+                    <th></th><th>Naam</th><th class="num">Prijs</th><th>Max/bestelling</th>
+                    <th>Volgorde</th><th>Zichtbaar</th><th></th>
+                </tr></thead>
+                <tbody id="productRows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- FACTUREN -->
+    <section class="panel hidden" id="tab-invoices">
+        <div class="toolbar">
+            <select id="invYear"></select>
+            <select id="invPeriod">
+                <option value="year">Heel het jaar</option>
+                <option value="q1">Kwartaal 1</option><option value="q2">Kwartaal 2</option>
+                <option value="q3">Kwartaal 3</option><option value="q4">Kwartaal 4</option>
+                <option value="m1">Januari</option><option value="m2">Februari</option>
+                <option value="m3">Maart</option><option value="m4">April</option>
+                <option value="m5">Mei</option><option value="m6">Juni</option>
+                <option value="m7">Juli</option><option value="m8">Augustus</option>
+                <option value="m9">September</option><option value="m10">Oktober</option>
+                <option value="m11">November</option><option value="m12">December</option>
+            </select>
+            <button class="btn small secondary" type="button" id="exportCsv">⬇ Export CSV (boekhouder)</button>
+        </div>
+        <div class="stats" id="invoiceStats"></div>
+        <div class="table-wrap">
+            <table class="data">
+                <thead><tr>
+                    <th>Nummer</th><th>Datum</th><th>Soort</th><th>Klant</th><th>Bestelling</th>
+                    <th class="num">Bedrag</th><th>Status</th><th></th>
+                </tr></thead>
+                <tbody id="invoiceRows"></tbody>
+            </table>
+        </div>
+        <p class="muted" style="margin-top:10px">Facturen en creditnota's kunnen niet gewijzigd of verwijderd
+            worden. Een fout rechtzetten doe je met een creditnota (via de bestelling).</p>
+    </section>
+
+    <!-- OVERZICHT -->
+    <section class="panel hidden" id="tab-overview">
+        <div class="stats" id="overviewStats"></div>
+        <div class="card-plain">
+            <h3>Vrijstellingsregeling kleine ondernemingen</h3>
+            <p class="muted">De grens geldt voor de <strong>totale</strong> omzet van je onderneming
+                (webshop + inschrijvingen). Kom je er dichtbij, contacteer dan je boekhouder.</p>
+            <div class="bar"><div class="bar-fill" id="thresholdBar"></div></div>
+            <p id="thresholdText"></p>
+        </div>
+        <div class="card-plain">
+            <h3>Best verkocht dit jaar</h3>
+            <div id="topProducts"></div>
+        </div>
+    </section>
+
+    <!-- INSTELLINGEN -->
+    <section class="panel hidden" id="tab-settings">
+        <form id="settingsForm" class="card-plain form-grid">
+            <h3>Webshop</h3>
+            <label class="check"><input type="checkbox" name="show_on_site"> Webshop tonen op de website
+                (link "🛒 Webshop" in het menu van jufvalerie.be)</label>
+            <label class="check"><input type="checkbox" name="shop_open"> Webshop is open (bestellen mogelijk)</label>
+            <label>Aankondiging bovenaan de webshop (optioneel)
+                <input name="announcement" maxlength="300">
+            </label>
+            <label>Levertermijn (tekst)
+                <input name="lead_time_text" maxlength="300">
+            </label>
+
+            <h3>Levering</h3>
+            <label class="check"><input type="checkbox" name="pickup_enabled"> Afhalen mogelijk</label>
+            <label>Afhaalinfo
+                <textarea name="pickup_info" rows="2" maxlength="500"></textarea>
+            </label>
+            <label class="check"><input type="checkbox" name="shipping_enabled"> Verzenden mogelijk</label>
+            <div class="form-row">
+                <label>Verzendkost (€)
+                    <input name="shipping_cost" type="number" min="0" step="0.01">
+                </label>
+                <label>Gratis verzending vanaf (€, leeg = nooit)
+                    <input name="free_shipping_from" type="number" min="0" step="0.01">
+                </label>
+            </div>
+
+            <h3>Bedrijfsgegevens (op facturen)</h3>
+            <p class="muted">Wijzigingen gelden enkel voor nieuwe facturen; bestaande facturen blijven ongewijzigd.</p>
+            <div class="form-row">
+                <label>Naam / handelsnaam <input name="business_name" required maxlength="120"></label>
+                <label>Ondernemingsnummer <input name="enterprise_number" maxlength="30" placeholder="0123.456.789"></label>
+            </div>
+            <label>Adres (meerdere regels)
+                <textarea name="business_address" rows="3" maxlength="300"></textarea>
+            </label>
+            <div class="form-row">
+                <label>IBAN <input name="iban" maxlength="40"></label>
+                <label>E-mail <input name="business_email" type="email" maxlength="254"></label>
+            </div>
+            <div class="form-row">
+                <label>Telefoon <input name="business_phone" maxlength="30"></label>
+                <label>Omzetgrens vrijstelling (€) <input name="vat_threshold" type="number" min="0" step="1"></label>
+            </div>
+            <label>Btw-vermelding op factuur
+                <input name="vat_exempt_text" required maxlength="300">
+            </label>
+            <label>Voettekst factuur
+                <input name="invoice_footer" maxlength="300">
+            </label>
+            <div class="error" id="settingsError"></div>
+            <button class="btn" type="submit">Instellingen opslaan</button>
+        </form>
+    </section>
+</main>
+
+<!-- Dialogen -->
+<div class="overlay" id="overlay"></div>
+<div class="modal wide" id="dialog" role="dialog" aria-modal="true">
+    <div style="display:flex;justify-content:flex-end;padding:10px 14px 0">
+        <button class="icon-btn" type="button" data-close aria-label="Sluiten">×</button>
+    </div>
+    <div id="dialogBody" style="padding:0 24px 24px"></div>
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+<div id="printArea"></div>
+
+</body>
+</html>

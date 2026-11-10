@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self';
+                   script-src 'self' https://cdn.jsdelivr.net;
+                   style-src 'self' 'unsafe-inline';
+                   img-src 'self' data:;
+                   connect-src 'self' https://nafajvywiknelkgufpac.supabase.co;
+                   object-src 'none';
+                   base-uri 'self';
+                   form-action 'self'">
+    <title>Bedankt voor je bestelling – Kleine Wonderwereld</title>
+    <link rel="icon" sizes="32x32" href="../favicon.png">
+    <link rel="stylesheet" href="assets/shop.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+            integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+            crossorigin="anonymous"></script>
+    <script src="assets/shop-common.js" defer></script>
+    <script src="assets/bedankt.js" defer></script>
+</head>
+<body>
+
+<header class="shop-header">
+    <div class="container">
+        <a class="brand" href="./">🌿 Kleine Wonderwereld <small>Webshop</small></a>
+        <nav class="header-links"><a href="../">← Naar het speelatelier</a></nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="card" id="result" aria-live="polite">
+        <div class="spinner" aria-label="Laden"></div>
+        <p style="text-align:center">We controleren je betaling…</p>
+    </div>
+</main>
+
+</body>
+</html>

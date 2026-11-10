@@ -155,3 +155,59 @@ Beurtenkaart via de website wordt nu `pass_requested` (te bevestigen). In admin.
 
 CDN-scripts zijn vastgezet met SRI. Nieuwe hash berekenen: `curl -s URL | openssl dgst -sha384 -binary | openssl base64 -A`.
 
+---
+
+## Webshop (jufvalerie.be/shop/)
+
+Volledig gescheiden van de inschrijvingen: eigen tabellen (`shop_*`), eigen
+Edge Functions (`shop-*`) en een eigen admin (`shop/admin.html`). De bestaande
+`create-mollie-payment` en `mollie-webhook` blijven ongewijzigd.
+
+### 1. Database
+SQL Editor → `sql/shop.sql` plakken → **Run** (na `security_hardening_2026.sql`).
+Maakt tabellen, factuurnummering zonder gaten, onveranderlijke facturen,
+RLS en de Storage-buckets `shop-products` (publiek) en `shop-documents` (privé).
+
+### 2. EmailJS — één nieuwe template
+Maak in EmailJS een template aan met:
+
+| Veld | Waarde |
+|---|---|
+| To Email | `{{to_email}}` |
+| Subject | `{{subject}}` |
+| Reply To | `{{reply_to}}` |
+| Content | `{{{message_html}}}` (drie accolades!) |
+
+### 3. Secrets (bovenop de bestaande)
+| Secret | Waarde |
+|---|---|
+| `EMAILJS_SHOP_TEMPLATE` | id van de nieuwe template |
+| `SHOP_ADMIN_EMAIL` | adres dat een melding krijgt bij elke nieuwe bestelling |
+
+### 4. Deployen
+```bash
+supabase functions deploy shop-create-order
+supabase functions deploy shop-admin
+supabase functions deploy shop-mollie-webhook --no-verify-jwt
+supabase functions deploy shop-document --no-verify-jwt
+```
+(`_shared/shop.ts` wordt automatisch meegenomen.)
+
+### 5. In gebruik nemen
+1. Ga naar `https://jufvalerie.be/shop/admin.html` (of via de knop in de gewone admin).
+2. **Instellingen**: controleer bedrijfsgegevens, verzendkost, afhaalinfo.
+3. **Producten**: voeg producten + foto's toe en zet ze op "zichtbaar".
+4. Test eerst met een Mollie **test**-sleutel; zet daarna "Webshop is open" aan.
+5. Zet "Webshop tonen op de website" aan om de link in het menu van de
+   hoofdsite te tonen (standaard verborgen). Draaide je `shop.sql` al vóór
+   deze optie bestond, voer dan eerst `sql/shop_show_on_site.sql` uit.
+
+### Facturatie
+- Na een geslaagde betaling maakt `shop-mollie-webhook` automatisch de factuur
+  (`W2026-0001`, ...) + pdf aan en mailt de klant een downloadlink.
+- Facturen kunnen niet gewijzigd of verwijderd worden (databasetrigger).
+  Rechtzetten = creditnota (`WC2026-0001`, ...) via de bestelling in de admin,
+  optioneel met automatische terugbetaling via Mollie.
+- Tab **Facturen** → CSV-export per maand/kwartaal/jaar voor de boekhouder.
+- Tab **Overzicht** → omzet t.o.v. de grens van de vrijstellingsregeling.
+
