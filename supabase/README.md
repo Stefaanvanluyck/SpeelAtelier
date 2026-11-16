@@ -245,6 +245,15 @@ supabase functions deploy shop-document --no-verify-jwt
   een *label* (Nieuw, Promo, Bestseller, …) en *uitgelicht* (bovenaan bij
   "Aanbevolen"). Er wordt altijd de gewone prijs aangerekend. Producten kan je
   dupliceren in de admin.
+- **Cadeauverpakking**: Instellingen → Cadeauverpakking (standaard uit). Klanten
+  vinken "Als cadeau inpakken" aan en schrijven een boodschap voor het kaartje.
+  De prijs komt apart op factuur en mails; de boodschap staat op de pakbon en in
+  de productieplanning.
+- **Productieplanning** (admin → Productie): alle stuks die nog gemaakt moeten
+  worden, opgeteld per product, met opmerkingen en cadeauboodschappen; afdrukbaar.
+- **Verzendlabels en pakbonnen** (admin → Bestellingen): selecteer bestellingen
+  of klik "Selecteer alle te verzenden" → labels op A4 (4 of 8 per blad, startpositie
+  instelbaar) met QR-code naar de bestelling in de admin.
 
 ### Testgegevens
 - `sql/shop_testdata.sql`: 4 categorieën, 9 testproducten (slug `test-…`) en

@@ -432,13 +432,31 @@ a.plain:hover { color: var(--accent-dark); }
     .shop-toast { bottom: 84px; }
 }
 @media (max-width: 560px) {
-    .brand { font-size: 1rem; }
+    .brand { font-size: 1rem; white-space: nowrap; }
     .brand small { display: none; }
     .header-links { gap: 10px; }
     .header-links a { font-size: .85rem; white-space: nowrap; }
     .cart-button { padding: 8px 12px; white-space: nowrap; }
-    .shop-header .container { padding: 10px 0; }
+    .shop-header .container { padding: 10px 0; gap: 8px; }
+    .hide-sm { display: none; }
 }
+@media (min-width: 561px) { .show-sm { display: none; } }
+@media (max-width: 420px) {
+    .hide-xs { display: none; }
+    .header-links > a { font-size: 1.2rem; padding: 2px 6px; }
+}
+.shop-header .container { flex-wrap: nowrap; }
+.brand { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.header-links { flex-shrink: 0; }
+@media (max-width: 360px) {
+    .brand { font-size: .9rem; }
+    .cart-button { padding: 7px 10px; font-size: .9rem; }
+}
+#leadTime:empty { display: none; }
+.gift-block { border: 1px dashed #ffb3c1; background: #fff7f9; border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; }
+.gift-check { font-weight: 400; }
+/* Nooit horizontaal scrollen op gsm (clip maakt geen scrollcontainer, sticky header blijft werken) */
+html { overflow-x: clip; }
 
 /* ---------- vliegend product ---------- */
 .fly-img {

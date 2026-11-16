@@ -355,6 +355,28 @@ legend { font-family: "Fredoka", "Poppins", sans-serif; font-weight: 600; paddin
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast.error { background: #a32020; }
 
+/* ---------- cadeauverpakking ---------- */
+.gift-note { background: #fff0f3; border: 1px dashed #ff9fb0; border-radius: 12px; padding: 10px 12px; margin: 10px 0; }
+.slip-gift { border-color: #ff9fb0; background: #fff0f3; }
+.gift-card-text { font-family: "Fredoka", "Poppins", sans-serif; font-size: 14pt; margin-top: 2mm; }
+
+/* ---------- productieplanning ---------- */
+.prod-card { padding: 16px 18px; }
+.prod-head { display: flex; gap: 14px; align-items: center; }
+.prod-head img { width: 56px; height: 56px; object-fit: cover; border-radius: 12px; }
+.prod-head h3 { margin: 0; }
+.prod-head > div:nth-child(2) { flex: 1; }
+.prod-qty { font-family: "Fredoka", "Poppins", sans-serif; font-size: 2rem; font-weight: 700; color: var(--g-dark); text-align: center; line-height: 1; }
+.prod-qty small { display: block; font-size: .7rem; font-weight: 500; color: var(--muted); font-family: "Poppins", sans-serif; }
+.prod-orders { list-style: none; margin-top: 10px; border-top: 1px solid var(--line); }
+.prod-orders li { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: .9rem; border-radius: 8px; }
+.prod-orders li:last-child { border-bottom: 0; }
+.prod-orders li.clickable { cursor: pointer; }
+.prod-orders li.clickable:hover { background: #f6fbf7; }
+.prod-orders .q { font-weight: 700; color: var(--g-dark); }
+.prod-orders .note { display: inline-block; margin-top: 3px; background: #fff7ea; border-radius: 6px; padding: 1px 7px; font-size: .82rem; }
+.prod-orders .note.gift { background: #ffeef1; }
+
 /* ---------- selectie bij bestellingen ---------- */
 th.sel, td.sel { width: 38px; text-align: center; cursor: pointer; }
 th.sel input, td.sel input { width: 17px; height: 17px; accent-color: var(--g); cursor: pointer; }
@@ -397,11 +419,11 @@ body.admin .bulk-bar .btn.secondary { background: transparent; color: #fff; bord
 .sheet:last-child { break-after: auto; page-break-after: auto; }
 .sheet-4 { grid-template-rows: 148.5mm 148.5mm; }
 .sheet-8 { grid-template-rows: repeat(4, 74.25mm); }
-.label {
+.slabel {
     box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; gap: 4mm;
     padding: 9mm 9mm 8mm; outline: .2mm dashed #c8c8c8; outline-offset: -.1mm;
 }
-.label.empty { outline-color: #eee; }
+.slabel.empty { outline-color: #eee; }
 .lb-from { font-size: 8pt; color: #444; border-bottom: .3mm solid #222; padding-bottom: 2mm; }
 .lb-main { flex: 1; display: flex; gap: 5mm; align-items: center; }
 .lb-to { flex: 1; font-size: 15pt; line-height: 1.35; }
@@ -419,7 +441,7 @@ body.admin .bulk-bar .btn.secondary { background: transparent; color: #fff; bord
 .sheet-4 .lb-from { font-size: 9pt; }
 .sheet-4 .lb-foot { font-size: 9.5pt; }
 
-.sheet-8 .label { padding: 5mm 6mm 4mm; gap: 2mm; }
+.sheet-8 .slabel { padding: 5mm 6mm 4mm; gap: 2mm; }
 .sheet-8 .lb-from { font-size: 6.5pt; padding-bottom: 1mm; }
 .sheet-8 .lb-to { font-size: 10.5pt; line-height: 1.25; }
 .sheet-8 .lb-name { font-size: 12.5pt; }
@@ -451,7 +473,7 @@ body.admin .bulk-bar .btn.secondary { background: transparent; color: #fff; bord
     body.admin > *:not(#printArea) { display: none !important; }
     body.admin { display: block !important; }
     #printArea { display: block !important; }
-    .label.empty { outline: 0; }
+    .slabel.empty { outline: 0; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 

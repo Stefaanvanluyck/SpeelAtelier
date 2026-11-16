@@ -112,6 +112,9 @@ export type Order = {
     shipping_cost: number;
     discount_code: string | null;
     discount_amount: number;
+    gift_wrap: boolean;
+    gift_message: string | null;
+    gift_wrap_cost: number;
     total: number;
     payment_status: string;
     order_status: string;
@@ -139,6 +142,7 @@ export type Invoice = {
     shipping_cost: number;
     discount_code: string | null;
     discount_amount: number;
+    gift_wrap_cost: number;
     total: number;
     vat_note: string;
     payment_note: string;
@@ -243,6 +247,12 @@ function discountHtml(order: Order) {
     return `<p>Korting${order.discount_code ? ` (${escapeHtml(order.discount_code)})` : ""}: -${euro(amount)}</p>`;
 }
 
+function giftHtml(order: Order) {
+    if (!order.gift_wrap) return "";
+    return `<p>🎁 Cadeauverpakking: ${euro(order.gift_wrap_cost ?? 0)}` +
+        (order.gift_message ? `<br>Kaartje: <em>"${escapeHtml(order.gift_message)}"</em>` : "") + `</p>`;
+}
+
 function deliveryHtml(order: Order, settings: Settings) {
     if (order.delivery_method === "pickup") {
         return `<p><strong>Afhalen</strong><br>${escapeHtml(settings.pickup_info)}</p>`;
@@ -267,6 +277,7 @@ export async function sendOrderConfirmation(order: Order, invoice: Invoice | nul
         `We hebben je betaling goed ontvangen.</p>` +
         itemsTableHtml(items) +
         discountHtml(order) +
+        giftHtml(order) +
         `<p>Verzending: ${euro(order.shipping_cost)}<br><strong>Totaal: ${euro(order.total)}</strong></p>` +
         deliveryHtml(order, settings) +
         `<p>${escapeHtml(settings.lead_time_text)}</p>` +
@@ -288,6 +299,7 @@ export async function sendOrderConfirmation(order: Order, invoice: Invoice | nul
             `${order.phone ? " – " + escapeHtml(order.phone) : ""}</p>` +
             itemsTableHtml(items) +
             discountHtml(order) +
+            giftHtml(order) +
             `<p><strong>Totaal: ${euro(order.total)}</strong></p>` +
             deliveryHtml(order, settings) +
             (order.customer_note ? `<p>Opmerking klant: ${escapeHtml(order.customer_note)}</p>` : "") +
@@ -504,6 +516,9 @@ export async function renderInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
     }
     if (Number(invoice.shipping_cost) > 0 || invoice.customer.delivery === "shipping") {
         totals.push(["Verzending", Number(invoice.shipping_cost)]);
+    }
+    if (Number(invoice.gift_wrap_cost ?? 0) > 0) {
+        totals.push(["Cadeauverpakking", Number(invoice.gift_wrap_cost)]);
     }
     totals.push(["Totaal", Number(invoice.total)]);
 

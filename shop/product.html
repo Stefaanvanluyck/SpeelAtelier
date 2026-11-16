@@ -43,7 +43,7 @@
     <div class="container">
         <a class="brand" href="./">🌿 Kleine Wonderwereld <small>Webshop</small></a>
         <nav class="header-links">
-            <a href="./">← Alle producten</a>
+            <a href="./" aria-label="Alle producten">←<span class="hide-sm"> Alle</span><span class="hide-xs"> producten</span></a>
             <button class="cart-button" id="cartButton" type="button" aria-label="Winkelmandje openen">
                 🛒 Mandje <span class="cart-badge" id="cartBadge">0</span>
             </button>
@@ -145,6 +145,19 @@
             <label>Opmerking (bv. kleurvoorkeur)
                 <textarea name="note" rows="3" maxlength="1000"></textarea>
             </label>
+
+            <div class="gift-block hidden" id="giftBlock">
+                <label class="check gift-check">
+                    <input type="checkbox" id="giftWrap" name="gift_wrap">
+                    <span><strong>🎁 Als cadeau inpakken</strong> <span class="muted" id="giftPrice"></span><br>
+                        <span class="muted small" id="giftInfo"></span></span>
+                </label>
+                <div id="giftFields" class="hidden">
+                    <label>Boodschap op het kaartje (optioneel)
+                        <textarea name="gift_message" rows="2" maxlength="300" placeholder="Fijne verjaardag! Veel speelplezier 🎈"></textarea>
+                    </label>
+                </div>
+            </div>
 
             <div>
                 <label for="discountCode">Kortingscode</label>

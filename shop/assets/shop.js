@@ -60,6 +60,12 @@
 
         settings = settingsRes.data;
         products = productsRes.data || [];
+
+        // Cadeauverpakking: apart opvragen zodat de shop blijft werken als de database nog niet bijgewerkt is.
+        const giftRes = await S.sb.from("shop_settings")
+            .select("gift_wrap_enabled, gift_wrap_price, gift_wrap_text").eq("id", 1).maybeSingle();
+        if (!giftRes.error && giftRes.data) Object.assign(settings, giftRes.data);
+        setupGiftBlock();
         // Categorieën zijn optioneel: als de tabel (nog) niet bestaat, werkt de shop gewoon verder.
         categories = categoriesRes.error ? [] : (categoriesRes.data || []);
 
@@ -521,6 +527,21 @@
         }, 0) * 100) / 100;
     }
 
+    function giftCost() {
+        return settings && settings.gift_wrap_enabled && $("giftWrap") && $("giftWrap").checked
+            ? Number(settings.gift_wrap_price) || 0 : 0;
+    }
+
+    function setupGiftBlock() {
+        const box = $("giftBlock");
+        if (!box) return;
+        const on = !!settings.gift_wrap_enabled;
+        box.classList.toggle("hidden", !on);
+        if (!on) return;
+        $("giftPrice").textContent = Number(settings.gift_wrap_price) > 0 ? "+ " + S.euro(settings.gift_wrap_price) : "gratis";
+        $("giftInfo").textContent = settings.gift_wrap_text || "";
+    }
+
     function calcTotals() {
         const subtotal = cartSubtotal();
         const disc = discount ? Math.min(subtotal, Number(discount.amount) || 0) : 0;
@@ -530,7 +551,8 @@
             const freeFrom = settings.free_shipping_from != null ? Number(settings.free_shipping_from) : null;
             shipping = freeFrom != null && afterDiscount >= freeFrom ? 0 : Number(settings.shipping_cost);
         }
-        return { subtotal: subtotal, discount: disc, shipping: shipping, total: afterDiscount + shipping };
+        const gift = giftCost();
+        return { subtotal: subtotal, discount: disc, shipping: shipping, gift: gift, total: afterDiscount + shipping + gift };
     }
 
     async function applyDiscount(code) {
@@ -616,6 +638,9 @@
                 (settings.free_shipping_from != null ? " (gratis vanaf " + S.euro(settings.free_shipping_from) + ")" : "") +
                 '</span></div>';
         }
+        if (step === "checkout" && t.gift > 0) {
+            html += '<div><span>🎁 Cadeauverpakking</span><span>' + S.euro(t.gift) + "</span></div>";
+        }
         html += '<div class="grand"><span>Totaal</span><span>' +
             S.euro(step === "checkout" ? t.total : t.subtotal - t.discount) + '</span></div>';
         $("totals").innerHTML = html;
@@ -660,6 +685,7 @@
 
     function openCart() {
         closeAll();
+        if ($("shopToast")) $("shopToast").classList.remove("show");
         $("cartDrawer").classList.add("open");
         $("overlay").classList.add("open");
         setStep("cart");
@@ -716,6 +742,9 @@
             },
             note: f.get("note"),
             discount_code: discount ? discount.code : "",
+            gift: giftCost() > 0 || (settings.gift_wrap_enabled && $("giftWrap") && $("giftWrap").checked)
+                ? { wrap: true, message: String(f.get("gift_message") || "").trim() }
+                : { wrap: false },
             terms_accepted: true
         };
 
@@ -872,6 +901,10 @@
         }
         if (e.target.name === "delivery") updateAddressVisibility();
         if (e.target.id === "isCompany") $("companyFields").classList.toggle("hidden", !e.target.checked);
+        if (e.target.id === "giftWrap") {
+            $("giftFields").classList.toggle("hidden", !e.target.checked);
+            renderCart();
+        }
     });
 
     document.addEventListener("keydown", function (e) {

@@ -220,6 +220,7 @@
         history.replaceState(null, "", "#" + name);
         window.scrollTo(0, 0);
         if (name === "dashboard") renderDashboard();
+        if (name === "production") renderProduction();
         if (name === "invoices") loadInvoices();
         if (name === "discounts") loadDiscounts();
         if (name === "waitlist") loadWaitlist();
@@ -326,8 +327,8 @@
             todos.push(["danger", "🧪", liveTest.length + " testproduct(en) zichtbaar in de open webshop", "Echte klanten kunnen ze kopen.", "products:test"]);
         }
         if (invErr.length) todos.push(["danger", "🧾", invErr.length + " betaalde bestelling(en) zonder factuur", "Open de bestelling en klik op 'Factuur aanmaken'.", "orders:paid"]);
-        if (newOnes.length) todos.push(["warn", "🆕", newOnes.length + " nieuwe bestelling(en) om te starten", "Zet ze op 'In productie'.", "orders:new"]);
-        if (prod.length) todos.push(["info", "✂️", prod.length + " bestelling(en) in productie", "", "orders:in_production"]);
+        if (newOnes.length) todos.push(["warn", "🆕", newOnes.length + " nieuwe bestelling(en) om te starten", "Bekijk wat je moet maken in Productie.", "production"]);
+        if (prod.length) todos.push(["info", "✂️", prod.length + " bestelling(en) in productie", "", "production"]);
         if (ready.length) todos.push(["info", "🏠", ready.length + " bestelling(en) wachten op afhaling", "", "orders:ready"]);
         if (stalePending.length) todos.push(["muted", "⏳", stalePending.length + " onbetaalde bestelling(en) ouder dan 1 dag", "Eventueel annuleren.", "orders:unpaid"]);
         if (noPhoto.length) todos.push(["muted", "📷", noPhoto.length + " zichtbaar product(en) zonder foto", "", "products:visible"]);
@@ -386,6 +387,94 @@
         }
     }
 
+    /* ======================== PRODUCTIE ======================== */
+
+    function productionOrders() {
+        return orders.filter(function (o) {
+            return o.payment_status === "paid" && ["new", "in_production"].includes(o.order_status);
+        }).sort(function (a, b) { return String(a.paid_at || a.created_at).localeCompare(String(b.paid_at || b.created_at)); });
+    }
+
+    function productionData() {
+        const list = productionOrders();
+        const agg = {};
+        list.forEach(function (o) {
+            (o.shop_order_items || []).forEach(function (i) {
+                const key = i.product_id || i.product_name;
+                if (!agg[key]) {
+                    const p = products.find(function (x) { return x.id === i.product_id; });
+                    agg[key] = { name: i.product_name, image: p ? p.image_path : null, weight: p ? p.weight_grams : null, qty: 0, orders: [] };
+                }
+                agg[key].qty += i.quantity;
+                agg[key].orders.push({ o: o, qty: i.quantity });
+            });
+        });
+        const rows = Object.keys(agg).map(function (k) { return agg[k]; })
+            .sort(function (a, b) { return b.qty - a.qty || a.name.localeCompare(b.name, "nl"); });
+        return { list: list, rows: rows };
+    }
+
+    function ageDays(o) {
+        return Math.floor((Date.now() - new Date(o.paid_at || o.created_at)) / 86400000);
+    }
+
+    function renderProduction() {
+        const d = productionData();
+        const pieces = d.rows.reduce(function (s, r) { return s + r.qty; }, 0);
+        const grams = d.rows.reduce(function (s, r) { return s + (r.weight ? r.weight * r.qty : 0); }, 0);
+        const oldest = d.list.length ? ageDays(d.list[0]) : 0;
+        $("prodCount").textContent = d.list.length ? String(pieces) : "";
+        $("prodKpis").innerHTML =
+            kpi("🧺", "Te maken stuks", String(pieces), d.rows.length + " verschillende producten") +
+            kpi("📦", "Bestellingen", String(d.list.length),
+                d.list.filter(function (o) { return o.order_status === "new"; }).length + " nog niet gestart") +
+            kpi("⚖️", "Totaal gewicht", grams ? (grams / 1000).toFixed(1).replace(".", ",") + " kg" : "–", "op basis van productgewichten") +
+            kpi("⏱️", "Oudste bestelling", d.list.length ? oldest + " dag" + (oldest === 1 ? "" : "en") : "–",
+                d.list.length ? esc(d.list[0].order_number) : "", oldest >= 5 ? "attention" : "");
+
+        if (!d.rows.length) {
+            $("prodList").innerHTML = '<div class="card-plain">' + emptyState("🎨", "Niets te maken", "Er zijn geen betaalde bestellingen die nog gemaakt moeten worden.") + "</div>";
+            return;
+        }
+        $("prodList").innerHTML = d.rows.map(function (r) {
+            return '<div class="card-plain prod-card"><div class="prod-head">' +
+                '<img src="' + S.imageUrl(r.image) + '" alt="">' +
+                '<div><h3>' + esc(r.name) + "</h3>" +
+                '<span class="muted">' + r.orders.length + " bestelling" + (r.orders.length === 1 ? "" : "en") +
+                (r.weight ? " · ± " + (r.weight * r.qty >= 1000 ? (r.weight * r.qty / 1000).toFixed(1).replace(".", ",") + " kg" : r.weight * r.qty + " g") : "") +
+                "</span></div>" +
+                '<div class="prod-qty">' + r.qty + "<small>stuks</small></div></div>" +
+                '<ul class="prod-orders">' + r.orders.map(function (x) {
+                    const o = x.o, age = ageDays(o);
+                    return '<li data-order="' + o.id + '" class="clickable">' +
+                        '<span class="q">' + x.qty + "×</span>" +
+                        "<span><strong>" + esc(o.order_number) + "</strong> · " + esc(o.customer_name) +
+                        ' <span class="muted">· ' + (o.delivery_method === "pickup" ? "🏠" : "📮") + " · " + age + "d</span>" +
+                        (o.customer_note ? '<br><span class="note">💬 ' + esc(o.customer_note) + "</span>" : "") +
+                        (o.gift_wrap ? '<br><span class="note gift">🎁 Cadeauverpakking' + (o.gift_message ? ": “" + esc(o.gift_message) + "”" : "") + "</span>" : "") +
+                        "</span>" + badge(ORDER_LABEL, o.order_status) + "</li>";
+                }).join("") + "</ul></div>";
+        }).join("");
+    }
+
+    function printProduction() {
+        const d = productionData();
+        if (!d.rows.length) { toast("Niets te maken.", true); return; }
+        const html = '<div class="slip prod-print"><div class="slip-head"><div><div class="slip-brand">Productieplanning</div>' +
+            '<div class="muted">' + new Date().toLocaleDateString("nl-BE", { weekday: "long", day: "numeric", month: "long" }) + "</div></div>" +
+            '<div class="slip-title">' + d.rows.reduce(function (s, r) { return s + r.qty; }, 0) + "<br><span>stuks</span></div></div>" +
+            '<table class="slip-table"><thead><tr><th>✓</th><th>Aantal</th><th>Product</th><th>Bestellingen &amp; opmerkingen</th></tr></thead><tbody>' +
+            d.rows.map(function (r) {
+                return '<tr><td class="box">☐</td><td><strong>' + r.qty + " ×</strong></td><td><strong>" + esc(r.name) + "</strong></td><td>" +
+                    r.orders.map(function (x) {
+                        return esc(x.o.order_number) + " (" + x.qty + "×, " + esc(x.o.customer_name) + ")" +
+                            (x.o.customer_note ? " – <em>" + esc(x.o.customer_note) + "</em>" : "") +
+                            (x.o.gift_wrap ? " – 🎁" : "");
+                    }).join("<br>") + "</td></tr>";
+            }).join("") + "</tbody></table></div>";
+        doPrint("slips", html);
+    }
+
     /* ======================== BESTELLINGEN ======================== */
 
     async function loadOrders() {
@@ -398,6 +487,7 @@
         invoicesByOrder = {};
         (inv.data || []).forEach(function (i) { invoicesByOrder[i.order_id] = i; });
         renderOrders();
+        renderProduction();
         if (products.length) renderProducts();
         if (!$("tab-dashboard").classList.contains("hidden")) renderDashboard();
     }
@@ -445,7 +535,7 @@
                 '<td data-label="Datum" title="' + esc(new Date(o.created_at).toLocaleString("nl-BE")) + '">' + esc(relTime(o.created_at)) + "</td>" +
                 '<td data-label="Klant">' + esc(o.customer_name) + '<br><span class="muted">' + esc(o.email) + "</span></td>" +
                 '<td data-label="Levering">' + (o.delivery_method === "pickup" ? "🏠 Afhalen" : "📮 Verzenden") +
-                '<br><span class="muted">' + items + " stuk" + (items === 1 ? "" : "s") + "</span></td>" +
+                '<br><span class="muted">' + items + " stuk" + (items === 1 ? "" : "s") + (o.gift_wrap ? " · 🎁" : "") + "</span></td>" +
                 '<td data-label="Totaal" class="num"><strong>' + S.euro(o.total) + "</strong>" +
                 (Number(o.discount_amount) > 0 ? '<br><span class="muted">🏷️ ' + esc(o.discount_code || "korting") + "</span>" : "") + "</td>" +
                 '<td data-label="Betaling">' + badge(PAYMENT_LABEL, o.payment_status) + "</td>" +
@@ -529,6 +619,8 @@
                 "📮 " + esc(o.street) + "<br>" + esc(o.postal_code) + " " + esc(o.city) + " (" + esc(o.country) + ")") +
             (o.tracking_code ? "<br>Track &amp; trace: " + esc(o.tracking_code) : "") + "</p>" +
             (o.customer_note ? "<h3>Opmerking klant</h3><p>" + esc(o.customer_note) + "</p>" : "") +
+            (o.gift_wrap ? '<div class="gift-note"><strong>🎁 Inpakken als cadeau</strong>' +
+                (o.gift_message ? "<br>Kaartje: <em>“" + esc(o.gift_message) + "”</em>" : "<br><span class=\"muted\">Geen boodschap</span>") + "</div>" : "") +
             "<h3>Interne notitie</h3>" +
             '<textarea id="adminNote" rows="2" maxlength="2000">' + esc(o.admin_note || "") + "</textarea>" +
             '<div class="actions"><button class="btn small secondary" type="button" data-save-note>Notitie opslaan</button></div>' +
@@ -539,6 +631,7 @@
                   '</td><td class="num">− ' + S.euro(o.discount_amount) + "</td></tr>"
                 : "") +
             '<tr><td></td><td>Verzending</td><td class="num">' + S.euro(o.shipping_cost) + "</td></tr>" +
+            (o.gift_wrap ? '<tr><td></td><td>🎁 Cadeauverpakking</td><td class="num">' + S.euro(o.gift_wrap_cost || 0) + "</td></tr>" : "") +
             '<tr><td></td><td><strong>Totaal</strong></td><td class="num"><strong>' + S.euro(o.total) + "</strong></td></tr></table>" +
 
             (paid ? "<h3>Status aanpassen</h3>" +
@@ -636,7 +729,7 @@
     function labelHtml(o) {
         const items = (o.shop_order_items || []).reduce(function (s, i) { return s + i.quantity; }, 0);
         const w = orderWeightGrams(o);
-        return '<div class="label">' +
+        return '<div class="slabel">' +
             '<div class="lb-from">Afz.: ' + esc(senderLine()) + "</div>" +
             '<div class="lb-main"><div class="lb-to">' +
             '<div class="lb-name">' + esc(o.customer_name) + "</div>" +
@@ -653,12 +746,12 @@
     function labelSheetsHtml(list, format, start) {
         const per = LABEL_FORMATS[format].perPage;
         const cells = [];
-        for (let i = 1; i < start; i++) cells.push('<div class="label empty"></div>');
+        for (let i = 1; i < start; i++) cells.push('<div class="slabel empty"></div>');
         list.forEach(function (o) { cells.push(labelHtml(o)); });
         let html = "";
         for (let i = 0; i < cells.length; i += per) {
             const page = cells.slice(i, i + per);
-            while (page.length < per) page.push('<div class="label empty"></div>');
+            while (page.length < per) page.push('<div class="slabel empty"></div>');
             html += '<div class="sheet sheet-' + format + '">' + page.join("") + "</div>";
         }
         return html;
@@ -683,6 +776,8 @@
                 return '<tr><td class="box">☐</td><td>' + i.quantity + " ×</td><td>" + esc(i.product_name) + "</td></tr>";
             }).join("") + "</tbody></table>" +
             (o.customer_note ? '<div class="slip-note"><strong>Opmerking klant:</strong> ' + esc(o.customer_note) + "</div>" : "") +
+            (o.gift_wrap ? '<div class="slip-note slip-gift"><strong>🎁 Inpakken als cadeau</strong>' +
+                (o.gift_message ? '<div class="gift-card-text">“' + esc(o.gift_message) + "”</div>" : " – zonder boodschap") + "</div>" : "") +
             '<p class="slip-thanks">Bedankt voor je bestelling en veel speelplezier! 🌈</p></div>';
     }
 
@@ -791,6 +886,9 @@
         const lines = (inv.lines || []).slice();
         if (Number(inv.shipping_cost) > 0) {
             lines.push({ description: "Verzending", quantity: 1, unit_price: Number(inv.shipping_cost) });
+        }
+        if (Number(inv.gift_wrap_cost || 0) > 0) {
+            lines.push({ description: "Cadeauverpakking", quantity: 1, unit_price: Number(inv.gift_wrap_cost) });
         }
 
         openDialog("<h2>Creditnota voor " + esc(inv.invoice_number) + "</h2>" +
@@ -1576,6 +1674,16 @@
             invoice_footer: String(f.get("invoice_footer")).trim(),
             vat_threshold: num("vat_threshold") || 25000
         };
+        // Enkel meesturen als de database deze kolommen al kent (shop.sql opnieuw gedraaid)
+        if (settings && "gift_wrap_enabled" in settings) {
+            row.gift_wrap_enabled = form.elements.gift_wrap_enabled.checked;
+            row.gift_wrap_price = num("gift_wrap_price") || 0;
+            row.gift_wrap_text = String(f.get("gift_wrap_text") || "").trim() ||
+                "Mooi ingepakt met een lintje en een kaartje met jouw boodschap.";
+        } else if (form.elements.gift_wrap_enabled.checked) {
+            $("settingsError").textContent = "Cadeauverpakking kan pas nadat sql/shop.sql opnieuw gedraaid is.";
+            return;
+        }
         $("settingsError").textContent = "";
         if (!row.pickup_enabled && !row.shipping_enabled && row.shop_open) {
             $("settingsError").textContent = "Zet minstens afhalen of verzenden aan."; return;
@@ -1623,6 +1731,7 @@
         else if (d.labelOrder) openLabelDialog([d.labelOrder]);
         else if (t.id === "bulkLabels") openLabelDialog(Array.from(selectedOrders));
         else if (t.id === "bulkSlips") printPackingSlips(Array.from(selectedOrders));
+        else if (t.id === "printProduction") printProduction();
         else if (t.id === "bulkClear") { selectedOrders.clear(); renderOrders(); }
         else if (t.id === "selectToShip") {
             const ship = orders.filter(isToShip);

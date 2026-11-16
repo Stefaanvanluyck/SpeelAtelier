@@ -11,7 +11,8 @@
 //       customer: { name, email, phone, company_name, company_vat },
 //       delivery: { method: "pickup"|"shipping", street, postal_code, city, country },
 //       note, terms_accepted: true,
-//       discount_code?: string
+//       discount_code?: string,
+//       gift?: { wrap: boolean, message?: string }
 //   }})
 // Antwoord: { checkoutUrl, orderId, orderNumber, total }
 //
@@ -191,7 +192,17 @@ async function handle(req: Request, headers: Record<string, string>): Promise<Re
         const freeFrom = settings.free_shipping_from != null ? Number(settings.free_shipping_from) : null;
         shipping = freeFrom != null && afterDiscount >= freeFrom ? 0 : Number(settings.shipping_cost);
     }
-    const total = round2(afterDiscount + shipping);
+
+    // Cadeauverpakking (enkel als ze in de instellingen aanstaat)
+    const g = body.gift ?? {};
+    const giftWrap = g.wrap === true && settings.gift_wrap_enabled === true;
+    const giftMessage = giftWrap ? (str(g.message, 300) || null) : null;
+    if ((giftMessage?.length ?? 0) > 300) {
+        return json({ error: "De boodschap op het kaartje is te lang (max. 300 tekens)." }, 400, headers);
+    }
+    const giftCost = giftWrap ? round2(Number(settings.gift_wrap_price) || 0) : 0;
+
+    const total = round2(afterDiscount + shipping + giftCost);
     if (total < 1) {
         return json({ error: "Het minimumbedrag voor een bestelling is € 1,00." }, 400, headers);
     }
@@ -229,6 +240,9 @@ async function handle(req: Request, headers: Record<string, string>): Promise<Re
             shipping_cost: shipping,
             discount_code: discountCode,
             discount_amount: discount,
+            gift_wrap: giftWrap,
+            gift_message: giftMessage,
+            gift_wrap_cost: giftCost,
             total,
             terms_accepted_at: new Date().toISOString(),
         })

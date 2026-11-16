@@ -56,6 +56,12 @@ INSERT INTO public.shop_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 ALTER TABLE public.shop_settings
     ADD COLUMN IF NOT EXISTS show_on_site boolean NOT NULL DEFAULT false;
 
+-- Cadeauverpakking (optie bij het afrekenen)
+ALTER TABLE public.shop_settings
+    ADD COLUMN IF NOT EXISTS gift_wrap_enabled boolean NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS gift_wrap_price   numeric(10,2) NOT NULL DEFAULT 2.50 CHECK (gift_wrap_price >= 0 AND gift_wrap_price <= 100),
+    ADD COLUMN IF NOT EXISTS gift_wrap_text    text NOT NULL DEFAULT 'Mooi ingepakt met een lintje en een kaartje met jouw boodschap.';
+
 -- Bedrijfsgegevens voorinvullen (zoals in privacy.html), enkel als ze nog leeg zijn.
 UPDATE public.shop_settings
 SET business_address  = CASE WHEN business_address  = '' THEN E'Braakstraat 7\n2960 Sint-Job' ELSE business_address END,
@@ -196,6 +202,12 @@ ALTER TABLE public.shop_orders
     ADD COLUMN IF NOT EXISTS discount_code   text,
     ADD COLUMN IF NOT EXISTS discount_amount numeric(10,2) NOT NULL DEFAULT 0 CHECK (discount_amount >= 0);
 
+-- Cadeauverpakking (total = subtotal - discount_amount + shipping_cost + gift_wrap_cost)
+ALTER TABLE public.shop_orders
+    ADD COLUMN IF NOT EXISTS gift_wrap      boolean NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS gift_message   text CHECK (gift_message IS NULL OR char_length(gift_message) <= 300),
+    ADD COLUMN IF NOT EXISTS gift_wrap_cost numeric(10,2) NOT NULL DEFAULT 0 CHECK (gift_wrap_cost >= 0);
+
 
 CREATE TABLE IF NOT EXISTS public.shop_order_items (
     id              bigserial PRIMARY KEY,
@@ -242,7 +254,8 @@ CREATE INDEX IF NOT EXISTS idx_shop_invoices_date ON public.shop_invoices (invoi
 
 ALTER TABLE public.shop_invoices
     ADD COLUMN IF NOT EXISTS discount_code   text,
-    ADD COLUMN IF NOT EXISTS discount_amount numeric(10,2) NOT NULL DEFAULT 0;
+    ADD COLUMN IF NOT EXISTS discount_amount numeric(10,2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS gift_wrap_cost  numeric(10,2) NOT NULL DEFAULT 0;
 
 
 CREATE TABLE IF NOT EXISTS public.shop_credit_notes (
@@ -352,6 +365,7 @@ BEGIN
        OR NEW.shipping_cost IS DISTINCT FROM OLD.shipping_cost
        OR NEW.discount_code   IS DISTINCT FROM OLD.discount_code
        OR NEW.discount_amount IS DISTINCT FROM OLD.discount_amount
+       OR NEW.gift_wrap_cost  IS DISTINCT FROM OLD.gift_wrap_cost
        OR NEW.total        IS DISTINCT FROM OLD.total
        OR NEW.vat_note     IS DISTINCT FROM OLD.vat_note THEN
         RAISE EXCEPTION 'Een uitgereikte factuur kan niet gewijzigd worden. Maak een creditnota.'
@@ -442,7 +456,7 @@ BEGIN
 
     INSERT INTO public.shop_invoices (
         invoice_number, invoice_date, order_id, seller, customer, lines,
-        subtotal, shipping_cost, discount_code, discount_amount, total, vat_note
+        subtotal, shipping_cost, discount_code, discount_amount, gift_wrap_cost, total, vat_note
     ) VALUES (
         public.shop_next_number('invoice', 'W'),
         (now() AT TIME ZONE 'Europe/Brussels')::date,
@@ -474,6 +488,7 @@ BEGIN
         v_order.shipping_cost,
         v_order.discount_code,
         v_order.discount_amount,
+        v_order.gift_wrap_cost,
         v_order.total,
         v_settings.vat_exempt_text
     )

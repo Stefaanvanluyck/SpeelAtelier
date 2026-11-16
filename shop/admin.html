@@ -66,6 +66,7 @@
     <nav class="tabs" role="tablist" aria-label="Onderdelen">
         <button type="button" class="tab active" data-tab="dashboard"><span class="ti">🏠</span> Dashboard</button>
         <button type="button" class="tab" data-tab="orders"><span class="ti">📦</span> Bestellingen <span class="pill" id="openCount"></span></button>
+        <button type="button" class="tab" data-tab="production"><span class="ti">✂️</span> Productie <span class="pill" id="prodCount"></span></button>
         <button type="button" class="tab" data-tab="products"><span class="ti">🧺</span> Producten</button>
         <button type="button" class="tab" data-tab="discounts"><span class="ti">🏷️</span> Kortingscodes</button>
         <button type="button" class="tab" data-tab="invoices"><span class="ti">🧾</span> Facturen</button>
@@ -139,6 +140,19 @@
                 <tbody id="orderRows"></tbody>
             </table>
         </div>
+    </section>
+
+    <!-- PRODUCTIE -->
+    <section class="panel hidden" id="tab-production">
+        <div class="page-head">
+            <div>
+                <h1>Productieplanning</h1>
+                <p class="muted">Alles wat nog gemaakt moet worden: betaalde bestellingen met status "Nieuw" of "In productie".</p>
+            </div>
+            <button class="btn small secondary" type="button" id="printProduction">🖨 Afdrukken</button>
+        </div>
+        <div class="kpis" id="prodKpis"></div>
+        <div id="prodList"></div>
     </section>
 
     <!-- PRODUCTEN -->
@@ -290,6 +304,20 @@
                 </label>
                 <label>Gratis verzending vanaf (€, leeg = nooit)
                     <input name="free_shipping_from" type="number" min="0" step="0.01">
+                </label>
+            </div>
+            </div>
+
+            <div class="card-plain form-grid">
+            <h3>🎁 Cadeauverpakking</h3>
+            <label class="check switch"><input type="checkbox" name="gift_wrap_enabled"> <span>Klanten kunnen kiezen voor cadeauverpakking
+                <small class="muted">met een kaartje en eigen boodschap</small></span></label>
+            <div class="form-row">
+                <label>Prijs (€, 0 = gratis)
+                    <input name="gift_wrap_price" type="number" min="0" max="100" step="0.01">
+                </label>
+                <label>Uitleg bij het afrekenen
+                    <input name="gift_wrap_text" maxlength="200">
                 </label>
             </div>
             </div>
