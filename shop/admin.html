@@ -67,6 +67,7 @@
         <button type="button" class="tab active" data-tab="dashboard"><span class="ti">🏠</span> Dashboard</button>
         <button type="button" class="tab" data-tab="orders"><span class="ti">📦</span> Bestellingen <span class="pill" id="openCount"></span></button>
         <button type="button" class="tab" data-tab="production"><span class="ti">✂️</span> Productie <span class="pill" id="prodCount"></span></button>
+        <button type="button" class="tab" data-tab="deliveries"><span class="ti">🚗</span> Leveringen <span class="pill" id="deliverCount"></span></button>
         <button type="button" class="tab" data-tab="products"><span class="ti">🧺</span> Producten</button>
         <button type="button" class="tab" data-tab="discounts"><span class="ti">🏷️</span> Kortingscodes</button>
         <button type="button" class="tab" data-tab="invoices"><span class="ti">🧾</span> Facturen</button>
@@ -121,12 +122,12 @@
                 <option value="all">Alle</option>
             </select>
             <input id="orderSearch" type="search" placeholder="🔍 Zoek op nummer, naam of e-mail" data-search>
-            <button class="btn small secondary" type="button" id="selectToShip">🏷️ Selecteer alle te verzenden</button>
+            <button class="btn small secondary" type="button" id="selectToShip">🏷️ Selecteer alle te leveren</button>
             <button class="btn small secondary" type="button" id="reloadOrders">↻ Vernieuwen</button>
         </div>
         <div class="bulk-bar hidden" id="bulkBar" role="region" aria-label="Selectie">
             <strong id="bulkCount"></strong>
-            <button class="btn small" type="button" id="bulkLabels">🏷️ Verzendlabels</button>
+            <button class="btn small" type="button" id="bulkLabels">🏷️ Adreslabels</button>
             <button class="btn small secondary" type="button" id="bulkSlips">🖨 Pakbonnen</button>
             <button class="link-btn" type="button" id="bulkClear">Selectie wissen</button>
         </div>
@@ -153,6 +154,23 @@
         </div>
         <div class="kpis" id="prodKpis"></div>
         <div id="prodList"></div>
+    </section>
+
+    <!-- LEVERINGEN (eigen thuislevering) -->
+    <section class="panel hidden" id="tab-deliveries">
+        <div class="page-head">
+            <div>
+                <h1>Leveringen</h1>
+                <p class="muted">Betaalde bestellingen met levering aan huis die nog niet afgeleverd zijn, gesorteerd per postcode.</p>
+            </div>
+        </div>
+        <div class="toolbar">
+            <button class="btn small" type="button" id="routeDeliveries">🗺️ Route in Google Maps</button>
+            <button class="btn small secondary" type="button" id="deliverAllOut">🚗 Alles op "Onderweg"</button>
+            <button class="btn small secondary" type="button" id="printDeliveries">🖨 Leverlijst afdrukken</button>
+            <label class="check" style="margin-left:auto"><input type="checkbox" id="deliverNotify" checked> Klant verwittigen per mail</label>
+        </div>
+        <div id="deliveryList"></div>
     </section>
 
     <!-- PRODUCTEN -->
@@ -297,12 +315,12 @@
             <label>Afhaalinfo
                 <textarea name="pickup_info" rows="2" maxlength="500"></textarea>
             </label>
-            <label class="check switch"><input type="checkbox" name="shipping_enabled"> <span>Verzenden mogelijk</span></label>
+            <label class="check switch"><input type="checkbox" name="shipping_enabled"> <span>Levering aan huis mogelijk</span></label>
             <div class="form-row">
-                <label>Verzendkost (€)
+                <label>Leverkost (€)
                     <input name="shipping_cost" type="number" min="0" step="0.01">
                 </label>
-                <label>Gratis verzending vanaf (€, leeg = nooit)
+                <label>Gratis levering vanaf (€, leeg = nooit)
                     <input name="free_shipping_from" type="number" min="0" step="0.01">
                 </label>
             </div>

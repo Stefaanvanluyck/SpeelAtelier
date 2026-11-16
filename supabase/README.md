@@ -254,6 +254,20 @@ supabase functions deploy shop-document --no-verify-jwt
 - **Verzendlabels en pakbonnen** (admin → Bestellingen): selecteer bestellingen
   of klik "Selecteer alle te verzenden" → labels op A4 (4 of 8 per blad, startpositie
   instelbaar) met QR-code naar de bestelling in de admin.
+- **Eigen thuislevering** (admin → Leveringen): adressen per postcode, route in
+  Google Maps, leverlijst afdrukken, per adres "🚗 Onderweg" en "✓ Afgeleverd"
+  (optioneel met mail naar de klant, incl. bezorgmoment). Statussen:
+  Nieuw → In productie → Onderweg → Afgeleverd (afhalen: … → Klaar → Afgehaald).
+  Toch per post verzonden? Via de bestelling → "Toch per post verzonden?" met track & trace.
+- **Volg je bestelling**: link in alle klantmails naar `shop/bedankt.html?…&volg=1`
+  met tijdlijn, bezorgmoment en (bij post) track & trace-link.
+- **Herroeping** (`shop/herroeping.html`): herroepknop in twee stappen + modelformulier.
+  Edge Function `shop-withdraw` controleert bestelnummer + e-mail, bewaart de herroeping
+  (`shop_withdrawals`) en mailt een ontvangstbevestiging. Zichtbaar in het dashboard en bij
+  de bestelling; verwerken = creditnota met terugbetaling + "Markeer als verwerkt".
+
+Deploy (alles): `supabase functions deploy shop-create-order shop-admin shop-withdraw`
+en `supabase functions deploy shop-mollie-webhook shop-document --no-verify-jwt`.
 
 ### Testgegevens
 - `sql/shop_testdata.sql`: 4 categorieën, 9 testproducten (slug `test-…`) en

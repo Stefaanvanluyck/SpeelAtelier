@@ -28,6 +28,7 @@
     /* ---------------- laden ---------------- */
 
     const PRODUCT_FIELDS = "id, name, slug, short_text, description, safety_note, price, image_path, extra_images, max_per_order";
+    const PRICE_NOTE = "Eindprijs – geen btw (vrijstellingsregeling kleine ondernemingen)";
 
     function productQuery(fields) {
         return S.sb.from("shop_products").select(fields).eq("active", true).order("sort_order").order("name");
@@ -72,7 +73,7 @@
         if ($("leadTime")) $("leadTime").textContent = "🧡 " + settings.lead_time_text;
         const topText = settings.announcement ||
             (settings.shipping_enabled && settings.free_shipping_from != null
-                ? "📦 Gratis verzending vanaf " + S.euro(settings.free_shipping_from) + " · 🏠 afhalen altijd gratis"
+                ? "🚗 Gratis levering aan huis vanaf " + S.euro(settings.free_shipping_from) + " · 🏠 afhalen altijd gratis"
                 : "");
         if (topText && $("topBar")) {
             $("topBar").textContent = topText;
@@ -84,7 +85,7 @@
             $("trustShipping").classList.toggle("hidden", !settings.shipping_enabled);
             if (settings.free_shipping_from != null) {
                 $("trustShipping").querySelector("div").innerHTML =
-                    "<strong>Gratis verzending</strong><br>vanaf " + S.euro(settings.free_shipping_from) + " (BE/NL)";
+                    "<strong>Gratis levering</strong><br>aan huis vanaf " + S.euro(settings.free_shipping_from);
             }
         }
 
@@ -308,7 +309,7 @@
             '</div><div class="product-info">' +
             (cat ? '<span class="eyebrow">' + S.escapeHtml(cat.name) + "</span>" : "") +
             "<h1>" + S.escapeHtml(p.name) + "</h1>" +
-            '<div class="price-line">' + priceHtml(p) + "</div>" +
+            '<div class="price-line">' + priceHtml(p) + '<div class="price-note">' + PRICE_NOTE + "</div></div>" +
             (p.short_text ? '<p class="lead">' + S.escapeHtml(p.short_text) + "</p>" : "") +
             '<div class="buy-row">' +
             '<div class="stepper"><button type="button" data-step="-1" aria-label="Minder">−</button>' +
@@ -325,7 +326,7 @@
             "<li>🧡 " + S.escapeHtml(settings.lead_time_text) + "</li>" +
             (settings.pickup_enabled ? "<li>🏠 Gratis afhalen in het atelier</li>" : "") +
             (settings.shipping_enabled
-                ? "<li>📦 Verzending " + S.euro(settings.shipping_cost) +
+                ? "<li>🚗 Levering aan huis " + S.euro(settings.shipping_cost) +
                   (settings.free_shipping_from != null ? ", gratis vanaf " + S.euro(settings.free_shipping_from) : "") + "</li>"
                 : "") +
             "<li>🔒 Veilig online betalen via Mollie</li>" +
@@ -336,7 +337,7 @@
                 S.escapeHtml(p.safety_note) + "</div></details>" : "") +
             '<details class="info-block"><summary>Levering &amp; retour</summary><div>' +
             (settings.pickup_enabled ? "<p><strong>Afhalen:</strong> " + S.escapeHtml(settings.pickup_info) + "</p>" : "") +
-            (settings.shipping_enabled ? "<p><strong>Verzenden:</strong> naar België en Nederland.</p>" : "") +
+            (settings.shipping_enabled ? "<p><strong>Levering aan huis:</strong> we brengen je bestelling zelf langs en laten vooraf weten wanneer.</p>" : "") +
             '<p>Meer info in de <a href="voorwaarden.html">algemene verkoopsvoorwaarden</a>.</p></div></details>' +
             "</div></article>" +
             relatedHtml(p);
@@ -619,8 +620,8 @@
             const pct = Math.min(100, ((tt.subtotal - tt.discount) / freeFrom) * 100);
             $("cartLines").insertAdjacentHTML("afterbegin",
                 '<div class="ship-progress"><p>' + (left > 0
-                    ? "Nog <strong>" + S.euro(left) + "</strong> tot gratis verzending 📦"
-                    : "🎉 Je bestelling wordt <strong>gratis verzonden</strong>!") + "</p>" +
+                    ? "Nog <strong>" + S.euro(left) + "</strong> tot gratis levering aan huis 🚗"
+                    : "🎉 We leveren je bestelling <strong>gratis aan huis</strong>!") + "</p>" +
                 '<div class="bar"><div style="width:' + pct.toFixed(0) + '%"></div></div></div>');
         }
 
@@ -630,11 +631,11 @@
             html += '<div class="discount-row"><span>Korting (' + S.escapeHtml(discount.code) + ')</span><span>− ' + S.euro(t.discount) + '</span></div>';
         }
         if (step === "checkout" && deliveryMethod() === "shipping") {
-            html += '<div><span>Verzending</span><span>' + (t.shipping ? S.euro(t.shipping) : "gratis") + '</span></div>';
+            html += '<div><span>Levering</span><span>' + (t.shipping ? S.euro(t.shipping) : "gratis") + '</span></div>';
         } else if (step === "cart" && settings.shipping_enabled && lines.length) {
-            html += '<div class="muted"><span>Verzending</span><span>' +
+            html += '<div class="muted"><span>Levering</span><span>' +
                 (settings.pickup_enabled ? "afhalen gratis · " : "") +
-                "verzenden " + S.euro(settings.shipping_cost) +
+                "aan huis " + S.euro(settings.shipping_cost) +
                 (settings.free_shipping_from != null ? " (gratis vanaf " + S.euro(settings.free_shipping_from) + ")" : "") +
                 '</span></div>';
         }
@@ -643,10 +644,11 @@
         }
         html += '<div class="grand"><span>Totaal</span><span>' +
             S.euro(step === "checkout" ? t.total : t.subtotal - t.discount) + '</span></div>';
+        html += '<div class="price-note">' + PRICE_NOTE + "</div>";
         $("totals").innerHTML = html;
 
         $("nextButton").disabled = !lines.length || !settings.shop_open || busy;
-        $("nextButton").textContent = step === "cart" ? "Afrekenen" : (busy ? "Even geduld…" : "Betalen " + S.euro(t.total));
+        $("nextButton").textContent = step === "cart" ? "Afrekenen" : (busy ? "Even geduld…" : "Bestellen en betalen " + S.euro(t.total));
     }
 
     function renderDeliveryChoice() {
@@ -656,7 +658,7 @@
                 '<span class="muted">' + S.escapeHtml(settings.pickup_info) + '</span></span></label>');
         }
         if (settings.shipping_enabled) {
-            opts.push('<label><input type="radio" name="delivery" value="shipping"><span><strong>Verzenden</strong> – ' +
+            opts.push('<label><input type="radio" name="delivery" value="shipping"><span><strong>Levering aan huis</strong> – ' +
                 S.euro(settings.shipping_cost) +
                 (settings.free_shipping_from != null ? ' <span class="muted">(gratis vanaf ' + S.euro(settings.free_shipping_from) + ')</span>' : "") +
                 '</span></label>');
@@ -705,7 +707,7 @@
         err.textContent = "";
 
         const method = deliveryMethod();
-        if (!method) { err.textContent = "Kies afhalen of verzenden."; return; }
+        if (!method) { err.textContent = "Kies afhalen of levering aan huis."; return; }
         if (!String(f.get("name") || "").trim()) { err.textContent = "Vul je naam in."; return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(f.get("email") || "").trim())) {
             err.textContent = "Vul een geldig e-mailadres in."; return;

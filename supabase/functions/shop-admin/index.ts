@@ -8,7 +8,7 @@
 // Aanroep (shop/admin.html):
 //   sb.functions.invoke("shop-admin", { body: { action, ... } })
 //
-//   set_status      { order_id, status, tracking_code?, notify }
+//   set_status      { order_id, status, tracking_code?, delivery_slot?, notify }
 //   cancel_order    { order_id }                      (enkel onbetaald)
 //   retry_invoice   { order_id }
 //   resend_invoice  { order_id }
@@ -40,7 +40,7 @@ import {
 } from "../_shared/shop.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const ORDER_STATUSES = ["new", "in_production", "ready_for_pickup", "shipped", "completed", "cancelled"];
+const ORDER_STATUSES = ["new", "in_production", "ready_for_pickup", "shipped", "out_for_delivery", "delivered", "completed", "cancelled"];
 
 async function isAdmin(req: Request): Promise<boolean> {
     const auth = req.headers.get("authorization") ?? "";
@@ -105,16 +105,23 @@ async function setStatus(body: any, headers: Record<string, string>) {
         return json({ error: "Deze bestelling is (nog) niet betaald." }, 400, headers);
     }
     if (status === "ready_for_pickup" && order.delivery_method !== "pickup") {
-        return json({ error: "Deze bestelling wordt verzonden, niet afgehaald." }, 400, headers);
+        return json({ error: "Deze bestelling wordt geleverd, niet afgehaald." }, 400, headers);
     }
-    if (status === "shipped" && order.delivery_method !== "shipping") {
-        return json({ error: "Deze bestelling wordt afgehaald, niet verzonden." }, 400, headers);
+    if (["shipped", "out_for_delivery", "delivered"].includes(status) && order.delivery_method !== "shipping") {
+        return json({ error: "Deze bestelling wordt afgehaald, niet geleverd." }, 400, headers);
     }
 
     const tracking = String(body.tracking_code ?? "").trim().slice(0, 100) || order.tracking_code;
+    const update: Record<string, unknown> = { order_status: status, tracking_code: tracking };
+    if (typeof body.delivery_slot === "string") {
+        update.delivery_slot = body.delivery_slot.trim().slice(0, 150) || null;
+    }
+    if (status === "delivered" || (status === "completed" && order.delivery_method === "pickup")) {
+        update.delivered_at = order.delivered_at ?? new Date().toISOString();
+    }
     const { data, error } = await sb
         .from("shop_orders")
-        .update({ order_status: status, tracking_code: tracking })
+        .update(update)
         .eq("id", order.id)
         .select("*")
         .single();

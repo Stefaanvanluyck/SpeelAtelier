@@ -119,6 +119,8 @@ export type Order = {
     payment_status: string;
     order_status: string;
     tracking_code: string | null;
+    delivery_slot: string | null;
+    delivered_at: string | null;
     mollie_payment_id: string | null;
     created_at: string;
 };
@@ -232,6 +234,33 @@ export function documentLink(order: Pick<Order, "id" | "public_token">, doc: "in
     return `${SUPABASE_URL}/functions/v1/shop-document?${p.toString()}`;
 }
 
+/** Link naar de statuspagina ("volg je bestelling") voor de klant. */
+export function statusLink(order: Pick<Order, "id" | "public_token">) {
+    const p = new URLSearchParams({ order: order.id, token: order.public_token, volg: "1" });
+    return `${BASE_URL}/shop/bedankt.html?${p.toString()}`;
+}
+
+export function withdrawLink(order: Pick<Order, "order_number">) {
+    return `${BASE_URL}/shop/herroeping.html?bestelling=${encodeURIComponent(order.order_number)}`;
+}
+
+/**
+ * Track & trace-link op basis van de code. PostNL-codes beginnen met "3S";
+ * al de rest behandelen we als bpost. Geen geldige code => null.
+ */
+export function trackingUrl(code: string | null, country: string, postalCode: string | null): string | null {
+    const c = String(code ?? "").replace(/\s+/g, "").toUpperCase();
+    if (!/^[A-Z0-9]{8,40}$/.test(c)) return null;
+    const pc = String(postalCode ?? "").replace(/\s+/g, "").toUpperCase();
+    if (c.startsWith("3S")) {
+        return country === "NL"
+            ? `https://jouw.postnl.nl/track-and-trace/${c}-NL-${pc}`
+            : `https://jouw.postnl.be/track-and-trace/${c}-BE-${pc}`;
+    }
+    return `https://track.bpost.cloud/btr/web/#/search?itemCode=${encodeURIComponent(c)}&lang=nl` +
+        (pc ? `&postalCode=${encodeURIComponent(pc)}` : "");
+}
+
 function itemsTableHtml(items: { product_name: string; quantity: number; line_total: number }[]) {
     return `<table style="border-collapse:collapse;width:100%;max-width:520px">` +
         items.map((i) =>
@@ -278,10 +307,14 @@ export async function sendOrderConfirmation(order: Order, invoice: Invoice | nul
         itemsTableHtml(items) +
         discountHtml(order) +
         giftHtml(order) +
-        `<p>Verzending: ${euro(order.shipping_cost)}<br><strong>Totaal: ${euro(order.total)}</strong></p>` +
+        `<p>${order.delivery_method === "pickup" ? "Verzending" : "Levering"}: ${euro(order.shipping_cost)}<br><strong>Totaal: ${euro(order.total)}</strong></p>` +
         deliveryHtml(order, settings) +
         `<p>${escapeHtml(settings.lead_time_text)}</p>` +
+        `<p><a href="${statusLink(order)}">📦 Volg je bestelling</a></p>` +
         invoicePart +
+        `<p style="font-size:12px;color:#666">Bedenktijd: je kan binnen 14 dagen na ontvangst afzien van je aankoop ` +
+        `(uitgezonderd producten op maat van jouw wensen). ` +
+        `<a href="${withdrawLink(order)}">Herroepingsformulier</a></p>` +
         `<p>Liefs,<br>${escapeHtml(settings.business_name)}</p>`;
 
     await sendShopEmail(
@@ -321,10 +354,24 @@ export async function sendStatusEmail(order: Order, status: string) {
         body = `<p>Je bestelling staat klaar om af te halen.</p><p>${escapeHtml(settings.pickup_info)}</p>`;
     } else if (status === "shipped") {
         subject = `Je bestelling ${order.order_number} is verzonden`;
+        const url = trackingUrl(order.tracking_code, order.country, order.postal_code);
         body = `<p>Je bestelling is onderweg!</p>` +
             (order.tracking_code
-                ? `<p>Track &amp; trace: <strong>${escapeHtml(order.tracking_code)}</strong></p>`
+                ? `<p>Track &amp; trace: <strong>${escapeHtml(order.tracking_code)}</strong>` +
+                  (url ? `<br><a href="${url}">Volg je pakje</a>` : "") + `</p>`
                 : "");
+    } else if (status === "out_for_delivery") {
+        subject = `We brengen je bestelling ${order.order_number} vandaag`;
+        body = `<p>Goed nieuws: we zijn onderweg om je bestelling bij je thuis af te leveren! 🚗</p>` +
+            (order.delivery_slot ? `<p>Verwacht bezorgmoment: <strong>${escapeHtml(order.delivery_slot)}</strong></p>` : "") +
+            `<p>Ben je niet thuis? Laat het ons even weten door op deze mail te antwoorden.</p>`;
+    } else if (status === "delivered") {
+        subject = `Je bestelling ${order.order_number} is afgeleverd`;
+        body = `<p>Je bestelling werd afgeleverd. Veel speelplezier! 🌈</p>` +
+            `<p>Is er iets niet in orde? Antwoord gerust op deze mail.</p>`;
+    } else if (status === "completed" && order.delivery_method === "pickup") {
+        subject = `Bedankt om je bestelling ${order.order_number} af te halen`;
+        body = `<p>Fijn dat je je bestelling kwam ophalen. Veel speelplezier! 🌈</p>`;
     } else if (status === "cancelled") {
         subject = `Je bestelling ${order.order_number} is geannuleerd`;
         body = `<p>Je bestelling werd geannuleerd. Heb je al betaald, dan ontvang je het bedrag terug.</p>`;
@@ -336,6 +383,7 @@ export async function sendStatusEmail(order: Order, status: string) {
         order.email,
         subject,
         `<p>Dag ${escapeHtml(order.customer_name)},</p>${body}` +
+            (status !== "cancelled" ? `<p><a href="${statusLink(order)}">📦 Bekijk de status van je bestelling</a></p>` : "") +
             `<p>Liefs,<br>${escapeHtml(settings.business_name)}</p>`,
         settings.business_email,
     );
@@ -515,7 +563,7 @@ export async function renderInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
         totals.push([`Korting${invoice.discount_code ? ` (${invoice.discount_code})` : ""}`, -discount]);
     }
     if (Number(invoice.shipping_cost) > 0 || invoice.customer.delivery === "shipping") {
-        totals.push(["Verzending", Number(invoice.shipping_cost)]);
+        totals.push(["Levering", Number(invoice.shipping_cost)]);
     }
     if (Number(invoice.gift_wrap_cost ?? 0) > 0) {
         totals.push(["Cadeauverpakking", Number(invoice.gift_wrap_cost)]);

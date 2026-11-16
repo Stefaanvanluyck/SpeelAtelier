@@ -25,10 +25,14 @@
         new: ["Nieuw", "b-pink"],
         in_production: ["In productie", "b-orange"],
         ready_for_pickup: ["Klaar voor afhaling", "b-blue"],
-        shipped: ["Verzonden", "b-blue"],
+        shipped: ["Verzonden (post)", "b-blue"],
+        out_for_delivery: ["Onderweg", "b-blue"],
+        delivered: ["Afgeleverd", "b-green"],
         completed: ["Afgerond", "b-green"],
         cancelled: ["Geannuleerd", "b-grey"]
     };
+    // Statussen waarbij de bestelling "klaar" is (niets meer te doen)
+    const DONE_STATUSES = ["delivered", "completed", "cancelled"];
     const INVOICE_LABEL = {
         issued: ["Uitgereikt", "b-green"],
         partially_credited: ["Deels gecrediteerd", "b-orange"],
@@ -42,6 +46,7 @@
     let categories = [];
     let discounts = [];
     let waitlist = [];
+    let withdrawals = [];
     let settings = null;
 
     function badge(map, key) {
@@ -221,6 +226,7 @@
         window.scrollTo(0, 0);
         if (name === "dashboard") renderDashboard();
         if (name === "production") renderProduction();
+        if (name === "deliveries") renderDeliveries();
         if (name === "invoices") loadInvoices();
         if (name === "discounts") loadDiscounts();
         if (name === "waitlist") loadWaitlist();
@@ -326,10 +332,22 @@
         if (liveTest.length && settings && settings.shop_open) {
             todos.push(["danger", "🧪", liveTest.length + " testproduct(en) zichtbaar in de open webshop", "Echte klanten kunnen ze kopen.", "products:test"]);
         }
+        const openWd = withdrawals.filter(function (w) { return w.status === "received"; });
+        openWd.forEach(function (w) {
+            const wo = orders.find(function (x) { return x.id === w.order_id; });
+            todos.unshift(["danger", "↩️", "Herroeping ontvangen voor " + (wo ? wo.order_number : "een bestelling"),
+                "Neem contact op, en maak na terugontvangst een creditnota met terugbetaling.", wo ? "order:" + wo.order_number : ""]);
+        });
         if (invErr.length) todos.push(["danger", "🧾", invErr.length + " betaalde bestelling(en) zonder factuur", "Open de bestelling en klik op 'Factuur aanmaken'.", "orders:paid"]);
         if (newOnes.length) todos.push(["warn", "🆕", newOnes.length + " nieuwe bestelling(en) om te starten", "Bekijk wat je moet maken in Productie.", "production"]);
         if (prod.length) todos.push(["info", "✂️", prod.length + " bestelling(en) in productie", "", "production"]);
         if (ready.length) todos.push(["info", "🏠", ready.length + " bestelling(en) wachten op afhaling", "", "orders:ready"]);
+        const toDeliver = orders.filter(isToDeliver);
+        if (toDeliver.length) {
+            const onWay = toDeliver.filter(function (o) { return o.order_status === "out_for_delivery"; }).length;
+            todos.push(["info", "🚗", toDeliver.length + " thuislevering(en) nog af te leveren",
+                onWay ? onWay + " ervan onderweg" : "Plan je leverronde in Leveringen.", "deliveries"]);
+        }
         if (stalePending.length) todos.push(["muted", "⏳", stalePending.length + " onbetaalde bestelling(en) ouder dan 1 dag", "Eventueel annuleren.", "orders:unpaid"]);
         if (noPhoto.length) todos.push(["muted", "📷", noPhoto.length + " zichtbaar product(en) zonder foto", "", "products:visible"]);
         if (waiting.length && settings && settings.shop_open) {
@@ -374,6 +392,12 @@
 
     function gotoTarget(target) {
         const parts = target.split(":");
+        if (parts[0] === "order") {
+            const nr = parts.slice(1).join(":");
+            const o = orders.find(function (x) { return x.order_number === nr; });
+            if (o) openOrder(o.id);
+            return;
+        }
         if (parts[0] === "orders") {
             orderFilter = parts[1] || "todo";
             showTab("orders");
@@ -475,32 +499,167 @@
         doPrint("slips", html);
     }
 
+    /* ======================== LEVERINGEN (eigen thuislevering) ======================== */
+
+    function deliveryOrders() {
+        return orders.filter(isToDeliver).sort(function (a, b) {
+            return String(a.postal_code || "").localeCompare(String(b.postal_code || "")) ||
+                String(a.city || "").localeCompare(String(b.city || "")) ||
+                String(a.street || "").localeCompare(String(b.street || ""), "nl", { numeric: true });
+        });
+    }
+
+    function addressLine(o) {
+        return [o.street, (o.postal_code || "") + " " + (o.city || ""), o.country === "NL" ? "Nederland" : "België"].join(", ");
+    }
+
+    function renderDeliveries() {
+        if (!$("deliveryList")) return;
+        const list = deliveryOrders();
+        const out = list.filter(function (o) { return o.order_status === "out_for_delivery"; }).length;
+        $("deliverCount").textContent = list.length ? String(list.length) : "";
+        $("routeDeliveries").disabled = !list.length;
+        $("deliverAllOut").disabled = !list.some(function (o) { return o.order_status !== "out_for_delivery"; });
+        if (!list.length) {
+            $("deliveryList").innerHTML = '<div class="card-plain">' + emptyState("🚗", "Niets te leveren", "Alle thuisleveringen zijn afgeleverd.") + "</div>";
+            return;
+        }
+        $("deliveryList").innerHTML =
+            '<p class="muted" style="margin-bottom:10px">' + list.length + " adres" + (list.length === 1 ? "" : "sen") +
+            " · " + out + " onderweg</p>" +
+            list.map(function (o, idx) {
+                const items = (o.shop_order_items || []).map(function (i) { return i.quantity + "× " + esc(i.product_name); }).join(", ");
+                const maps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(addressLine(o));
+                const ready = o.order_status !== "new";
+                return '<div class="card-plain delivery-card st-' + esc(o.order_status) + '">' +
+                    '<div class="dc-head"><span class="dc-nr">' + (idx + 1) + "</span>" +
+                    "<div><strong>" + esc(o.customer_name) + "</strong> · " + esc(o.order_number) + "<br>" +
+                    '<a href="' + maps + '" target="_blank" rel="noopener">📍 ' + esc(o.street) + ", " + esc(o.postal_code) + " " + esc(o.city) + "</a>" +
+                    (o.phone ? '<br><a href="tel:' + esc(String(o.phone).replace(/\s+/g, "")) + '">📞 ' + esc(o.phone) + "</a>" : "") +
+                    "</div>" + badge(ORDER_LABEL, o.order_status) + "</div>" +
+                    '<p class="dc-items">' + items + "</p>" +
+                    (o.delivery_slot ? '<p class="dc-slot">🕒 ' + esc(o.delivery_slot) + "</p>" : "") +
+                    (o.customer_note ? '<p class="note">💬 ' + esc(o.customer_note) + "</p>" : "") +
+                    (o.gift_wrap ? '<p class="note gift">🎁 Cadeau' + (o.gift_message ? ": “" + esc(o.gift_message) + "”" : "") + "</p>" : "") +
+                    (!ready ? '<p class="muted small">⚠️ Nog niet in productie gezet.</p>' : "") +
+                    '<div class="actions">' +
+                    (o.order_status !== "out_for_delivery"
+                        ? '<button class="btn small secondary" type="button" data-deliver-order="' + o.id + '" data-deliver-status="out_for_delivery">🚗 Onderweg</button>'
+                        : "") +
+                    '<button class="btn small big-tap" type="button" data-deliver-order="' + o.id + '" data-deliver-status="delivered">✓ Afgeleverd</button>' +
+                    '<button class="link-btn" type="button" data-goto="order:' + esc(o.order_number) + '">Details</button>' +
+                    "</div></div>";
+            }).join("");
+    }
+
+    async function deliveryAction(orderId, status, btn) {
+        const o = orderById(orderId);
+        if (!o) return;
+        if (status === "delivered" && !confirm("Bestelling " + o.order_number + " (" + o.customer_name + ") markeren als afgeleverd?")) return;
+        const notify = $("deliverNotify") ? $("deliverNotify").checked : false;
+        if (btn) btn.disabled = true;
+        try {
+            await callAdmin({ action: "set_status", order_id: o.id, status: status, notify: notify, tracking_code: "" });
+            toast((status === "delivered" ? "Afgeleverd" : "Onderweg") + ": " + o.order_number + (notify ? " (klant verwittigd)" : ""));
+            await loadOrders();
+        } catch (e) {
+            toast(e.message || "Mislukt.", true);
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async function markAllOut() {
+        const list = deliveryOrders().filter(function (o) { return o.order_status !== "out_for_delivery"; });
+        if (!list.length) return;
+        const notify = $("deliverNotify").checked;
+        if (!confirm(list.length + " bestelling(en) op \"Onderweg\" zetten" + (notify ? " en de klanten mailen" : "") + "?")) return;
+        let ok = 0;
+        for (const o of list) {
+            try {
+                await callAdmin({ action: "set_status", order_id: o.id, status: "out_for_delivery", notify: notify, tracking_code: "" });
+                ok++;
+            } catch (e) {
+                toast(o.order_number + ": " + e.message, true);
+            }
+        }
+        toast(ok + " bestelling(en) onderweg.");
+        await loadOrders();
+    }
+
+    function openRoute() {
+        const list = deliveryOrders();
+        if (!list.length) return;
+        const origin = settings && settings.business_address ? String(settings.business_address).replace(/\n/g, ", ") : "";
+        // Google Maps laat tot 9 tussenstops toe in een link; rest volgt in een tweede route.
+        const stops = list.map(addressLine);
+        const chunk = stops.slice(0, 10);
+        const dest = chunk[chunk.length - 1];
+        const way = chunk.slice(0, -1);
+        const url = "https://www.google.com/maps/dir/?api=1" +
+            (origin ? "&origin=" + encodeURIComponent(origin) : "") +
+            "&destination=" + encodeURIComponent(dest) +
+            (way.length ? "&waypoints=" + encodeURIComponent(way.join("|")) : "") +
+            "&travelmode=driving";
+        window.open(url, "_blank", "noopener");
+        if (stops.length > 10) toast("Google Maps toont max. 10 adressen; de eerste 10 (per postcode) zijn geopend.", true);
+    }
+
+    function printDeliveryList() {
+        const list = deliveryOrders();
+        if (!list.length) { toast("Niets te leveren.", true); return; }
+        const html = '<div class="slip"><div class="slip-head"><div><div class="slip-brand">Leverlijst</div>' +
+            '<div class="muted">' + new Date().toLocaleDateString("nl-BE", { weekday: "long", day: "numeric", month: "long" }) + "</div></div>" +
+            '<div class="slip-title">' + list.length + "<br><span>adressen</span></div></div>" +
+            '<table class="slip-table"><thead><tr><th>✓</th><th>#</th><th>Klant &amp; adres</th><th>Producten</th></tr></thead><tbody>' +
+            list.map(function (o, i) {
+                return '<tr><td class="box">☐</td><td>' + (i + 1) + "</td><td><strong>" + esc(o.customer_name) + "</strong> (" + esc(o.order_number) + ")<br>" +
+                    esc(o.street) + "<br>" + esc(o.postal_code) + " " + esc(o.city) +
+                    (o.phone ? "<br>☎ " + esc(o.phone) : "") +
+                    (o.delivery_slot ? "<br>🕒 " + esc(o.delivery_slot) : "") + "</td><td>" +
+                    (o.shop_order_items || []).map(function (it) { return it.quantity + "× " + esc(it.product_name); }).join("<br>") +
+                    (o.gift_wrap ? "<br>🎁 cadeau" : "") +
+                    (o.customer_note ? "<br><em>" + esc(o.customer_note) + "</em>" : "") + "</td></tr>";
+            }).join("") + "</tbody></table></div>";
+        doPrint("slips", html);
+    }
+
     /* ======================== BESTELLINGEN ======================== */
 
     async function loadOrders() {
-        const [o, inv] = await Promise.all([
+        const [o, inv, wd] = await Promise.all([
             sb.from("shop_orders").select("*, shop_order_items(*)").order("created_at", { ascending: false }).limit(1000),
-            sb.from("shop_invoices").select("id, invoice_number, order_id, pdf_path, status, total, invoice_date")
+            sb.from("shop_invoices").select("id, invoice_number, order_id, pdf_path, status, total, invoice_date"),
+            sb.from("shop_withdrawals").select("*").order("created_at", { ascending: false })
         ]);
         if (o.error) { toast("Bestellingen laden mislukt.", true); return; }
         orders = o.data || [];
+        withdrawals = wd.error ? [] : (wd.data || []);
         invoicesByOrder = {};
         (inv.data || []).forEach(function (i) { invoicesByOrder[i.order_id] = i; });
         renderOrders();
         renderProduction();
+        renderDeliveries();
         if (products.length) renderProducts();
         if (!$("tab-dashboard").classList.contains("hidden")) renderDashboard();
     }
 
     function isTodo(o) {
-        return o.payment_status === "paid" && !["completed", "cancelled"].includes(o.order_status);
+        return o.payment_status === "paid" && !DONE_STATUSES.includes(o.order_status);
+    }
+
+    // Thuislevering die nog niet afgeleverd is
+    function isToDeliver(o) {
+        return o.payment_status === "paid" && o.delivery_method === "shipping" &&
+            !DONE_STATUSES.includes(o.order_status) && o.order_status !== "shipped";
     }
 
     const ORDER_FILTERS = [
         ["todo", "Te behandelen", isTodo],
         ["new", "Nieuw", function (o) { return o.payment_status === "paid" && o.order_status === "new"; }],
         ["in_production", "In productie", function (o) { return o.payment_status === "paid" && o.order_status === "in_production"; }],
-        ["ready", "Klaar / verzonden", function (o) { return o.payment_status === "paid" && ["ready_for_pickup", "shipped"].includes(o.order_status); }],
+        ["deliver", "Te leveren", isToDeliver],
+        ["ready", "Klaar / onderweg", function (o) { return o.payment_status === "paid" && ["ready_for_pickup", "shipped", "out_for_delivery"].includes(o.order_status); }],
+        ["done", "Afgeleverd / afgehaald", function (o) { return o.payment_status === "paid" && ["delivered", "completed"].includes(o.order_status); }],
         ["paid", "Alle betaalde", isPaidLike],
         ["unpaid", "Niet betaald", function (o) { return !isPaidLike(o); }],
         ["all", "Alle", function () { return true; }]
@@ -534,7 +693,7 @@
                 '<td data-label="Nr."><strong>' + esc(o.order_number) + "</strong></td>" +
                 '<td data-label="Datum" title="' + esc(new Date(o.created_at).toLocaleString("nl-BE")) + '">' + esc(relTime(o.created_at)) + "</td>" +
                 '<td data-label="Klant">' + esc(o.customer_name) + '<br><span class="muted">' + esc(o.email) + "</span></td>" +
-                '<td data-label="Levering">' + (o.delivery_method === "pickup" ? "🏠 Afhalen" : "📮 Verzenden") +
+                '<td data-label="Levering">' + (o.delivery_method === "pickup" ? "🏠 Afhalen" : "🚗 Levering") +
                 '<br><span class="muted">' + items + " stuk" + (items === 1 ? "" : "s") + (o.gift_wrap ? " · 🎁" : "") + "</span></td>" +
                 '<td data-label="Totaal" class="num"><strong>' + S.euro(o.total) + "</strong>" +
                 (Number(o.discount_amount) > 0 ? '<br><span class="muted">🏷️ ' + esc(o.discount_code || "korting") + "</span>" : "") + "</td>" +
@@ -563,10 +722,7 @@
         all.indeterminate = vis > 0 && vis < visibleOrderIds.length;
     }
 
-    function isToShip(o) {
-        return o.payment_status === "paid" && o.delivery_method === "shipping" &&
-            !["shipped", "completed", "cancelled"].includes(o.order_status);
-    }
+    function isToShip(o) { return isToDeliver(o); }
 
     function emptyState(icon, title, text) {
         return '<div class="empty-state"><div class="es-icon">' + icon + "</div><strong>" + esc(title) + "</strong>" +
@@ -579,30 +735,53 @@
             return "<tr><td>" + i.quantity + " ×</td><td>" + esc(i.product_name) + '</td><td class="num">' + S.euro(i.line_total) + "</td></tr>";
         }).join("");
         const paid = o.payment_status === "paid";
+        const pickup = o.delivery_method === "pickup";
 
         let statusButtons = "";
         if (paid) {
-            const steps = ["in_production", o.delivery_method === "pickup" ? "ready_for_pickup" : "shipped", "completed"];
+            const steps = pickup
+                ? [["in_production", "✂️ In productie"], ["ready_for_pickup", "🏠 Klaar voor afhaling"], ["completed", "✓ Afgehaald"]]
+                : [["in_production", "✂️ In productie"], ["out_for_delivery", "🚗 Onderweg"], ["delivered", "✓ Afgeleverd"]];
             statusButtons = steps.map(function (s) {
-                return '<button class="btn small' + (o.order_status === s ? " secondary" : "") + '" type="button" data-set-status="' + s + '">' +
-                    esc(ORDER_LABEL[s][0]) + "</button>";
+                return '<button class="btn small' + (o.order_status === s[0] ? " secondary" : "") + '" type="button" data-set-status="' + s[0] + '">' +
+                    esc(s[1]) + "</button>";
             }).join("");
         }
 
-        const flow = ["new", "in_production", o.delivery_method === "pickup" ? "ready_for_pickup" : "shipped", "completed"];
-        const at = flow.indexOf(o.order_status);
+        const flow = pickup
+            ? ["new", "in_production", "ready_for_pickup", "completed"]
+            : ["new", "in_production", "out_for_delivery", "delivered"];
+        let at = flow.indexOf(o.order_status);
+        if (!pickup && o.order_status === "shipped") at = 2;
+        if (!pickup && o.order_status === "completed") at = 3;
+        const stepLabel = function (s) { return s === "completed" && pickup ? "Afgehaald" : ORDER_LABEL[s][0]; };
         const stepper = (paid || o.order_status !== "new") && o.order_status !== "cancelled"
             ? '<ol class="stepper-line">' + flow.map(function (s, i) {
                 return '<li class="' + (i <= at ? "done" : "") + (i === at ? " current" : "") + '"><span>' + (i <= at ? "✓" : i + 1) +
-                    "</span>" + esc(ORDER_LABEL[s][0]) + "</li>";
+                    "</span>" + esc(stepLabel(s)) + "</li>";
             }).join("") + "</ol>"
             : "";
+        const wd = withdrawals.filter(function (w) { return w.order_id === o.id; });
+        const mapsUrl = "https://www.google.com/maps/search/?api=1&query=" +
+            encodeURIComponent([o.street, o.postal_code, o.city, o.country === "NL" ? "Nederland" : "België"].join(" "));
 
         return '<div class="detail-head"><div><h2>Bestelling ' + esc(o.order_number) + "</h2>" +
             '<p class="muted">' + new Date(o.created_at).toLocaleString("nl-BE") + " · " +
             badge(PAYMENT_LABEL, o.payment_status) + " " + badge(ORDER_LABEL, o.order_status) + "</p></div>" +
             '<div class="detail-total">' + S.euro(o.total) + "</div></div>" +
             stepper +
+            wd.map(function (w) {
+                return '<div class="withdraw-note"><strong>↩️ Herroeping ontvangen</strong> op ' +
+                    esc(new Date(w.created_at).toLocaleString("nl-BE")) + " · " +
+                    (w.status === "processed" ? '<span class="badge b-green">Verwerkt</span>' : '<span class="badge b-red">Te verwerken</span>') +
+                    "<br><strong>Producten:</strong> " + esc(w.items) +
+                    (w.reason ? "<br><strong>Reden:</strong> " + esc(w.reason) : "") +
+                    (w.status !== "processed"
+                        ? '<div class="actions"><button class="btn small" type="button" data-withdraw-done="' + w.id + '">✓ Markeer als verwerkt</button>' +
+                          (inv && inv.status !== "credited" ? '<button class="btn small warn" type="button" data-credit="' + inv.id + '">Creditnota / terugbetaling</button>' : "") +
+                          "</div>"
+                        : "") + "</div>";
+            }).join("") +
             '<div class="detail-grid"><div>' +
             "<h3>Klant</h3><p>" + esc(o.customer_name) + "<br>" +
             '<a href="mailto:' + esc(o.email) + "?subject=" + encodeURIComponent("Je bestelling " + o.order_number) + '">✉️ ' + esc(o.email) + "</a>" +
@@ -615,8 +794,11 @@
                 return '<p class="muted">⭐ Terugkerende klant: ' + prev.length + " eerdere bestelling" +
                     (prev.length === 1 ? "" : "en") + " (" + S.euro(sum) + ")</p>";
             })() +
-            "<h3>Levering</h3><p>" + (o.delivery_method === "pickup" ? "🏠 Afhalen" :
-                "📮 " + esc(o.street) + "<br>" + esc(o.postal_code) + " " + esc(o.city) + " (" + esc(o.country) + ")") +
+            "<h3>Levering</h3><p>" + (pickup ? "🏠 Afhalen" :
+                "🚗 Levering aan huis<br>" + esc(o.street) + "<br>" + esc(o.postal_code) + " " + esc(o.city) + " (" + esc(o.country) + ")" +
+                '<br><a href="' + mapsUrl + '" target="_blank" rel="noopener">🗺️ Open in Google Maps</a>') +
+            (o.delivery_slot ? "<br>🕒 Bezorgmoment: <strong>" + esc(o.delivery_slot) + "</strong>" : "") +
+            (o.delivered_at ? "<br>✓ " + (pickup ? "Afgehaald" : "Afgeleverd") + " op " + esc(new Date(o.delivered_at).toLocaleString("nl-BE")) : "") +
             (o.tracking_code ? "<br>Track &amp; trace: " + esc(o.tracking_code) : "") + "</p>" +
             (o.customer_note ? "<h3>Opmerking klant</h3><p>" + esc(o.customer_note) + "</p>" : "") +
             (o.gift_wrap ? '<div class="gift-note"><strong>🎁 Inpakken als cadeau</strong>' +
@@ -630,16 +812,21 @@
                 ? '<tr><td></td><td>Korting' + (o.discount_code ? " (" + esc(o.discount_code) + ")" : "") +
                   '</td><td class="num">− ' + S.euro(o.discount_amount) + "</td></tr>"
                 : "") +
-            '<tr><td></td><td>Verzending</td><td class="num">' + S.euro(o.shipping_cost) + "</td></tr>" +
+            '<tr><td></td><td>' + (pickup ? "Verzending" : "Levering") + '</td><td class="num">' + S.euro(o.shipping_cost) + "</td></tr>" +
             (o.gift_wrap ? '<tr><td></td><td>🎁 Cadeauverpakking</td><td class="num">' + S.euro(o.gift_wrap_cost || 0) + "</td></tr>" : "") +
             '<tr><td></td><td><strong>Totaal</strong></td><td class="num"><strong>' + S.euro(o.total) + "</strong></td></tr></table>" +
 
             (paid ? "<h3>Status aanpassen</h3>" +
-                (o.delivery_method === "shipping"
-                    ? '<label>Track &amp; trace (optioneel)<input id="trackingCode" maxlength="100" value="' + esc(o.tracking_code || "") + '"></label>'
+                (!pickup
+                    ? '<label>Bezorgmoment (optioneel, komt in de mail)<input id="deliverySlot" maxlength="150" placeholder="bv. dinsdag 18/11 tussen 17 en 19 uur" value="' + esc(o.delivery_slot || "") + '"></label>'
                     : "") +
                 '<label class="check"><input type="checkbox" id="notifyCustomer" checked> Klant verwittigen per mail</label>' +
-                '<div class="actions">' + statusButtons + "</div>" : "") +
+                '<div class="actions">' + statusButtons + "</div>" +
+                (!pickup
+                    ? '<details class="post-ship"><summary>Toch per post verzonden?</summary>' +
+                      '<label>Track &amp; trace<input id="trackingCode" maxlength="100" value="' + esc(o.tracking_code || "") + '"></label>' +
+                      '<div class="actions"><button class="btn small secondary" type="button" data-set-status="shipped">📮 Markeer als verzonden (post)</button></div></details>'
+                    : "") : "") +
 
             "<h3>Factuur</h3>" +
             (inv
@@ -657,7 +844,7 @@
             '<div class="actions" style="margin-top:18px">' +
             '<button class="btn small secondary" type="button" data-print>🖨 Pakbon</button>' +
             (o.delivery_method === "shipping"
-                ? '<button class="btn small secondary" type="button" data-label-order="' + o.id + '">🏷️ Verzendlabel</button>' : "") +
+                ? '<button class="btn small secondary" type="button" data-label-order="' + o.id + '">🏷️ Adreslabel</button>' : "") +
             (["pending", "failed", "expired"].includes(o.payment_status)
                 ? '<button class="btn small danger" type="button" data-cancel>Bestelling annuleren</button>' : "") +
             (paid && o.order_status !== "cancelled" && !inv
@@ -807,13 +994,13 @@
         const list = all.filter(function (o) { return o.delivery_method === "shipping"; });
         const skipped = all.length - list.length;
         if (!list.length) {
-            toast("Geen verzendbestellingen geselecteerd (afhaalbestellingen krijgen geen label).", true);
+            toast("Geen thuisleveringen geselecteerd (afhaalbestellingen krijgen geen label).", true);
             return;
         }
         const pref = JSON.parse(localStorage.getItem("kww_label_pref") || '{"format":"4"}');
         const format = LABEL_FORMATS[pref.format] ? pref.format : "4";
 
-        openDialog("<h2>🏷️ Verzendlabels afdrukken</h2>" +
+        openDialog("<h2>🏷️ Adreslabels afdrukken</h2>" +
             '<p class="muted">' + list.length + " label" + (list.length === 1 ? "" : "s") +
             (skipped ? " · " + skipped + " afhaalbestelling" + (skipped === 1 ? "" : "en") + " overgeslagen" : "") + "</p>" +
             '<form id="labelForm" class="label-form">' +
@@ -885,7 +1072,7 @@
 
         const lines = (inv.lines || []).slice();
         if (Number(inv.shipping_cost) > 0) {
-            lines.push({ description: "Verzending", quantity: 1, unit_price: Number(inv.shipping_cost) });
+            lines.push({ description: "Levering", quantity: 1, unit_price: Number(inv.shipping_cost) });
         }
         if (Number(inv.gift_wrap_cost || 0) > 0) {
             lines.push({ description: "Cadeauverpakking", quantity: 1, unit_price: Number(inv.gift_wrap_cost) });
@@ -1735,12 +1922,12 @@
         else if (t.id === "bulkClear") { selectedOrders.clear(); renderOrders(); }
         else if (t.id === "selectToShip") {
             const ship = orders.filter(isToShip);
-            if (!ship.length) { toast("Er zijn geen betaalde verzendbestellingen die nog verzonden moeten worden.", true); return; }
+            if (!ship.length) { toast("Er zijn geen betaalde thuisleveringen die nog afgeleverd moeten worden.", true); return; }
             selectedOrders.clear();
             ship.forEach(function (o) { selectedOrders.add(o.id); });
             orderFilter = "paid";
             renderOrders();
-            toast(ship.length + " bestelling(en) geselecteerd om te verzenden.");
+            toast(ship.length + " bestelling(en) geselecteerd om te leveren.");
         }
         else if (d.orderFilter) { orderFilter = d.orderFilter; renderOrders(); }
         else if (d.gotoOrders) gotoTarget("orders:" + d.gotoOrders);
@@ -1770,12 +1957,27 @@
         else if (d.setStatus) {
             const notify = $("notifyCustomer") ? $("notifyCustomer").checked : false;
             orderAction(function () {
-                return callAdmin({
+                const payload = {
                     action: "set_status", order_id: currentOrder.id, status: d.setStatus, notify: notify,
                     tracking_code: $("trackingCode") ? $("trackingCode").value : ""
-                });
+                };
+                if ($("deliverySlot")) payload.delivery_slot = $("deliverySlot").value;
+                return callAdmin(payload);
             }, "Status bijgewerkt" + (notify ? " en klant verwittigd." : "."));
         }
+        else if (d.withdrawDone) {
+            orderAction(async function () {
+                const { error } = await sb.from("shop_withdrawals")
+                    .update({ status: "processed", processed_at: new Date().toISOString() }).eq("id", d.withdrawDone);
+                if (error) throw new Error(error.message);
+            }, "Herroeping gemarkeerd als verwerkt.");
+        }
+        else if (d.deliverStatus) {
+            deliveryAction(d.deliverOrder, d.deliverStatus, t);
+        }
+        else if (t.id === "deliverAllOut") markAllOut();
+        else if (t.id === "printDeliveries") printDeliveryList();
+        else if (t.id === "routeDeliveries") openRoute();
         else if (t.hasAttribute("data-save-note")) {
             orderAction(async function () {
                 const { error } = await sb.from("shop_orders").update({ admin_note: $("adminNote").value || null }).eq("id", currentOrder.id);

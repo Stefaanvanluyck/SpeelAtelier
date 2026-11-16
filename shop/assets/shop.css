@@ -453,6 +453,25 @@ a.plain:hover { color: var(--accent-dark); }
     .cart-button { padding: 7px 10px; font-size: .9rem; }
 }
 #leadTime:empty { display: none; }
+
+/* ---------- herroeping ---------- */
+.withdraw h2 { margin-top: 26px; }
+.withdraw #withdrawStart { margin: 18px 0 8px; }
+.actions-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.model-form { border: 1px dashed var(--line); border-radius: 12px; padding: 16px 18px; background: #fffdfa; }
+.model-form p { margin-bottom: 10px; }
+@media print {
+    body * { visibility: hidden; }
+    .model-form, .model-form * { visibility: visible; }
+    .model-form { position: absolute; left: 0; top: 0; width: 100%; border: 0; font-size: 12pt; }
+}
+
+/* ---------- prijsvermelding ---------- */
+.price-note { font-size: .78rem; color: var(--muted); }
+
+/* ---------- statuspagina ---------- */
+.status-items { list-style: none; display: inline-grid; gap: 2px; text-align: left; margin: 4px 0 12px; }
+.track-link { display: inline-block; margin-top: 4px; }
 .gift-block { border: 1px dashed #ffb3c1; background: #fff7f9; border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; }
 .gift-check { font-weight: 400; }
 /* Nooit horizontaal scrollen op gsm (clip maakt geen scrollcontainer, sticky header blijft werken) */

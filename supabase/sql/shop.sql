@@ -208,6 +208,17 @@ ALTER TABLE public.shop_orders
     ADD COLUMN IF NOT EXISTS gift_message   text CHECK (gift_message IS NULL OR char_length(gift_message) <= 300),
     ADD COLUMN IF NOT EXISTS gift_wrap_cost numeric(10,2) NOT NULL DEFAULT 0 CHECK (gift_wrap_cost >= 0);
 
+-- Eigen levering: extra statussen "onderweg" en "afgeleverd", tijdstip van
+-- aflevering en een bezorgmoment dat de beheerder aan de klant doorgeeft.
+ALTER TABLE public.shop_orders
+    ADD COLUMN IF NOT EXISTS delivery_slot text CHECK (delivery_slot IS NULL OR char_length(delivery_slot) <= 150),
+    ADD COLUMN IF NOT EXISTS delivered_at  timestamptz;
+
+ALTER TABLE public.shop_orders DROP CONSTRAINT IF EXISTS shop_orders_order_status_check;
+ALTER TABLE public.shop_orders ADD CONSTRAINT shop_orders_order_status_check
+    CHECK (order_status IN ('new', 'in_production', 'ready_for_pickup', 'shipped',
+                            'out_for_delivery', 'delivered', 'completed', 'cancelled'));
+
 
 CREATE TABLE IF NOT EXISTS public.shop_order_items (
     id              bigserial PRIMARY KEY,
@@ -220,6 +231,24 @@ CREATE TABLE IF NOT EXISTS public.shop_order_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_shop_order_items_order ON public.shop_order_items (order_id);
+
+
+-- Herroepingen (14 dagen bedenktijd). Ingediend via Edge Function
+-- shop-withdraw (service role); de beheerder leest en markeert als verwerkt.
+CREATE TABLE IF NOT EXISTS public.shop_withdrawals (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id        uuid NOT NULL REFERENCES public.shop_orders (id) ON DELETE RESTRICT,
+    customer_name   text NOT NULL CHECK (char_length(btrim(customer_name)) BETWEEN 1 AND 100),
+    email           text NOT NULL CHECK (char_length(email) <= 254),
+    items           text NOT NULL CHECK (char_length(btrim(items)) BETWEEN 1 AND 1000),
+    reason          text CHECK (reason IS NULL OR char_length(reason) <= 1000),
+    status          text NOT NULL DEFAULT 'received' CHECK (status IN ('received', 'processed', 'rejected')),
+    admin_note      text CHECK (admin_note IS NULL OR char_length(admin_note) <= 1000),
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    processed_at    timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS idx_shop_withdrawals_order ON public.shop_withdrawals (order_id);
 
 
 CREATE TABLE IF NOT EXISTS public.shop_number_sequences (
@@ -595,21 +624,39 @@ REVOKE ALL ON FUNCTION public.shop_create_credit_note(uuid, jsonb, text) FROM PU
 -- ---------------------------------------------------------------------------
 -- 5. Publieke statusopvraging (bedankpagina)
 -- ---------------------------------------------------------------------------
--- Enkel wie het geheime token kent (zit in de terugkeerlink) ziet de status.
-CREATE OR REPLACE FUNCTION public.shop_order_public_status(p_order_id uuid, p_token uuid)
+-- Enkel wie het geheime token kent (zit in de terugkeerlink en in de mails)
+-- ziet de status. Gebruikt door bedankt.html (ook als "volg je bestelling").
+-- Het retourtype werd uitgebreid; daarom eerst DROP (CREATE OR REPLACE kan dat niet).
+DROP FUNCTION IF EXISTS public.shop_order_public_status(uuid, uuid);
+CREATE FUNCTION public.shop_order_public_status(p_order_id uuid, p_token uuid)
 RETURNS TABLE (
     order_number    text,
     payment_status  text,
     order_status    text,
     total           numeric,
-    delivery_method text
+    delivery_method text,
+    tracking_code   text,
+    country         text,
+    postal_code     text,
+    created_at      timestamptz,
+    paid_at         timestamptz,
+    gift_wrap       boolean,
+    items           jsonb,
+    withdrawn       boolean,
+    delivery_slot   text,
+    delivered_at    timestamptz
 )
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-    SELECT o.order_number, o.payment_status, o.order_status, o.total, o.delivery_method
+    SELECT o.order_number, o.payment_status, o.order_status, o.total, o.delivery_method,
+           o.tracking_code, o.country, o.postal_code, o.created_at, o.paid_at, o.gift_wrap,
+           COALESCE((SELECT jsonb_agg(jsonb_build_object('name', i.product_name, 'quantity', i.quantity) ORDER BY i.id)
+                     FROM public.shop_order_items i WHERE i.order_id = o.id), '[]'::jsonb),
+           EXISTS (SELECT 1 FROM public.shop_withdrawals w WHERE w.order_id = o.id),
+           o.delivery_slot, o.delivered_at
     FROM public.shop_orders o
     WHERE o.id = p_order_id AND o.public_token = p_token;
 $$;
@@ -740,6 +787,19 @@ ALTER TABLE public.shop_credit_notes      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_categories        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_discount_codes    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_notify_signups    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_withdrawals       ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON public.shop_withdrawals FROM anon, authenticated;
+GRANT SELECT ON public.shop_withdrawals TO authenticated;
+GRANT UPDATE (status, admin_note, processed_at) ON public.shop_withdrawals TO authenticated;
+
+DROP POLICY IF EXISTS "shop_withdrawals_admin_read" ON public.shop_withdrawals;
+CREATE POLICY "shop_withdrawals_admin_read" ON public.shop_withdrawals
+    FOR SELECT TO authenticated USING (public.is_admin());
+
+DROP POLICY IF EXISTS "shop_withdrawals_admin_update" ON public.shop_withdrawals;
+CREATE POLICY "shop_withdrawals_admin_update" ON public.shop_withdrawals
+    FOR UPDATE TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 -- Standaard alles intrekken, daarna gericht toekennen.
 REVOKE ALL ON public.shop_settings, public.shop_products, public.shop_orders,

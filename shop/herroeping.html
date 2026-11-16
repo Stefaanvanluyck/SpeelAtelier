@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self';
+                   script-src 'self' https://cdn.jsdelivr.net;
+                   style-src 'self' 'unsafe-inline';
+                   img-src 'self' data:;
+                   connect-src 'self' https://nafajvywiknelkgufpac.supabase.co;
+                   object-src 'none';
+                   base-uri 'self';
+                   form-action 'self'">
+    <title>Herroeping (bedenktijd) – Webshop Kleine Wonderwereld</title>
+    <meta name="description" content="Zie je af van je aankoop binnen de bedenktijd van 14 dagen? Herroep je bestelling hier online of gebruik het modelformulier.">
+    <link rel="canonical" href="https://jufvalerie.be/shop/herroeping.html">
+    <link rel="icon" sizes="32x32" href="../favicon.png">
+    <link rel="stylesheet" href="assets/shop.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+            integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+            crossorigin="anonymous"></script>
+    <script src="assets/shop-common.js" defer></script>
+    <script src="assets/herroeping.js" defer></script>
+</head>
+<body>
+
+<header class="shop-header">
+    <div class="container">
+        <a class="brand" href="./">🌿 Kleine Wonderwereld <small>Webshop</small></a>
+        <nav class="header-links"><a href="./" aria-label="Terug naar de webshop">←<span class="hide-sm"> Terug naar de</span><span class="hide-xs"> webshop</span></a></nav>
+    </div>
+</header>
+
+<main class="container">
+<article class="card withdraw">
+    <h1>Herroeping – 14 dagen bedenktijd</h1>
+    <p>Als consument mag je binnen <strong>14 dagen na ontvangst</strong> van je bestelling zonder opgave van
+        reden afzien van je aankoop. Dat kan hieronder online, of met het modelformulier onderaan.</p>
+    <p class="muted">Uitzondering: producten die volgens jouw specifieke wensen gemaakt werden (bv. een
+        kleurcombinatie op aanvraag) vallen niet onder het herroepingsrecht. Zie onze
+        <a href="voorwaarden.html">verkoopsvoorwaarden</a>, artikel 6.</p>
+
+    <!-- Stap 1: herroepknop -->
+    <div id="withdrawStart">
+        <button class="btn big" type="button" id="withdrawOpen">↩️ Overeenkomst herroepen</button>
+    </div>
+
+    <!-- Stap 2: gegevens + bevestigen -->
+    <form id="withdrawForm" class="form-grid hidden" novalidate>
+        <h2>Je gegevens</h2>
+        <div class="form-row">
+            <label>Bestelnummer *
+                <input name="order_number" required maxlength="20" placeholder="B2026-0012" autocomplete="off" style="text-transform:uppercase">
+            </label>
+            <label>E-mailadres van je bestelling *
+                <input name="email" type="email" required maxlength="254" autocomplete="email">
+            </label>
+        </div>
+        <label>Naam *
+            <input name="name" required maxlength="100" autocomplete="name">
+        </label>
+        <label>Welke producten wil je terugsturen? *
+            <textarea name="items" rows="3" maxlength="1000" required placeholder="bv. 1 × Regenboogrijst 1 kg (of: de volledige bestelling)"></textarea>
+        </label>
+        <label>Reden (niet verplicht)
+            <textarea name="reason" rows="2" maxlength="1000"></textarea>
+        </label>
+        <div class="error" id="withdrawError" role="alert"></div>
+        <div class="actions-row">
+            <button class="btn" type="submit" id="withdrawSubmit">✔ Bevestig herroeping</button>
+            <button class="btn secondary" type="button" id="withdrawCancel">Annuleren</button>
+        </div>
+        <p class="muted small">Na het bevestigen krijg je meteen een ontvangstbevestiging per e-mail.</p>
+    </form>
+
+    <div id="withdrawDone" class="hidden notice" role="status"></div>
+
+    <h2 id="model">Modelformulier voor herroeping</h2>
+    <p class="muted">Liever op papier of per mail? Vul dit formulier in en stuur het naar ons
+        (alleen invullen en terugzenden als je de overeenkomst wil herroepen).</p>
+    <div class="model-form">
+        <p>Aan: <span data-setting="business_name">Kleine Wonderwereld</span>,
+            <span data-setting="business_address"></span>,
+            <span data-setting="business_email"></span></p>
+        <p>Ik deel u hierbij mede dat ik onze overeenkomst betreffende de verkoop van de volgende
+            goederen herroep:</p>
+        <p class="line">………………………………………………………………………………………</p>
+        <p>Besteld op / ontvangen op: …………………… &nbsp; Bestelnummer: ……………………</p>
+        <p>Naam consument: ……………………………………………</p>
+        <p>Adres consument: ……………………………………………………………………</p>
+        <p>Handtekening (alleen bij papieren formulier): ……………………</p>
+        <p>Datum: ……………………</p>
+    </div>
+    <p><button class="btn secondary small" type="button" id="printModel">🖨 Modelformulier afdrukken</button></p>
+</article>
+</main>
+<footer class="site-footer">
+    <svg class="wave" viewBox="0 0 1440 50" preserveAspectRatio="none" aria-hidden="true"><path d="M0,25 C240,55 480,-5 720,25 C960,55 1200,-5 1440,25 L1440,50 L0,50 Z"></path></svg>
+    <div class="container footer-grid">
+        <div>
+            <div class="footer-brand">🌿 Kleine Wonderwereld</div>
+            <p>Sensorisch speelmateriaal, met liefde en zorg op bestelling gemaakt in ons speelatelier.</p>
+            <div class="pay-badges" aria-label="Betalen"><span>🔒 Veilig betalen via Mollie</span></div>
+        </div>
+        <div>
+            <h4>Webshop</h4>
+            <ul>
+                <li><a href="./">Alle producten</a></li>
+                <li><a href="voorwaarden.html">Verkoopsvoorwaarden</a></li>
+                <li><a href="herroeping.html">Herroeping (14 dagen)</a></li>
+                <li><a href="../privacy.html">Privacy</a></li>
+                <li><a href="../">Het speelatelier</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Contact</h4>
+            <ul id="footerContact"></ul>
+        </div>
+    </div>
+    <div class="container footer-bottom">© <span id="footerYear"></span> · Gemaakt met 🧡</div>
+</footer>
+
+</body>
+</html>
