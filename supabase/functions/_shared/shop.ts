@@ -110,6 +110,8 @@ export type Order = {
     customer_note: string | null;
     subtotal: number;
     shipping_cost: number;
+    discount_code: string | null;
+    discount_amount: number;
     total: number;
     payment_status: string;
     order_status: string;
@@ -135,6 +137,8 @@ export type Invoice = {
     lines: DocLine[];
     subtotal: number;
     shipping_cost: number;
+    discount_code: string | null;
+    discount_amount: number;
     total: number;
     vat_note: string;
     payment_note: string;
@@ -233,6 +237,12 @@ function itemsTableHtml(items: { product_name: string; quantity: number; line_to
         `</table>`;
 }
 
+function discountHtml(order: Order) {
+    const amount = Number(order.discount_amount ?? 0);
+    if (!(amount > 0)) return "";
+    return `<p>Korting${order.discount_code ? ` (${escapeHtml(order.discount_code)})` : ""}: -${euro(amount)}</p>`;
+}
+
 function deliveryHtml(order: Order, settings: Settings) {
     if (order.delivery_method === "pickup") {
         return `<p><strong>Afhalen</strong><br>${escapeHtml(settings.pickup_info)}</p>`;
@@ -256,6 +266,7 @@ export async function sendOrderConfirmation(order: Order, invoice: Invoice | nul
         `<p>Bedankt voor je bestelling <strong>${escapeHtml(order.order_number)}</strong>! ` +
         `We hebben je betaling goed ontvangen.</p>` +
         itemsTableHtml(items) +
+        discountHtml(order) +
         `<p>Verzending: ${euro(order.shipping_cost)}<br><strong>Totaal: ${euro(order.total)}</strong></p>` +
         deliveryHtml(order, settings) +
         `<p>${escapeHtml(settings.lead_time_text)}</p>` +
@@ -276,6 +287,7 @@ export async function sendOrderConfirmation(order: Order, invoice: Invoice | nul
             `<p>${escapeHtml(order.customer_name)} – ${escapeHtml(order.email)}` +
             `${order.phone ? " – " + escapeHtml(order.phone) : ""}</p>` +
             itemsTableHtml(items) +
+            discountHtml(order) +
             `<p><strong>Totaal: ${euro(order.total)}</strong></p>` +
             deliveryHtml(order, settings) +
             (order.customer_note ? `<p>Opmerking klant: ${escapeHtml(order.customer_note)}</p>` : "") +
@@ -486,6 +498,10 @@ async function uploadPdf(path: string, bytes: Uint8Array) {
 
 export async function renderInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
     const totals: [string, number][] = [["Subtotaal", Number(invoice.subtotal)]];
+    const discount = Number(invoice.discount_amount ?? 0);
+    if (discount > 0) {
+        totals.push([`Korting${invoice.discount_code ? ` (${invoice.discount_code})` : ""}`, -discount]);
+    }
     if (Number(invoice.shipping_cost) > 0 || invoice.customer.delivery === "shipping") {
         totals.push(["Verzending", Number(invoice.shipping_cost)]);
     }

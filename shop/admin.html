@@ -22,63 +22,117 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
     <script src="assets/shop-common.js" defer></script>
+    <script src="assets/vendor/qrcode.js" defer></script>
     <script src="assets/admin.js" defer></script>
 </head>
 <body class="admin">
 
 <header class="admin-header">
     <div class="container">
-        <div>
-            <div class="admin-title">🛒 Admin – Webshop</div>
-            <div class="admin-sub">Producten · bestellingen · facturen</div>
+        <div class="admin-brand">
+            <span class="admin-logo" aria-hidden="true">🛒</span>
+            <div>
+                <div class="admin-title">Webshop-beheer</div>
+                <div class="admin-sub">Kleine Wonderwereld</div>
+            </div>
         </div>
         <nav class="header-links">
-            <a class="switch-link" href="../admin.html">📅 Naar admin inschrijvingen</a>
-            <a href="./" target="_blank" rel="noopener">Webshop bekijken ↗</a>
+            <button class="shop-state hidden" type="button" id="shopStateButton" title="Webshop openen of sluiten"></button>
+            <a class="switch-link" href="../admin.html">📅 Inschrijvingen</a>
+            <a class="header-ghost" href="./" target="_blank" rel="noopener">Webshop ↗</a>
+            <span class="user-chip hidden" id="userChip"></span>
             <button class="btn small secondary hidden" type="button" id="logoutButton">Afmelden</button>
         </nav>
     </div>
 </header>
 
 <!-- Login -->
-<main class="container" id="loginView">
-    <form class="card" id="loginForm" style="max-width:420px">
-        <h1>Aanmelden</h1>
-        <p class="muted">Gebruik hetzelfde beheerdersaccount als voor de inschrijvingen.</p>
-        <div class="form-grid" style="margin-top:14px">
+<main class="login-wrap" id="loginView">
+    <form class="login-card" id="loginForm">
+        <div class="login-logo" aria-hidden="true">🛒</div>
+        <h1>Webshop-beheer</h1>
+        <p class="muted">Meld je aan met hetzelfde beheerdersaccount als voor de inschrijvingen.</p>
+        <div class="form-grid" style="margin-top:18px">
             <label>E-mail <input name="email" type="email" required autocomplete="username"></label>
             <label>Wachtwoord <input name="password" type="password" required autocomplete="current-password"></label>
             <div class="error" id="loginError"></div>
-            <button class="btn" type="submit">Aanmelden</button>
+            <button class="btn big" type="submit">Aanmelden</button>
         </div>
     </form>
 </main>
 
 <!-- App -->
-<main class="container hidden" id="appView">
-    <nav class="tabs" role="tablist">
-        <button type="button" class="tab active" data-tab="orders">📦 Bestellingen <span class="pill" id="openCount"></span></button>
-        <button type="button" class="tab" data-tab="products">🧺 Producten</button>
-        <button type="button" class="tab" data-tab="invoices">🧾 Facturen</button>
-        <button type="button" class="tab" data-tab="overview">📊 Overzicht</button>
-        <button type="button" class="tab" data-tab="settings">⚙️ Instellingen</button>
+<div class="admin-layout hidden" id="appView">
+    <nav class="tabs" role="tablist" aria-label="Onderdelen">
+        <button type="button" class="tab active" data-tab="dashboard"><span class="ti">🏠</span> Dashboard</button>
+        <button type="button" class="tab" data-tab="orders"><span class="ti">📦</span> Bestellingen <span class="pill" id="openCount"></span></button>
+        <button type="button" class="tab" data-tab="products"><span class="ti">🧺</span> Producten</button>
+        <button type="button" class="tab" data-tab="discounts"><span class="ti">🏷️</span> Kortingscodes</button>
+        <button type="button" class="tab" data-tab="invoices"><span class="ti">🧾</span> Facturen</button>
+        <button type="button" class="tab" data-tab="overview"><span class="ti">📊</span> Omzet &amp; btw</button>
+        <button type="button" class="tab" data-tab="waitlist"><span class="ti">💌</span> Wachtlijst <span class="pill" id="waitCount"></span></button>
+        <button type="button" class="tab" data-tab="settings"><span class="ti">⚙️</span> Instellingen</button>
+        <p class="tab-hint muted">Tip: druk <kbd>/</kbd> om te zoeken</p>
     </nav>
 
+<main class="admin-main">
+    <!-- DASHBOARD -->
+    <section class="panel" id="tab-dashboard">
+        <div class="page-head">
+            <div>
+                <h1 id="greeting">Welkom terug</h1>
+                <p class="muted" id="todayLine"></p>
+            </div>
+            <button class="btn small secondary" type="button" id="reloadDashboard">↻ Vernieuwen</button>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="dash-grid">
+            <div class="card-plain">
+                <div class="card-head"><h3>Omzet laatste 30 dagen</h3><span class="muted" id="chartTotal"></span></div>
+                <div id="revenueChart" class="chart"></div>
+            </div>
+            <div class="card-plain">
+                <div class="card-head"><h3>Te doen</h3></div>
+                <ul class="todo-list" id="todoList"></ul>
+            </div>
+        </div>
+        <div class="dash-grid">
+            <div class="card-plain">
+                <div class="card-head"><h3>Laatste bestellingen</h3><button class="link-btn" type="button" data-tab="orders">Alles bekijken →</button></div>
+                <div id="recentOrders"></div>
+            </div>
+            <div class="card-plain">
+                <div class="card-head"><h3>Topproducten (30 dagen)</h3></div>
+                <div id="dashTop"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- BESTELLINGEN -->
-    <section class="panel" id="tab-orders">
+    <section class="panel hidden" id="tab-orders">
+        <div class="page-head"><h1>Bestellingen</h1></div>
+        <div class="status-chips" id="orderChips"></div>
         <div class="toolbar">
-            <select id="orderFilter">
-                <option value="todo">Te behandelen (betaald, niet afgerond)</option>
+            <select id="orderFilter" class="hidden">
+                <option value="todo">Te behandelen</option>
                 <option value="paid">Alle betaalde</option>
                 <option value="unpaid">Niet betaald / geannuleerd</option>
                 <option value="all">Alle</option>
             </select>
-            <input id="orderSearch" type="search" placeholder="Zoek op nummer, naam of e-mail">
+            <input id="orderSearch" type="search" placeholder="🔍 Zoek op nummer, naam of e-mail" data-search>
+            <button class="btn small secondary" type="button" id="selectToShip">🏷️ Selecteer alle te verzenden</button>
             <button class="btn small secondary" type="button" id="reloadOrders">↻ Vernieuwen</button>
         </div>
+        <div class="bulk-bar hidden" id="bulkBar" role="region" aria-label="Selectie">
+            <strong id="bulkCount"></strong>
+            <button class="btn small" type="button" id="bulkLabels">🏷️ Verzendlabels</button>
+            <button class="btn small secondary" type="button" id="bulkSlips">🖨 Pakbonnen</button>
+            <button class="link-btn" type="button" id="bulkClear">Selectie wissen</button>
+        </div>
         <div class="table-wrap">
-            <table class="data">
+            <table class="data responsive">
                 <thead><tr>
+                    <th class="sel"><input type="checkbox" id="selectAllOrders" aria-label="Alles selecteren"></th>
                     <th>Nr.</th><th>Datum</th><th>Klant</th><th>Levering</th>
                     <th class="num">Totaal</th><th>Betaling</th><th>Status</th><th>Factuur</th>
                 </tr></thead>
@@ -89,22 +143,76 @@
 
     <!-- PRODUCTEN -->
     <section class="panel hidden" id="tab-products">
+        <div class="page-head"><h1>Producten</h1></div>
         <div class="toolbar">
             <button class="btn" type="button" id="newProduct">+ Nieuw product</button>
+            <button class="btn secondary" type="button" id="manageCategories">🗂 Categorieën</button>
+            <span class="toolbar-spacer"></span>
+            <input id="productSearchAdmin" type="search" placeholder="🔍 Zoek product" data-search>
+            <select id="productFilterAdmin" aria-label="Filter">
+                <option value="">Alle producten</option>
+                <option value="visible">Zichtbaar</option>
+                <option value="hidden">Verborgen</option>
+                <option value="featured">Uitgelicht</option>
+                <option value="sale">In promo</option>
+                <option value="test">Testproducten</option>
+            </select>
         </div>
         <div class="table-wrap">
-            <table class="data">
+            <table class="data responsive">
                 <thead><tr>
-                    <th></th><th>Naam</th><th class="num">Prijs</th><th>Max/bestelling</th>
-                    <th>Volgorde</th><th>Zichtbaar</th><th></th>
+                    <th></th><th>Naam</th><th>Categorie</th><th class="num">Prijs</th><th>Verkocht</th>
+                    <th>Volgorde</th><th>Uitgelicht</th><th>Zichtbaar</th><th></th>
                 </tr></thead>
                 <tbody id="productRows"></tbody>
             </table>
         </div>
     </section>
 
+    <!-- KORTINGSCODES -->
+    <section class="panel hidden" id="tab-discounts">
+        <div class="page-head"><h1>Kortingscodes</h1></div>
+        <div class="toolbar">
+            <button class="btn" type="button" id="newDiscount">+ Nieuwe kortingscode</button>
+        </div>
+        <div class="table-wrap">
+            <table class="data">
+                <thead><tr>
+                    <th>Code</th><th>Korting</th><th>Voorwaarden</th><th>Geldig</th>
+                    <th>Gebruikt</th><th>Status</th><th></th>
+                </tr></thead>
+                <tbody id="discountRows"></tbody>
+            </table>
+        </div>
+        <p class="muted" style="margin-top:10px">De korting gaat van het subtotaal van de producten af (niet van de
+            verzendkost). "Gebruikt" telt enkel betaalde bestellingen. Een gebruikte code kan je niet verwijderen,
+            wel uitschakelen.</p>
+    </section>
+
+    <!-- WACHTLIJST -->
+    <section class="panel hidden" id="tab-waitlist">
+        <div class="page-head"><h1>Wachtlijst</h1></div>
+        <div class="card-plain">
+            <h3>Wachtlijst opening webshop</h3>
+            <p class="muted">Bezoekers die hun e-mailadres achterlieten terwijl de webshop gesloten was. Stuur hen
+                één mail wanneer de shop opengaat (bv. in BCC) en wis daarna de adressen – zo beloofd op de website.</p>
+            <div class="actions">
+                <button class="btn small" type="button" id="copyWaitlist">📋 Kopieer niet-verwittigde adressen</button>
+                <button class="btn small secondary" type="button" id="markWaitlist">✓ Markeer als verwittigd</button>
+                <button class="btn small danger" type="button" id="purgeWaitlist">🗑 Wis verwittigde adressen</button>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="data">
+                <thead><tr><th>E-mail</th><th>Ingeschreven</th><th>Verwittigd</th><th></th></tr></thead>
+                <tbody id="waitRows"></tbody>
+            </table>
+        </div>
+    </section>
+
     <!-- FACTUREN -->
     <section class="panel hidden" id="tab-invoices">
+        <div class="page-head"><h1>Facturen &amp; creditnota's</h1></div>
         <div class="toolbar">
             <select id="invYear"></select>
             <select id="invPeriod">
@@ -136,6 +244,7 @@
 
     <!-- OVERZICHT -->
     <section class="panel hidden" id="tab-overview">
+        <div class="page-head"><h1>Omzet &amp; btw-grens</h1></div>
         <div class="stats" id="overviewStats"></div>
         <div class="card-plain">
             <h3>Vrijstellingsregeling kleine ondernemingen</h3>
@@ -152,24 +261,29 @@
 
     <!-- INSTELLINGEN -->
     <section class="panel hidden" id="tab-settings">
-        <form id="settingsForm" class="card-plain form-grid">
-            <h3>Webshop</h3>
-            <label class="check"><input type="checkbox" name="show_on_site"> Webshop tonen op de website
-                (link "🛒 Webshop" in het menu van jufvalerie.be)</label>
-            <label class="check"><input type="checkbox" name="shop_open"> Webshop is open (bestellen mogelijk)</label>
+        <div class="page-head"><h1>Instellingen</h1></div>
+        <form id="settingsForm" class="settings-form">
+            <div class="card-plain form-grid">
+            <h3>🛍️ Webshop</h3>
+            <label class="check switch"><input type="checkbox" name="show_on_site"> <span>Webshop tonen op de website
+                <small class="muted">link "🛒 Webshop" in het menu van jufvalerie.be</small></span></label>
+            <label class="check switch"><input type="checkbox" name="shop_open"> <span>Webshop is open
+                <small class="muted">klanten kunnen bestellen en betalen</small></span></label>
             <label>Aankondiging bovenaan de webshop (optioneel)
                 <input name="announcement" maxlength="300">
             </label>
             <label>Levertermijn (tekst)
                 <input name="lead_time_text" maxlength="300">
             </label>
+            </div>
 
-            <h3>Levering</h3>
-            <label class="check"><input type="checkbox" name="pickup_enabled"> Afhalen mogelijk</label>
+            <div class="card-plain form-grid">
+            <h3>🚚 Levering</h3>
+            <label class="check switch"><input type="checkbox" name="pickup_enabled"> <span>Afhalen mogelijk</span></label>
             <label>Afhaalinfo
                 <textarea name="pickup_info" rows="2" maxlength="500"></textarea>
             </label>
-            <label class="check"><input type="checkbox" name="shipping_enabled"> Verzenden mogelijk</label>
+            <label class="check switch"><input type="checkbox" name="shipping_enabled"> <span>Verzenden mogelijk</span></label>
             <div class="form-row">
                 <label>Verzendkost (€)
                     <input name="shipping_cost" type="number" min="0" step="0.01">
@@ -178,8 +292,10 @@
                     <input name="free_shipping_from" type="number" min="0" step="0.01">
                 </label>
             </div>
+            </div>
 
-            <h3>Bedrijfsgegevens (op facturen)</h3>
+            <div class="card-plain form-grid">
+            <h3>🧾 Bedrijfsgegevens (op facturen)</h3>
             <p class="muted">Wijzigingen gelden enkel voor nieuwe facturen; bestaande facturen blijven ongewijzigd.</p>
             <div class="form-row">
                 <label>Naam / handelsnaam <input name="business_name" required maxlength="120"></label>
@@ -202,11 +318,16 @@
             <label>Voettekst factuur
                 <input name="invoice_footer" maxlength="300">
             </label>
-            <div class="error" id="settingsError"></div>
-            <button class="btn" type="submit">Instellingen opslaan</button>
+            </div>
+            <div class="save-bar">
+                <span class="muted" id="settingsDirty"></span>
+                <div class="error" id="settingsError"></div>
+                <button class="btn" type="submit">Instellingen opslaan</button>
+            </div>
         </form>
     </section>
 </main>
+</div>
 
 <!-- Dialogen -->
 <div class="overlay" id="overlay"></div>

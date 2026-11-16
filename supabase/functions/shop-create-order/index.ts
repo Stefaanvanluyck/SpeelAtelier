@@ -10,7 +10,8 @@
 //       items: [{ product_id, quantity }],
 //       customer: { name, email, phone, company_name, company_vat },
 //       delivery: { method: "pickup"|"shipping", street, postal_code, city, country },
-//       note, terms_accepted: true
+//       note, terms_accepted: true,
+//       discount_code?: string
 //   }})
 // Antwoord: { checkoutUrl, orderId, orderNumber, total }
 //
@@ -164,15 +165,33 @@ async function handle(req: Request, headers: Record<string, string>): Promise<Re
     }
 
     // ------------------------------------------------------------------
-    // 4. Bedragen
+    // 4. Bedragen (korting op het subtotaal, verzending op het bedrag na korting)
     // ------------------------------------------------------------------
     const subtotal = round2(lines.reduce((s, l) => s + l.line_total, 0));
+
+    let discountCode: string | null = null;
+    let discount = 0;
+    const rawCode = str(body.discount_code, 30);
+    if (rawCode) {
+        const { data: check, error: checkError } = await sb.rpc("shop_check_discount", {
+            p_code: rawCode,
+            p_subtotal: subtotal,
+        });
+        if (checkError) throw checkError;
+        if (!check?.valid) {
+            return json({ error: String(check?.message ?? "Deze kortingscode is ongeldig.") }, 400, headers);
+        }
+        discountCode = String(check.code);
+        discount = Math.min(subtotal, round2(Number(check.amount) || 0));
+    }
+
+    const afterDiscount = round2(subtotal - discount);
     let shipping = 0;
     if (method === "shipping") {
         const freeFrom = settings.free_shipping_from != null ? Number(settings.free_shipping_from) : null;
-        shipping = freeFrom != null && subtotal >= freeFrom ? 0 : Number(settings.shipping_cost);
+        shipping = freeFrom != null && afterDiscount >= freeFrom ? 0 : Number(settings.shipping_cost);
     }
-    const total = round2(subtotal + shipping);
+    const total = round2(afterDiscount + shipping);
     if (total < 1) {
         return json({ error: "Het minimumbedrag voor een bestelling is € 1,00." }, 400, headers);
     }
@@ -208,6 +227,8 @@ async function handle(req: Request, headers: Record<string, string>): Promise<Re
             customer_note: note,
             subtotal,
             shipping_cost: shipping,
+            discount_code: discountCode,
+            discount_amount: discount,
             total,
             terms_accepted_at: new Date().toISOString(),
         })

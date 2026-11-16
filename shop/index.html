@@ -35,6 +35,8 @@
 </head>
 <body>
 
+<div class="top-bar hidden" id="topBar" role="note"></div>
+
 <header class="shop-header">
     <div class="container">
         <a class="brand" href="./">🌿 Kleine Wonderwereld <small>Webshop</small></a>
@@ -47,37 +49,92 @@
     </div>
 </header>
 
-<main class="container">
+<div class="hero-wrap">
+    <div class="confetti" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="container">
     <section class="hero">
-        <h1>Sensorisch speelplezier voor thuis</h1>
+        <h1>Sensorisch <span class="accent">speelplezier</span> voor thuis</h1>
         <p>Gekleurde rijst, gekleurde pasta en andere leuke materialen om te voelen, scheppen en
             ontdekken. Alles wordt met zorg <strong>op bestelling</strong> gemaakt.</p>
         <div class="notice" id="leadTime"></div>
-        <div class="notice hidden" id="announcement"></div>
         <div class="notice closed hidden" id="closedNotice">
             De webshop is momenteel gesloten. Je kan de producten wel al bekijken.
+            <form class="notify-form" id="notifyForm" novalidate>
+                <label for="notifyEmail">Laat je e-mailadres achter en we sturen je één mailtje zodra je kan bestellen:</label>
+                <div class="notify-row">
+                    <input id="notifyEmail" name="email" type="email" maxlength="254" autocomplete="email"
+                           placeholder="jouw@email.be" required>
+                    <button class="btn" type="submit">Hou me op de hoogte</button>
+                </div>
+                <p class="muted small">We gebruiken je adres enkel hiervoor en wissen het daarna.
+                    Zie onze <a href="../privacy.html">privacyverklaring</a>.</p>
+                <p class="muted" id="notifyMsg" role="status"></p>
+            </form>
         </div>
     </section>
+    </div>
+    <svg class="wave" viewBox="0 0 1440 50" preserveAspectRatio="none" aria-hidden="true"><path d="M0,25 C240,55 480,-5 720,25 C960,55 1200,-5 1440,25 L1440,50 L0,50 Z"></path></svg>
+</div>
 
-    <section class="grid" id="productGrid" aria-live="polite">
-        <div class="spinner" aria-label="Laden"></div>
+<main class="container">
+
+    <ul class="trust-bar" aria-label="Waarom bij ons">
+        <li><span>🧡</span><div><strong>Handgemaakt</strong><br>met zorg op bestelling</div></li>
+        <li id="trustPickup"><span>🏠</span><div><strong>Gratis afhalen</strong><br>in het speelatelier</div></li>
+        <li id="trustShipping"><span>📦</span><div><strong>Verzending</strong><br>naar België en Nederland</div></li>
+        <li><span>🔒</span><div><strong>Veilig betalen</strong><br>via Mollie</div></li>
+    </ul>
+
+    <section class="filters" aria-label="Producten filteren">
+        <div class="chips" id="categoryChips"></div>
+        <div class="filter-tools">
+            <input id="productSearch" type="search" placeholder="🔍 Zoek een product…" maxlength="60"
+                   aria-label="Zoek een product">
+            <select id="productSort" aria-label="Sorteren">
+                <option value="">Aanbevolen</option>
+                <option value="new">Nieuwste</option>
+                <option value="price-asc">Prijs: laag – hoog</option>
+                <option value="price-desc">Prijs: hoog – laag</option>
+                <option value="name">Naam A – Z</option>
+            </select>
+        </div>
+    </section>
+    <p class="muted result-count" id="resultCount" aria-live="polite"></p>
+
+    <section class="grid" id="productGrid" aria-live="polite" aria-busy="true">
+        <div class="product skeleton"><div></div><p></p><p></p></div>
+        <div class="product skeleton"><div></div><p></p><p></p></div>
+        <div class="product skeleton"><div></div><p></p><p></p></div>
+        <div class="product skeleton"><div></div><p></p><p></p></div>
     </section>
 </main>
 
-<footer class="shop-footer">
-    <a href="voorwaarden.html">Algemene verkoopsvoorwaarden</a> ·
-    <a href="../privacy.html">Privacy</a> ·
-    <a href="../">Speelatelier</a>
+<footer class="site-footer">
+    <svg class="wave" viewBox="0 0 1440 50" preserveAspectRatio="none" aria-hidden="true"><path d="M0,25 C240,55 480,-5 720,25 C960,55 1200,-5 1440,25 L1440,50 L0,50 Z"></path></svg>
+    <div class="container footer-grid">
+        <div>
+            <div class="footer-brand">🌿 Kleine Wonderwereld</div>
+            <p>Sensorisch speelmateriaal, met liefde en zorg op bestelling gemaakt in ons speelatelier.</p>
+            <div class="pay-badges" aria-label="Betalen"><span>🔒 Veilig betalen via Mollie</span></div>
+        </div>
+        <div>
+            <h4>Webshop</h4>
+            <ul>
+                <li><a href="./">Alle producten</a></li>
+                <li><a href="voorwaarden.html">Verkoopsvoorwaarden</a></li>
+                <li><a href="../privacy.html">Privacy</a></li>
+                <li><a href="../">Het speelatelier</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Contact</h4>
+            <ul id="footerContact"></ul>
+        </div>
+    </div>
+    <div class="container footer-bottom">© <span id="footerYear"></span> · Gemaakt met 🧡</div>
 </footer>
 
-<!-- Productdetail -->
 <div class="overlay" id="overlay"></div>
-<div class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div style="display:flex;justify-content:flex-end;padding:10px 14px 0">
-        <button class="icon-btn" type="button" data-close aria-label="Sluiten">×</button>
-    </div>
-    <div class="modal-content" id="modalContent"></div>
-</div>
 
 <!-- Winkelmandje + afrekenen -->
 <aside class="drawer" id="cartDrawer" aria-label="Winkelmandje">
@@ -141,6 +198,16 @@
             <label>Opmerking (bv. kleurvoorkeur)
                 <textarea name="note" rows="3" maxlength="1000"></textarea>
             </label>
+
+            <div>
+                <label for="discountCode">Kortingscode</label>
+                <div class="notify-row">
+                    <input id="discountCode" name="discount_code" maxlength="30" autocomplete="off"
+                           style="text-transform:uppercase">
+                    <button class="btn secondary" type="button" id="applyDiscount">Toepassen</button>
+                </div>
+                <p class="muted" id="discountMsg" role="status"></p>
+            </div>
 
             <label class="check">
                 <input type="checkbox" name="terms" required>

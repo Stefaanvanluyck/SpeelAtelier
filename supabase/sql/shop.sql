@@ -8,8 +8,8 @@
 -- Vereist: security_hardening_2026.sql is al gedraaid (is_admin()).
 --
 -- Inhoud:
---   1. Tabellen: instellingen, producten, bestellingen, bestellijnen,
---      facturen, creditnota's, nummering
+--   1. Tabellen: instellingen, categorieën, producten, kortingscodes,
+--      meldingen, bestellingen, bestellijnen, facturen, creditnota's, nummering
 --   2. Nummering zonder gaten (W2026-0001 / WC2026-0001 / B2026-0001)
 --   3. Facturen en creditnota's zijn onveranderlijk (trigger)
 --   4. Functies voor de Edge Functions (enkel service role)
@@ -65,6 +65,16 @@ SET business_address  = CASE WHEN business_address  = '' THEN E'Braakstraat 7\n2
 WHERE id = 1;
 
 
+CREATE TABLE IF NOT EXISTS public.shop_categories (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    name        text NOT NULL CHECK (char_length(btrim(name)) BETWEEN 1 AND 60),
+    slug        text NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+    sort_order  integer NOT NULL DEFAULT 0,
+    active      boolean NOT NULL DEFAULT true,
+    created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+
 CREATE TABLE IF NOT EXISTS public.shop_products (
     id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name            text NOT NULL CHECK (char_length(btrim(name)) BETWEEN 1 AND 120),
@@ -85,6 +95,50 @@ CREATE TABLE IF NOT EXISTS public.shop_products (
 
 CREATE INDEX IF NOT EXISTS idx_shop_products_active
     ON public.shop_products (active, sort_order);
+
+-- Categorie (optioneel). Categorie verwijderen => producten worden "zonder categorie".
+ALTER TABLE public.shop_categories
+    ADD COLUMN IF NOT EXISTS icon text CHECK (icon IS NULL OR char_length(icon) <= 8);
+
+ALTER TABLE public.shop_products
+    ADD COLUMN IF NOT EXISTS category_id uuid REFERENCES public.shop_categories (id) ON DELETE SET NULL;
+
+-- Presentatie: doorstreepte "van"-prijs (promo), label (bv. "Nieuw") en uitgelicht.
+-- compare_at_price is enkel weergave; er wordt altijd 'price' aangerekend.
+ALTER TABLE public.shop_products
+    ADD COLUMN IF NOT EXISTS compare_at_price numeric(10,2)
+        CHECK (compare_at_price IS NULL OR (compare_at_price >= 0 AND compare_at_price <= 10000)),
+    ADD COLUMN IF NOT EXISTS badge text CHECK (badge IS NULL OR char_length(badge) <= 20),
+    ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false;
+
+
+-- Kortingscodes. used_count telt enkel BETAALDE bestellingen (webhook).
+CREATE TABLE IF NOT EXISTS public.shop_discount_codes (
+    id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    code         text NOT NULL UNIQUE CHECK (code ~ '^[A-Z0-9_-]{3,30}$'),
+    description  text CHECK (description IS NULL OR char_length(description) <= 200),
+    kind         text NOT NULL CHECK (kind IN ('percent', 'fixed')),
+    value        numeric(10,2) NOT NULL CHECK (value > 0),
+    min_order    numeric(10,2) CHECK (min_order IS NULL OR min_order >= 0),
+    valid_from   date,
+    valid_until  date,
+    max_uses     integer CHECK (max_uses IS NULL OR max_uses >= 1),
+    used_count   integer NOT NULL DEFAULT 0 CHECK (used_count >= 0),
+    active       boolean NOT NULL DEFAULT true,
+    created_at   timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT shop_discount_percent_max CHECK (kind <> 'percent' OR value <= 100),
+    CONSTRAINT shop_discount_dates CHECK (valid_from IS NULL OR valid_until IS NULL OR valid_from <= valid_until)
+);
+
+
+-- "Laat me weten wanneer de webshop opengaat"
+CREATE TABLE IF NOT EXISTS public.shop_notify_signups (
+    id          bigserial PRIMARY KEY,
+    email       text NOT NULL UNIQUE CHECK (char_length(email) <= 254
+                    AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    notified_at timestamptz
+);
 
 
 CREATE TABLE IF NOT EXISTS public.shop_orders (
@@ -137,6 +191,11 @@ CREATE INDEX IF NOT EXISTS idx_shop_orders_created  ON public.shop_orders (creat
 CREATE INDEX IF NOT EXISTS idx_shop_orders_status   ON public.shop_orders (payment_status, order_status);
 CREATE INDEX IF NOT EXISTS idx_shop_orders_email    ON public.shop_orders (LOWER(email));
 
+-- Korting (op het subtotaal; total = subtotal - discount_amount + shipping_cost)
+ALTER TABLE public.shop_orders
+    ADD COLUMN IF NOT EXISTS discount_code   text,
+    ADD COLUMN IF NOT EXISTS discount_amount numeric(10,2) NOT NULL DEFAULT 0 CHECK (discount_amount >= 0);
+
 
 CREATE TABLE IF NOT EXISTS public.shop_order_items (
     id              bigserial PRIMARY KEY,
@@ -180,6 +239,10 @@ CREATE TABLE IF NOT EXISTS public.shop_invoices (
 );
 
 CREATE INDEX IF NOT EXISTS idx_shop_invoices_date ON public.shop_invoices (invoice_date DESC);
+
+ALTER TABLE public.shop_invoices
+    ADD COLUMN IF NOT EXISTS discount_code   text,
+    ADD COLUMN IF NOT EXISTS discount_amount numeric(10,2) NOT NULL DEFAULT 0;
 
 
 CREATE TABLE IF NOT EXISTS public.shop_credit_notes (
@@ -287,6 +350,8 @@ BEGIN
        OR NEW.lines        IS DISTINCT FROM OLD.lines
        OR NEW.subtotal     IS DISTINCT FROM OLD.subtotal
        OR NEW.shipping_cost IS DISTINCT FROM OLD.shipping_cost
+       OR NEW.discount_code   IS DISTINCT FROM OLD.discount_code
+       OR NEW.discount_amount IS DISTINCT FROM OLD.discount_amount
        OR NEW.total        IS DISTINCT FROM OLD.total
        OR NEW.vat_note     IS DISTINCT FROM OLD.vat_note THEN
         RAISE EXCEPTION 'Een uitgereikte factuur kan niet gewijzigd worden. Maak een creditnota.'
@@ -377,7 +442,7 @@ BEGIN
 
     INSERT INTO public.shop_invoices (
         invoice_number, invoice_date, order_id, seller, customer, lines,
-        subtotal, shipping_cost, total, vat_note
+        subtotal, shipping_cost, discount_code, discount_amount, total, vat_note
     ) VALUES (
         public.shop_next_number('invoice', 'W'),
         (now() AT TIME ZONE 'Europe/Brussels')::date,
@@ -407,6 +472,8 @@ BEGIN
         v_lines,
         v_order.subtotal,
         v_order.shipping_cost,
+        v_order.discount_code,
+        v_order.discount_amount,
         v_order.total,
         v_settings.vat_exempt_text
     )
@@ -536,6 +603,115 @@ REVOKE ALL ON FUNCTION public.shop_order_public_status(uuid, uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.shop_order_public_status(uuid, uuid) TO anon, authenticated;
 
 
+-- Kortingscode controleren en het kortingsbedrag berekenen.
+-- Eén bron van waarheid: zowel de webshop (voorvertoning) als
+-- shop-create-order (definitieve berekening) gebruiken deze functie.
+-- Antwoord: {valid, message?, code?, amount?, label?}
+CREATE OR REPLACE FUNCTION public.shop_check_discount(p_code text, p_subtotal numeric)
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v        public.shop_discount_codes;
+    v_today  date := (now() AT TIME ZONE 'Europe/Brussels')::date;
+    v_sub    numeric(10,2) := GREATEST(COALESCE(p_subtotal, 0), 0);
+    v_amount numeric(10,2);
+BEGIN
+    SELECT * INTO v FROM public.shop_discount_codes
+    WHERE code = upper(btrim(COALESCE(p_code, '')));
+
+    IF NOT FOUND OR NOT v.active THEN
+        RETURN jsonb_build_object('valid', false, 'message', 'Deze kortingscode is ongeldig.');
+    END IF;
+    IF (v.valid_from IS NOT NULL AND v_today < v.valid_from)
+       OR (v.valid_until IS NOT NULL AND v_today > v.valid_until) THEN
+        RETURN jsonb_build_object('valid', false, 'message', 'Deze kortingscode is momenteel niet geldig.');
+    END IF;
+    IF v.max_uses IS NOT NULL AND v.used_count >= v.max_uses THEN
+        RETURN jsonb_build_object('valid', false, 'message', 'Deze kortingscode is al opgebruikt.');
+    END IF;
+    IF v.min_order IS NOT NULL AND v_sub < v.min_order THEN
+        RETURN jsonb_build_object('valid', false, 'message',
+            'Deze kortingscode geldt vanaf € ' || replace(to_char(v.min_order, 'FM999990.00'), '.', ',') || '.');
+    END IF;
+
+    IF v.kind = 'percent' THEN
+        v_amount := round(v_sub * v.value / 100, 2);
+    ELSE
+        v_amount := LEAST(v.value, v_sub);
+    END IF;
+
+    RETURN jsonb_build_object(
+        'valid',  true,
+        'code',   v.code,
+        'amount', v_amount,
+        'label',  CASE WHEN v.kind = 'percent'
+                       THEN replace(rtrim(rtrim(v.value::text, '0'), '.'), '.', ',') || '% korting'
+                       ELSE '€ ' || replace(to_char(v.value, 'FM999990.00'), '.', ',') || ' korting' END
+    );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.shop_check_discount(text, numeric) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.shop_check_discount(text, numeric) TO anon, authenticated, service_role;
+
+
+-- Gebruik van een kortingscode registreren (webhook, bij betaling).
+CREATE OR REPLACE FUNCTION public.shop_redeem_discount(p_code text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    IF NOT public.is_service_role() THEN
+        RAISE EXCEPTION 'Niet toegelaten' USING ERRCODE = '42501';
+    END IF;
+    UPDATE public.shop_discount_codes
+    SET used_count = used_count + 1
+    WHERE code = upper(btrim(COALESCE(p_code, '')));
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.shop_redeem_discount(text) FROM PUBLIC, anon, authenticated;
+
+
+-- Inschrijven op "laat me weten wanneer de webshop opengaat".
+CREATE OR REPLACE FUNCTION public.shop_notify_signup(p_email text)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_email text := lower(btrim(COALESCE(p_email, '')));
+    v_recent integer;
+BEGIN
+    IF char_length(v_email) > 254
+       OR v_email !~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' THEN
+        RAISE EXCEPTION 'Ongeldig e-mailadres' USING ERRCODE = 'P0001';
+    END IF;
+
+    -- Eenvoudige flood-bescherming
+    SELECT count(*) INTO v_recent FROM public.shop_notify_signups
+    WHERE created_at > now() - interval '10 minutes';
+    IF v_recent >= 30 THEN
+        RAISE EXCEPTION 'Even te druk, probeer later opnieuw' USING ERRCODE = 'P0001';
+    END IF;
+
+    INSERT INTO public.shop_notify_signups (email) VALUES (v_email)
+    ON CONFLICT (email) DO UPDATE SET notified_at = NULL;
+    RETURN true;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.shop_notify_signup(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.shop_notify_signup(text) TO anon, authenticated;
+
+
 -- ---------------------------------------------------------------------------
 -- 6. RLS
 -- ---------------------------------------------------------------------------
@@ -546,13 +722,48 @@ ALTER TABLE public.shop_order_items       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_number_sequences  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_invoices          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_credit_notes      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_categories        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_discount_codes    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_notify_signups    ENABLE ROW LEVEL SECURITY;
 
 -- Standaard alles intrekken, daarna gericht toekennen.
 REVOKE ALL ON public.shop_settings, public.shop_products, public.shop_orders,
               public.shop_order_items, public.shop_number_sequences,
-              public.shop_invoices, public.shop_credit_notes
+              public.shop_invoices, public.shop_credit_notes,
+              public.shop_categories, public.shop_discount_codes, public.shop_notify_signups
     FROM anon, authenticated;
 REVOKE ALL ON SEQUENCE public.shop_order_items_id_seq FROM anon, authenticated;
+REVOKE ALL ON SEQUENCE public.shop_notify_signups_id_seq FROM anon, authenticated;
+
+-- Categorieën: publiek enkel actieve, beheerder alles
+GRANT SELECT ON public.shop_categories TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.shop_categories TO authenticated;
+
+DROP POLICY IF EXISTS "shop_categories_public_read" ON public.shop_categories;
+CREATE POLICY "shop_categories_public_read" ON public.shop_categories
+    FOR SELECT TO anon, authenticated
+    USING (active OR public.is_admin());
+
+DROP POLICY IF EXISTS "shop_categories_admin_write" ON public.shop_categories;
+CREATE POLICY "shop_categories_admin_write" ON public.shop_categories
+    FOR ALL TO authenticated
+    USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- Kortingscodes: enkel beheerder (publiek controleren via shop_check_discount)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.shop_discount_codes TO authenticated;
+
+DROP POLICY IF EXISTS "shop_discount_codes_admin" ON public.shop_discount_codes;
+CREATE POLICY "shop_discount_codes_admin" ON public.shop_discount_codes
+    FOR ALL TO authenticated
+    USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- Meldingen: enkel beheerder (publiek inschrijven via shop_notify_signup)
+GRANT SELECT, UPDATE, DELETE ON public.shop_notify_signups TO authenticated;
+
+DROP POLICY IF EXISTS "shop_notify_signups_admin" ON public.shop_notify_signups;
+CREATE POLICY "shop_notify_signups_admin" ON public.shop_notify_signups
+    FOR ALL TO authenticated
+    USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 -- Instellingen: iedereen leest, beheerder wijzigt
 GRANT SELECT ON public.shop_settings TO anon, authenticated;

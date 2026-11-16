@@ -109,6 +109,10 @@ Deno.serve(async (req: Request) => {
     // 4. Factuur + mails (fouten mogen de status niet ongedaan maken)
     if (becamePaid) {
         const paidOrder = updated[0] as Order;
+        if (paidOrder.discount_code) {
+            const { error: redeemError } = await sb.rpc("shop_redeem_discount", { p_code: paidOrder.discount_code });
+            if (redeemError) console.error("Kortingscode registreren mislukt:", redeemError);
+        }
         let invoice: Invoice | null = null;
         try {
             invoice = await ensureInvoice(orderId);

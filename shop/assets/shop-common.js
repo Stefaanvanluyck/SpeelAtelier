@@ -79,6 +79,50 @@ window.SHOP = (function () {
         return readCart().reduce(function (s, i) { return s + i.quantity; }, 0);
     }
 
+    /* ---------- visuele hulpjes ---------- */
+
+    function reducedMotion() {
+        return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    function confetti(amount) {
+        if (reducedMotion()) return;
+        const colors = ["#ff6f86", "#ffd166", "#7bd3a4", "#8ec5ff", "#c7a4ff", "#ff9a76"];
+        const box = document.createElement("div");
+        box.className = "confetti-burst";
+        box.setAttribute("aria-hidden", "true");
+        for (let i = 0; i < (amount || 120); i++) {
+            const c = document.createElement("i");
+            c.style.left = Math.random() * 100 + "vw";
+            c.style.background = colors[i % colors.length];
+            c.style.animationDuration = (2.2 + Math.random() * 2.2) + "s";
+            c.style.animationDelay = (Math.random() * 0.8) + "s";
+            c.style.setProperty("--dx", (Math.random() * 200 - 100) + "px");
+            c.style.setProperty("--rot", (Math.random() * 900 - 450) + "deg");
+            if (i % 3 === 0) c.style.borderRadius = "50%";
+            box.appendChild(c);
+        }
+        document.body.appendChild(box);
+        setTimeout(function () { box.remove(); }, 5500);
+    }
+
+    // Contactgegevens in de footer (uit de webshop-instellingen)
+    async function fillFooter() {
+        const el = document.getElementById("footerContact");
+        if (!el) return;
+        const { data } = await sb.from("shop_settings")
+            .select("business_name, business_address, business_email, business_phone").eq("id", 1).maybeSingle();
+        if (!data) return;
+        const items = [];
+        if (data.business_address) items.push("<li>📍 " + escapeHtml(data.business_address).replace(/\n/g, ", ") + "</li>");
+        if (data.business_email) items.push('<li>✉️ <a href="mailto:' + escapeHtml(data.business_email) + '">' + escapeHtml(data.business_email) + "</a></li>");
+        if (data.business_phone) items.push('<li>📞 <a href="tel:' + escapeHtml(data.business_phone.replace(/\s+/g, "")) + '">' + escapeHtml(data.business_phone) + "</a></li>");
+        el.innerHTML = items.join("");
+        const year = document.getElementById("footerYear");
+        if (year) year.textContent = new Date().getFullYear() + " " + (data.business_name || "");
+    }
+    document.addEventListener("DOMContentLoaded", fillFooter);
+
     return {
         SUPABASE_URL: SUPABASE_URL,
         sb: sb,
@@ -91,6 +135,8 @@ window.SHOP = (function () {
         clearCart: clearCart,
         setQuantity: setQuantity,
         addToCart: addToCart,
-        cartCount: cartCount
+        cartCount: cartCount,
+        reducedMotion: reducedMotion,
+        confetti: confetti
     };
 })();

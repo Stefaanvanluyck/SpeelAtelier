@@ -68,7 +68,7 @@ Dit werkt vanzelf zodra de functie is gedeployed (geen extra config nodig).
 
 ---
 
-## Stap 4 — RLS-hardening (optie 4)
+## Stap 3 — RLS-hardening (optie 4)
 
 1. Open `sql/rls_hardening.sql`.
 2. Vervang op de eerste regel van het `DO`-blok
@@ -103,7 +103,7 @@ RLS-schema compatibel is):
 
 ---
 
-## Stap 5 — Galerij-uploads (optioneel)
+## Stap 4 — Galerij-uploads (optioneel)
 
 1. Open `sql/gallery.sql`.
 2. In [Supabase Dashboard](https://supabase.com/dashboard) → **SQL Editor**
@@ -143,15 +143,17 @@ RLS-schema compatibel is):
   1. `index.html` (`calculateAmount`)
   2. `sql/amount_validation_trigger.sql`
   3. `functions/create-mollie-payment/index.ts`
+
 ## Security hardening (2026)
 
 Draai `sql/security_hardening_2026.sql` als LAATSTE script in de SQL Editor (na alle andere scripts) en deploy daarna beide edge functions opnieuw:
 
-```n supabase functions deploy create-mollie-payment
- supabase functions deploy mollie-webhook --no-verify-jwt
+```bash
+supabase functions deploy create-mollie-payment
+supabase functions deploy mollie-webhook --no-verify-jwt
 ```
 
-Beurtenkaart via de website wordt nu `pass_requested` (te bevestigen). In admin.html bevestig je met de ???-knop; pas dan worden beurten afgetrokken.
+Beurtenkaart via de website wordt nu `pass_requested` (te bevestigen). In admin.html bevestig je met de 🎟️-knop ("Kaart – te bevestigen"); pas dan worden beurten afgetrokken.
 
 CDN-scripts zijn vastgezet met SRI. Nieuwe hash berekenen: `curl -s URL | openssl dgst -sha384 -binary | openssl base64 -A`.
 
@@ -210,4 +212,47 @@ supabase functions deploy shop-document --no-verify-jwt
   optioneel met automatische terugbetaling via Mollie.
 - Tab **Facturen** → CSV-export per maand/kwartaal/jaar voor de boekhouder.
 - Tab **Overzicht** → omzet t.o.v. de grens van de vrijstellingsregeling.
+
+### Categorieën, kortingscodes, productpagina's en wachtlijst (update)
+Draaide je `shop.sql` al eerder? Plak het **volledige** `sql/shop.sql` opnieuw
+in de SQL Editor → **Run** (het script is idempotent: bestaande gegevens
+blijven behouden). Deploy daarna opnieuw:
+
+```bash
+supabase functions deploy shop-create-order
+supabase functions deploy shop-admin
+supabase functions deploy shop-mollie-webhook --no-verify-jwt
+supabase functions deploy shop-document --no-verify-jwt
+```
+
+- **Categorieën**: Producten → "Categorieën beheren". Klanten filteren en
+  zoeken bovenaan de webshop; de filter staat in de link (`/shop/?cat=...&q=...`).
+- **Kortingscodes**: tab Kortingscodes. Percentage of vast bedrag, optioneel
+  minimumbedrag, geldigheidsperiode en maximaal aantal keer te gebruiken. De
+  korting gaat van het subtotaal af (niet van de verzendkost; de grens voor
+  gratis verzending geldt op het bedrag ná korting). Het bedrag wordt in de
+  database berekend (`shop_check_discount`) en staat op factuur en mails.
+  "Gebruikt" telt enkel betaalde bestellingen.
+- **Productpagina's**: elk product heeft een eigen deelbare link
+  `/shop/product.html?p=<slug>` met titel, beschrijving en schema.org-gegevens
+  voor Google. Oude links `/shop/#slug` worden doorgestuurd. Let op: Facebook/
+  WhatsApp-voorbeelden tonen de algemene webshopfoto, omdat die geen JavaScript
+  uitvoeren (statische hosting).
+- **Wachtlijst**: is de webshop gesloten, dan kunnen bezoekers hun e-mailadres
+  achterlaten. Tab Wachtlijst → adressen kopiëren (BCC), markeren als
+  verwittigd en daarna wissen (zoals beloofd in de privacyverklaring).
+- **Presentatie**: per product een optionele *van-prijs* (doorstreept, promo),
+  een *label* (Nieuw, Promo, Bestseller, …) en *uitgelicht* (bovenaan bij
+  "Aanbevolen"). Er wordt altijd de gewone prijs aangerekend. Producten kan je
+  dupliceren in de admin.
+
+### Testgegevens
+- `sql/shop_testdata.sql`: 4 categorieën, 9 testproducten (slug `test-…`) en
+  3 kortingscodes (`TEST…`). Ze worden **verborgen/uitgeschakeld** toegevoegd,
+  zodat een open webshop er geen last van heeft. Onderaan staat een
+  uitgecommentarieerd blok om ze zichtbaar te maken (enkel doen als de shop
+  gesloten is of in een testproject).
+- `sql/shop_testdata_remove.sql`: wist alles weer. Bestellingen en facturen
+  blijven bewaard.
+
 

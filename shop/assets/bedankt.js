@@ -51,26 +51,43 @@
         }
 
         const nr = S.escapeHtml(order.order_number);
+        const pickup = order.delivery_method === "pickup";
+        const summary = '<div class="order-summary">' +
+            "<span>Bestelling</span><strong>" + nr + "</strong>" +
+            "<span>Bedrag</span><strong>" + S.euro(order.total) + "</strong>" +
+            "<span>Levering</span><strong>" + (pickup ? "🏠 Afhalen" : "📦 Verzenden") + "</strong></div>";
 
         if (order.payment_status === "paid") {
             S.clearCart();
             sessionStorage.removeItem("kww_shop_pending");
-            show("<h1>Bedankt voor je bestelling! 🎉</h1>" +
-                "<p>Je betaling voor bestelling <strong>" + nr + "</strong> (" + S.euro(order.total) +
-                ") is goed ontvangen.</p>" +
-                "<p>Je krijgt zo dadelijk een bevestigingsmail met je factuur.</p>" +
-                (order.delivery_method === "pickup"
-                    ? "<p>We laten je weten wanneer je bestelling klaarstaat om af te halen.</p>"
-                    : "<p>We laten je weten wanneer je bestelling verzonden is.</p>") +
-                '<p><a class="btn" href="./">Verder winkelen</a> <a class="btn secondary" href="../">Naar het speelatelier</a></p>');
+            const steps = [
+                ["Besteld", true],
+                ["Betaald", true],
+                ["In productie", ["in_production", "ready_for_pickup", "shipped", "completed"].includes(order.order_status)],
+                [pickup ? "Klaar om af te halen" : "Verzonden", ["ready_for_pickup", "shipped", "completed"].includes(order.order_status)]
+            ];
+            show('<div class="status-icon">🎉</div>' +
+                "<h1>Bedankt voor je bestelling!</h1>" +
+                "<p>Je betaling is goed ontvangen. Je krijgt zo dadelijk een bevestigingsmail met je factuur.</p>" +
+                summary +
+                '<ol class="timeline" aria-label="Status van je bestelling">' + steps.map(function (s) {
+                    return '<li class="' + (s[1] ? "done" : "") + '"><span class="dot">' + (s[1] ? "✓" : "") + "</span>" + s[0] + "</li>";
+                }).join("") + "</ol>" +
+                "<p>" + (pickup
+                    ? "We laten je weten wanneer je bestelling klaarstaat om af te halen."
+                    : "We laten je weten wanneer je bestelling verzonden is.") + "</p>" +
+                '<p style="margin-top:14px"><a class="btn" href="./">Verder winkelen</a> <a class="btn secondary" href="../">Naar het speelatelier</a></p>');
+            S.confetti(140);
         } else if (order.payment_status === "pending") {
-            show("<h1>Betaling wordt verwerkt</h1>" +
-                "<p>Je betaling voor bestelling <strong>" + nr + "</strong> is nog niet bevestigd. " +
-                "Dit kan enkele minuten duren. Je krijgt een mail zodra de betaling binnen is.</p>" +
+            show('<div class="status-icon wait">⏳</div>' +
+                "<h1>Betaling wordt verwerkt</h1>" +
+                "<p>Je betaling is nog niet bevestigd. Dit kan enkele minuten duren. " +
+                "Je krijgt een mail zodra de betaling binnen is.</p>" + summary +
                 '<p><button class="btn secondary" type="button" id="retry">Opnieuw controleren</button></p>');
             document.getElementById("retry").addEventListener("click", function () { location.reload(); });
         } else {
-            show("<h1>Betaling niet gelukt</h1>" +
+            show('<div class="status-icon fail">😕</div>' +
+                "<h1>Betaling niet gelukt</h1>" +
                 "<p>De betaling voor bestelling <strong>" + nr + "</strong> werd niet voltooid " +
                 "(geannuleerd of verlopen). Er werd niets aangerekend.</p>" +
                 "<p>Je winkelmandje staat nog klaar.</p>" +
