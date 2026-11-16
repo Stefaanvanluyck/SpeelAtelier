@@ -181,23 +181,98 @@ export async function getOrderItems(orderId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Mail (EmailJS, één generieke template)
+// Mail: SMTP (bv. Gmail met app-wachtwoord) of, als reserve, EmailJS
 // ---------------------------------------------------------------------------
-// Maak in EmailJS één template aan met:
-//   To Email : {{to_email}}
-//   Subject  : {{subject}}
-//   Content  : {{{message_html}}}      (drie accolades = HTML toegelaten)
-//   Reply To : {{reply_to}}
+// SMTP-secrets (aanbevolen):
+//   SMTP_HOST=smtp.gmail.com  SMTP_PORT=465  SMTP_USER=…@gmail.com
+//   SMTP_PASS=<app-wachtwoord>  SMTP_FROM="Naam <…@gmail.com>"
+// Let op: Supabase Edge Functions blokkeren poort 25 en 587; gebruik 465 (SSL).
+//
+// Reserve (EmailJS): één template met
+//   To Email : {{to_email}}   Subject : {{subject}}
+//   Content  : {{{message_html}}}   Reply To : {{reply_to}}
+const SMTP_HOST = Deno.env.get("SMTP_HOST") ?? "";
+const SMTP_PORT = Number(Deno.env.get("SMTP_PORT") ?? "465");
+const SMTP_USER = Deno.env.get("SMTP_USER") ?? "";
+const SMTP_PASS = (Deno.env.get("SMTP_PASS") ?? "").replace(/\s+/g, "");
+const SMTP_FROM = Deno.env.get("SMTP_FROM") ?? SMTP_USER;
+
+export function mailProvider(): "smtp" | "emailjs" | null {
+    if (SMTP_HOST && SMTP_USER && SMTP_PASS) return "smtp";
+    if (EMAILJS_SHOP_TEMPLATE && EMAILJS_SERVICE && EMAILJS_PUBLIC_KEY) return "emailjs";
+    return null;
+}
+
+// deno-lint-ignore no-explicit-any
+let smtpTransport: any = null;
+async function getTransport() {
+    if (smtpTransport) return smtpTransport;
+    const nodemailer = (await import("npm:nodemailer@6.9.16")).default;
+    smtpTransport = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        secure: SMTP_PORT === 465,
+        auth: { user: SMTP_USER, pass: SMTP_PASS },
+    });
+    return smtpTransport;
+}
+
+function htmlToText(html: string): string {
+    return html
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/(p|div|tr|h\d|li)>/gi, "\n")
+        .replace(/<a [^>]*href="([^"]+)"[^>]*>([^<]*)<\/a>/gi, "$2 ($1)")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+}
+
+function mailLayout(subject: string, inner: string): string {
+    return `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>` +
+        `<body style="margin:0;padding:0;background:#f6f8f4">` +
+        `<div style="max-width:600px;margin:0 auto;padding:24px 16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#1f2a1f">` +
+        `<div style="font-size:20px;font-weight:bold;color:#e4566e;margin-bottom:16px">🌿 Kleine Wonderwereld</div>` +
+        `<div style="background:#ffffff;border-radius:14px;padding:22px 22px 10px">${inner}</div>` +
+        `<p style="font-size:12px;color:#888;text-align:center;margin-top:16px">Kleine Wonderwereld · <a href="${BASE_URL}/shop/" style="color:#888">jufvalerie.be/shop</a></p>` +
+        `</div></body></html>`;
+}
+
 export async function sendShopEmail(
     to: string,
     subject: string,
     messageHtml: string,
     replyTo = "",
 ): Promise<boolean> {
-    if (!EMAILJS_SHOP_TEMPLATE || !to) {
-        console.error("Geen EMAILJS_SHOP_TEMPLATE of ontvanger; mail niet verstuurd.");
+    if (!to) {
+        console.error("Geen ontvanger; mail niet verstuurd.");
         return false;
     }
+    const provider = mailProvider();
+
+    if (provider === "smtp") {
+        try {
+            const transport = await getTransport();
+            await transport.sendMail({
+                from: SMTP_FROM,
+                to,
+                subject,
+                html: mailLayout(subject, messageHtml),
+                text: htmlToText(messageHtml),
+                ...(replyTo ? { replyTo } : {}),
+            });
+            return true;
+        } catch (err) {
+            console.error("SMTP-fout:", err);
+            return false;
+        }
+    }
+
+    if (provider !== "emailjs") {
+        console.error("Geen mailinstellingen (SMTP_* of EMAILJS_SHOP_TEMPLATE); mail niet verstuurd.");
+        return false;
+    }
+
     const body: Record<string, unknown> = {
         service_id: EMAILJS_SERVICE,
         template_id: EMAILJS_SHOP_TEMPLATE,

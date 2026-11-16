@@ -143,6 +143,7 @@
             renderShopState();
             await loadCategories();
             await Promise.all([loadOrders(), loadProducts(), loadWaitlist()]);
+            loadMailStatus();
             const fromHash = location.hash.slice(1);
             if (!openOrderFromHash()) {
                 showTab(document.getElementById("tab-" + fromHash) ? fromHash : "dashboard");
@@ -151,6 +152,42 @@
             $("loginView").classList.remove("hidden");
             $("appView").classList.add("hidden");
         }
+    }
+
+    /* ---------- e-mail ---------- */
+
+    let mailProvider = "unknown";
+
+    async function loadMailStatus() {
+        try {
+            const res = await callAdmin({ action: "mail_status" });
+            mailProvider = res.provider || null;
+        } catch (e) {
+            mailProvider = "unknown";
+        }
+        renderMailStatus();
+        if (!$("tab-dashboard").classList.contains("hidden")) renderDashboard();
+    }
+
+    function renderMailStatus() {
+        const el = $("mailStatus");
+        if (!el) return;
+        if (mailProvider === "smtp") el.innerHTML = '<span class="badge b-green">Actief</span> Mails worden verstuurd via SMTP (Gmail).';
+        else if (mailProvider === "emailjs") el.innerHTML = '<span class="badge b-green">Actief</span> Mails worden verstuurd via EmailJS.';
+        else if (mailProvider === null) el.innerHTML = '<span class="badge b-red">Niet ingesteld</span> Er worden geen webshopmails verstuurd.';
+        else el.textContent = "Status kon niet opgevraagd worden.";
+    }
+
+    async function sendTestMail() {
+        const btn = $("sendTestMail");
+        btn.disabled = true;
+        try {
+            const res = await callAdmin({ action: "test_email", to: $("testMailTo").value.trim() });
+            toast("Testmail verstuurd naar " + res.to + ". Kijk ook in je spam.");
+        } catch (e) {
+            toast(e.message, true);
+        }
+        btn.disabled = false;
     }
 
     /* ---------- webshop open/dicht in de kop ---------- */
@@ -227,6 +264,7 @@
         if (name === "dashboard") renderDashboard();
         if (name === "production") renderProduction();
         if (name === "deliveries") renderDeliveries();
+        if (name === "settings") renderMailStatus();
         if (name === "invoices") loadInvoices();
         if (name === "discounts") loadDiscounts();
         if (name === "waitlist") loadWaitlist();
@@ -333,6 +371,9 @@
             todos.push(["danger", "🧪", liveTest.length + " testproduct(en) zichtbaar in de open webshop", "Echte klanten kunnen ze kopen.", "products:test"]);
         }
         const openWd = withdrawals.filter(function (w) { return w.status === "received"; });
+        if (mailProvider === null) {
+            todos.push(["danger", "✉️", "Er worden geen e-mails verstuurd", "Stel de mailinstellingen in voor je de shop opent (Instellingen → E-mails).", "settings"]);
+        }
         openWd.forEach(function (w) {
             const wo = orders.find(function (x) { return x.id === w.order_id; });
             todos.unshift(["danger", "↩️", "Herroeping ontvangen voor " + (wo ? wo.order_number : "een bestelling"),
@@ -1975,6 +2016,7 @@
         else if (d.deliverStatus) {
             deliveryAction(d.deliverOrder, d.deliverStatus, t);
         }
+        else if (t.id === "sendTestMail") sendTestMail();
         else if (t.id === "deliverAllOut") markAllOut();
         else if (t.id === "printDeliveries") printDeliveryList();
         else if (t.id === "routeDeliveries") openRoute();

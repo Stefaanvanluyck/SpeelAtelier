@@ -170,8 +170,20 @@ SQL Editor → `sql/shop.sql` plakken → **Run** (na `security_hardening_2026.s
 Maakt tabellen, factuurnummering zonder gaten, onveranderlijke facturen,
 RLS en de Storage-buckets `shop-products` (publiek) en `shop-documents` (privé).
 
-### 2. EmailJS — één nieuwe template
-Maak in EmailJS een template aan met:
+### 2. E-mail — Gmail via SMTP (aanbevolen) of EmailJS
+De webshopmails gaan via **SMTP**. Met Gmail: zet tweestapsverificatie aan, maak
+een **app-wachtwoord** en zet deze secrets (poort **465**: Supabase blokkeert 25 en 587):
+
+| Secret | Waarde |
+|---|---|
+| `SMTP_HOST` | `smtp.gmail.com` |
+| `SMTP_PORT` | `465` |
+| `SMTP_USER` | het Gmail-adres |
+| `SMTP_PASS` | het app-wachtwoord (nooit in git!) |
+| `SMTP_FROM` | `Kleine Wonderwereld <adres@gmail.com>` |
+
+Controleren: admin → Instellingen → E-mails → **Testmail versturen**.
+Zonder SMTP-secrets valt de shop terug op EmailJS met één template:
 
 | Veld | Waarde |
 |---|---|

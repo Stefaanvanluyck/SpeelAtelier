@@ -14,6 +14,8 @@
 //   resend_invoice  { order_id }
 //   credit_note     { invoice_id, lines:[{description,quantity,unit_price}],
 //                     reason, refund: boolean, notify: boolean }
+//   mail_status     {}                                → { provider: "smtp"|"emailjs"|null }
+//   test_email      { to? }                           (standaard: zakelijk e-mailadres)
 //
 // Deploy: supabase functions deploy shop-admin
 // ============================================================================
@@ -23,12 +25,14 @@ import {
     corsHeaders,
     CreditNote,
     documentLink,
+    EMAIL_REGEX,
     ensureCreditPdf,
     ensureInvoice,
     escapeHtml,
     euro,
     getSettings,
     json,
+    mailProvider,
     mollie,
     Order,
     round2,
@@ -81,6 +85,10 @@ Deno.serve(async (req: Request) => {
                 return await resendInvoice(body, headers);
             case "credit_note":
                 return await creditNote(body, headers);
+            case "mail_status":
+                return json({ provider: mailProvider() }, 200, headers);
+            case "test_email":
+                return await testEmail(body, headers);
             default:
                 return json({ error: "Onbekende actie." }, 400, headers);
         }
@@ -178,6 +186,25 @@ async function resendInvoice(body: any, headers: Record<string, string>) {
 
     await sb.from("shop_invoices").update({ emailed_at: new Date().toISOString() }).eq("id", invoice.id);
     return json({ ok: true }, 200, headers);
+}
+
+async function testEmail(body: any, headers: Record<string, string>) {
+    const settings = await getSettings();
+    const to = String(body.to ?? "").trim().toLowerCase() || settings.business_email;
+    if (!EMAIL_REGEX.test(to)) return json({ error: "Ongeldig e-mailadres." }, 400, headers);
+    const provider = mailProvider();
+    if (!provider) return json({ error: "Er zijn nog geen mailinstellingen (SMTP) ingesteld." }, 400, headers);
+    const ok = await sendShopEmail(
+        to,
+        "Testmail webshop ✔",
+        `<p>Dag,</p><p>Dit is een testmail van de webshop. Komt deze aan, dan werken de webshopmails ` +
+            `(bestelbevestigingen, statusmails, herroepingen). 🎉</p>` +
+            `<p style="color:#888;font-size:13px">Verstuurd via ${provider === "smtp" ? "SMTP" : "EmailJS"} op ` +
+            `${escapeHtml(new Date().toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }))}.</p>`,
+        settings.business_email,
+    );
+    if (!ok) return json({ error: "Versturen mislukt. Controleer de SMTP-gegevens (zie logs van shop-admin)." }, 502, headers);
+    return json({ ok: true, to, provider }, 200, headers);
 }
 
 async function creditNote(body: any, headers: Record<string, string>) {
